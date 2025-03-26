@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A1E1C4B2-93CF-42E7-AB51-E74AEF4047FB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>Ra2EasyShp</RootNamespace>
     <AssemblyName>Ra2EasyShp</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>

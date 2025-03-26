@@ -192,9 +192,9 @@ namespace Ra2EasyShp.Funcs
                             model.EditImage.OutImgTempPath = GetPath.CreateImageTempPath();
                             LocalImageManage.SaveBitmapToTemp(bitmap, model.EditImage.OutImgTempPath);
                             model.EditImage.Name = Path.GetFileName(filePath);
-                            //model.EditImage.ImgPath = filePath;
-                            model.EditImage.ImgPath = GetPath.CreateImageTempPath();
-                            LocalImageManage.SaveBitmapToTemp(bitmap, model.EditImage.ImgPath);
+                            model.EditImage.ImgPath = filePath;
+                            //model.EditImage.ImgPath = GetPath.CreateImageTempPath();
+                            //LocalImageManage.SaveBitmapToTemp(bitmap, model.EditImage.ImgPath);
                         }
                     }
                 }

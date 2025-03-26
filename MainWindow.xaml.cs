@@ -786,10 +786,10 @@ namespace Ra2EasyShp
 
             //string folderPath = @"D:\RA2Scripts\VEH8-马牛";
             //string folderPath = @"C:\Users\Milk\Desktop\数字图";
-            string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
+            //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
-            string[] files = Directory.GetFiles(folderPath);
-            //string[] fileso = { @"C:\Users\Milk\Desktop\QQ20250322-023533.png" };
+            //string[] files = Directory.GetFiles(folderPath);
+            string[] files = { @"C:\Users\Milk\Desktop\QQ20250323-005711.png" };
 
 
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月18日17时8分5秒\输出.shp" };
