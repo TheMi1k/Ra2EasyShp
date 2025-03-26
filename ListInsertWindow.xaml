@@ -1,0 +1,23 @@
+﻿<Window x:Class="Ra2EasyShp.ListInsertWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ra2EasyShp"
+        mc:Ignorable="d"
+        Title="插入选项" FontSize="15" Height="220" Width="300">
+    <Grid>
+        <StackPanel>
+            <TextBlock x:Name="TextBlock_OptionTip" d:Text="往00001位置插入空行，00001及下方内容往下移动" FontSize="17" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Center" Width="240" Height="70" Margin="0 20 0 0"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 5 0 0">
+                <TextBlock Text="插入行数"/>
+                <TextBox x:Name="TextBox_InsertLine" d:Text="999" Width="70" Margin="5 0 0 0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 20 0 0">
+                <Button x:Name="Button_Option1" Content="取消" Width="60" FontSize="20" Click="Button_Option1_Click"/>
+                <Button x:Name="Button_Option2" Content="确定" Width="60" FontSize="20" Click="Button_Option2_Click" Margin="50 0 0 0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

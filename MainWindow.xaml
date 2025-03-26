@@ -1,0 +1,917 @@
+﻿<Window x:Class="Ra2EasyShp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ra2EasyShp"
+        mc:Ignorable="d"
+        Title="Ra2EasyShp" FontSize="15" d:Height="860" d:Width="1160" Height="{Binding MainWindowSize.MainWindowH, Mode=TwoWay}" Width="{Binding MainWindowSize.MainWindowW, Mode=TwoWay}"
+        MinHeight="860" MinWidth="1160"
+        ResizeMode="CanResizeWithGrip"
+        SizeChanged="Window_SizeChanged"
+        StateChanged="Window_StateChanged"
+        >
+
+    <Window.Resources>
+        <Style x:Key="MyStyle">
+            <Setter Property="Control.FontFamily" Value="NSimSun"/>
+            <Setter Property="Control.FontWeight" Value="Normal"/>
+            <Setter Property="Control.HorizontalAlignment" Value="Left"/>
+            <Setter Property="Control.VerticalAlignment" Value="Top"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid x:Name="Grid_Main">
+        <StackPanel>
+            <Menu Margin="0 0 0 0" FontSize="15" IsEnabled="{Binding UIEnable}">
+                <MenuItem Width="80" HorizontalContentAlignment="Left" Margin="0 0 0 0">
+                    <MenuItem.Header>
+                        <TextBlock Text="其他" Margin="15 0 0 0"/>
+                    </MenuItem.Header>
+                    <MenuItem Header="关于" HorizontalContentAlignment="Left"  Click="MenuItem_About_Click"/>
+                </MenuItem>
+            </Menu>
+
+            <StackPanel Orientation="Horizontal" Margin="10 10 0 0">
+                <StackPanel>
+                    <DataGrid x:Name="DataGrid_Images"
+                        Drop="Img_Drop" AllowDrop="True"
+                        Height="{Binding MainWindowSize.DataGrid_ImagesH, Mode=TwoWay}" d:Height="750" Width="260"
+                        IsEnabled="{Binding UIEnable}"
+                        MouseDoubleClick="DataGrid_Images_DoubleClick"
+                        AutoGenerateColumns="False"
+                        RowHeaderWidth="0"
+                        IsReadOnly="True"
+                        CanUserSortColumns="False"
+                        CanUserResizeColumns="False"
+                        CanUserResizeRows="False"
+                        CanUserReorderColumns="False"
+                        SelectionUnit="Cell"
+                        PreviewKeyDown="ListView_Images_KeyDown"
+                        ContextMenuOpening="DataGrid_ContextMenuOpening"
+                        PreviewMouseRightButtonDown="DataGrid_MouseRightButtonDown"
+                    >
+                        <DataGrid.ContextMenu>
+                            <ContextMenu x:Name="DataGridContextMenu" FontSize="15" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                <MenuItem x:Name="MenuItem1" Click="InsertMenuItem_Click" Margin="0 0 0 0" HorizontalAlignment="Left" Width="300"/>
+                                <Separator/>
+                                <MenuItem Header="清空操作列表" Click="Button_ClearList1_Click"/>
+                                <MenuItem Header="清空叠加列表" Click="Button_ClearList2_Click"/>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="40" >
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text=""/>
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding IndexStr}" FontSize="13" Foreground="Black" Style="{StaticResource MyStyle}" Height="17" Margin="0 4 0 0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Width="100">
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="操作图片列表" FontSize="14" Style="{StaticResource MyStyle}"/>
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding EditImage.Name}" FontSize="13" Foreground="{Binding EditImage.StrColor}" Style="{StaticResource MyStyle}" Height="17" Margin="0 4 0 0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Width="100">
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="叠加图片列表" FontSize="14" Style="{StaticResource MyStyle}"/>
+                                </DataGridTemplateColumn.Header>
+
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding OverlayImage.Name}" FontSize="13" Foreground="{Binding OverlayImage.StrColor}" Style="{StaticResource MyStyle}" Height="17" Margin="0 4 0 0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Grid Height="30" Width="260" Background="LightGray" AllowDrop="True" Drop="Img_DropToEnd" IsEnabled="{Binding UIEnable}">
+                        <Line X1="141" Y1="1" X2="141" Y2="29" Stroke="Gray"/>
+                        <TextBlock Text="拖放到这添加到列表尾部" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0 0 0 0"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Margin="10 0 0 0">
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel>
+                            <!--图片预览窗口-->
+                            <StackPanel Margin="0 0 0 0">
+                                <Border x:Name="Border_ImgView" d:Width="600" d:Height="500" Width="{Binding MainWindowSize.Border_ImgViewW, Mode=TwoWay}" Height="{Binding MainWindowSize.Border_ImgViewH, Mode=TwoWay}" BorderThickness="1" BorderBrush="Gray" Margin="0 0 0 0">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="Grid_ImgView_PreviewMouseWheel">
+                                        <Grid x:Name="Grid_ImgView" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Grid.LayoutTransform>
+                                                <ScaleTransform ScaleX="{Binding ImageViewScaleTransform}" ScaleY="{Binding ImageViewScaleTransform}"/>
+                                            </Grid.LayoutTransform>
+
+                                            <Grid x:Name="Grid_InImg" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{Binding ViewBackground}">
+                                                <Image x:Name="Image_input"
+                                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                    RenderOptions.ClearTypeHint="Enabled"
+                                                    Stretch="None"
+                                                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                    PreviewMouseMove="Image_ViewImg_MouseMove"
+                                                    MouseLeave="Image_ViewImg_MouseLeave"
+                                                />
+                                            </Grid>
+
+                                            <Grid x:Name="Grid_OutImg" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden" Background="{Binding ViewBackground}">
+                                                <Image x:Name="Image_output"
+                                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                    RenderOptions.ClearTypeHint="Enabled"
+                                                    Stretch="None"
+                                                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                    PreviewMouseMove="Image_ViewImg_MouseMove"
+                                                    MouseLeave="Image_ViewImg_MouseLeave"
+                                                />
+                                            </Grid>
+
+                                            <Grid x:Name="Grid_OutImgOverlay" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Visible" IsHitTestVisible="False" d:Margin="0 0 0 0" Margin="{Binding OverlayUI.OverlayGridThickness, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                                                <Image x:Name="Image_outputOverlay"
+                                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                    RenderOptions.ClearTypeHint="Enabled"
+                                                    Stretch="None"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top"
+                                                />
+                                            </Grid>
+
+                                            <Grid x:Name="Grid_PaletteImg" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden" d:Margin="0 0 0 0" Background="{Binding ViewBackground}">
+                                                <Image x:Name="Image_PaletteImg"
+                                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                    RenderOptions.ClearTypeHint="Enabled"
+                                                    Stretch="None"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top"
+                                                    PreviewMouseMove="Image_ViewImg_MouseMove"
+                                                    MouseLeave="Image_ViewImg_MouseLeave"
+                                                    PreviewMouseRightButtonDown="Image_PaletteImg_MouseRightButtonDown">
+
+                                                    <Image.ContextMenu>
+                                                        <ContextMenu x:Name="Image_PaletteImgContextMenu" Width="160" FontSize="15" VerticalAlignment="Top" HorizontalAlignment="Left" Closed="Image_PaletteImgContextMenu_Closed">
+                                                            <MenuItem Header="禁用所选色号" Click="Button_PletteIndexDisable_Click"/>
+                                                            <MenuItem Header="透明所选色号" Click="Button_PletteIndexTransparent_Click"/>
+                                                        </ContextMenu>
+                                                    </Image.ContextMenu>
+                                                </Image>
+                                            </Grid>
+
+                                            <Grid x:Name="Grid_Ra2Grids" Width="0" Height="0" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed" IsHitTestVisible="False">
+                                                <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Height="4000" Width="4000">
+                                                    <Grid x:Name="Grid_Ra2Grids_Grid" HorizontalAlignment="Left" VerticalAlignment="Top" Height="4000" Width="4000" Margin="0 0 0 0">
+                                                        <Grid.RenderTransform>
+                                                            <ScaleTransform ScaleX="1" ScaleY="0.5"/>
+                                                        </Grid.RenderTransform>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 -37 18 0" Width="258" Background="White" IsHitTestVisible="False">
+                                    <TextBlock Text="[坐标"/>
+                                    <TextBlock Text="X: " Margin="5 0 0 0"/>
+                                    <TextBlock Text="{Binding ViewImagePointX}" Margin="5 0 0 0" Width="40"/>
+                                    <TextBlock Text="Y: " Margin="5 0 0 0"/>
+                                    <TextBlock Text="{Binding ViewImagePointY}" Margin="5 0 0 0" Width="40"/>
+                                    <TextBlock Text="色盘: " Margin="5 0 0 0"/>
+                                    <TextBlock Text="{Binding ViewImagePointPaletteIndex}" Margin="5 0 0 0" Width="30"/>
+                                    <TextBlock Text="]"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!--显示设置-->
+                            <StackPanel Orientation="Horizontal" Width="600" Margin="0 5 0 0">
+                                <Border BorderThickness="1" BorderBrush="Gray" Width="260">
+                                    <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
+                                        <TextBlock Text="显示模式"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <RadioButton x:Name="RadioButton_ViewMode_InImg" Content="原图" Margin="5 1 0 0" IsChecked="True" Checked="RadioButton_ViewModeChanged"/>
+                                            <RadioButton x:Name="RadioButton_ViewMode_OutImg" Content="仿色后" Margin="5 1 0 0" Checked="RadioButton_ViewModeChanged"/>
+                                            <RadioButton x:Name="RadioButton_ViewMode_OutImgOnPalette" Content="色盘下" Margin="5 1 0 0" Checked="RadioButton_ViewModeChanged"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border BorderThickness="1" BorderBrush="Gray" Width="220" Margin="5 0 0 0">
+                                    <StackPanel Orientation="Horizontal" Margin="0 0 0 0" Background="Transparent" MouseEnter="ArtTranslucency_MouseEnter" MouseLeave="ArtTranslucency_MouseLeave">
+                                        <TextBlock Text="透明度"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <RadioButton x:Name="RadioButton_ArtTranslucency_none" Content="无" Margin="5 1 0 0" IsChecked="True" Checked="RadioButton_ArtTranslucencyChanged"/>
+                                            <RadioButton x:Name="RadioButton_ArtTranslucency_25" Content="25" Margin="5 1 0 0" Checked="RadioButton_ArtTranslucencyChanged"/>
+                                            <RadioButton x:Name="RadioButton_ArtTranslucency_50" Content="50" Margin="5 1 0 0" Checked="RadioButton_ArtTranslucencyChanged"/>
+                                            <RadioButton x:Name="RadioButton_ArtTranslucency_75" Content="75" Margin="5 1 0 0" Checked="RadioButton_ArtTranslucencyChanged"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <StackPanel Orientation="Horizontal" Margin="10 0 0 0">
+                                    <TextBlock Text="预览缩放"/>
+                                    <TextBlock Text="{Binding ImageViewScaleTransformStr}" Margin="5 0 0 0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0 10 0 0" Width="600" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="当前序号:" FontSize="16"/>
+                            <TextBlock x:Name="TextBlock_NowIndex" Text="{Binding IndexStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  FontSize="16" Width="60" Margin="10 0 0 0"/>
+                        </StackPanel>
+
+                        <Button Content="预览背景色/图片" Height="25" AllowDrop="True" Drop="SetBackgroundImage" Click="SelectViewBackgroundColor_Click" Margin="5 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+
+                        <Button x:Name="Button_Play" Content="播放" Width="60" Height="25" Click="Button_Play_Click" Margin="20 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="10 0 0 0" Background="Transparent" MouseEnter="PlayerColor_MouseEnter" MouseLeave="PlayerColor_MouseLeave">
+                            <TextBlock Text="预览所属色" Margin="0 3 0 0"/>
+                            <ComboBox x:Name="ComboBox_PlayerColorView" Width="70" Height="25" VerticalAlignment="Top" Margin="5 0 0 0" SelectionChanged="ComboBox_PlayerColorView_Changed"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="10 0 0 0" >
+                            <CheckBox x:Name="CheckBox_Ra2Grids" Content="网格" Margin="0 5 0 0" Checked="CheckBox_Ra2Grids_Changed" Unchecked="CheckBox_Ra2Grids_Changed"/>
+                            <Button x:Name="Button_SetRa2GridsColor" Background="Black" Height="20" Width="20" Margin="2 0 0 0" Click="Button_SetRa2GridsColor_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!--下方功能栏-->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10 0 0">
+                        <TabControl Width="600" Height="210" IsEnabled="{Binding UIEnable}">
+                            <TabItem Header="裁剪/缩放" Width="80">
+                                <StackPanel Margin="10 0 0 0" Orientation="Horizontal">
+                                    <GroupBox Header="缩放" Width="160" Height="175" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                        <StackPanel Margin="10 5 0 0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel>
+                                                    <TextBlock Text="宽度" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                    <TextBox Text="{Binding ResizeUI.ImageNowWidthStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                </StackPanel>
+
+                                                <StackPanel x:Name="StackPanel_ResizeHeight" Margin="10 0 0 0">
+                                                    <TextBlock Text="高度" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                    <TextBox Text="{Binding ResizeUI.ImageNowHeightStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <CheckBox x:Name="CheckBox_MaintainAspectRatio" Content="保持比例" Margin="0 10 0 0" Checked="CheckBox_MaintainAspectRatio_Checked" Unchecked="CheckBox_MaintainAspectRatio_Checked"/>
+
+                                            <TextBlock Text="[还原] 或 [应用] 会取消画布调整" FontSize="14" TextWrapping="Wrap" Margin="0 5 0 0"/>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                                                <Button Content="还原" Width="50" Click="Button_CancelResize_Click"/>
+                                                <Button Content="应用" Width="50" Margin="25 0 0 0" Click="Button_Resize_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </GroupBox>
+
+                                    <StackPanel Margin="10 65 0 0" VerticalAlignment="Top" Background="Transparent" MouseEnter="Resize_MouseEnter" MouseLeave="Resize_MouseLeave">
+                                        <Path Width="60" Height="40" Fill="Black" Stretch="Fill" Data="M545.3 407.1h-421c-14.5 0-26.3 11.8-26.3 26.3v155.2c0 14.5 11.8 26.3 26.3 26.3h421V721c0 10.2 11.1 16.5 19.8 11.4l356.4-209c8.7-5.1 8.7-17.6 0-22.7l-356.4-209c-8.8-5.2-19.8 1.2-19.8 11.4v104zM598 651.9v-89.6H150.7V459.8H598v-87.6L848.7 512 598 651.9z"/>
+                                    </StackPanel>
+
+                                    <GroupBox Header="画布调整" Margin="10 0 0 0" Width="210" Height="175" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                        <StackPanel Margin="10 0 0 0">
+                                            <StackPanel Margin="60 0 0 0">
+                                                <TextBlock Text="顶部" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
+                                                <TextBox Text="{Binding ResizeUI.ReMarginTop, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0 -15 0 0">
+                                                <StackPanel>
+                                                    <TextBlock Text="左侧" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
+                                                    <TextBox Text="{Binding ResizeUI.ReMarginLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                </StackPanel>
+
+                                                <StackPanel Margin="60 0 0 0">
+                                                    <TextBlock Text="右侧" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
+                                                    <TextBox Text="{Binding ResizeUI.ReMarginRight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <StackPanel Margin="60 -15 0 0">
+                                                <TextBlock Text="底部" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
+                                                <TextBox Text="{Binding ResizeUI.ReMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                            </StackPanel>
+
+                                            <CheckBox Content="调整后优化画布尺寸" IsChecked="{Binding ResizeUI.ReMarginCutImage}" Margin="0 5 0 0"/>
+                                            
+                                            <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                                                <Button Content="还原到缩放" Click="Button_CancelReMargin_Click"/>
+                                                <Button Content="应用" Width="60" Margin="40 0 0 0" Click="Button_ReMargin_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </GroupBox>
+                                </StackPanel>
+                            </TabItem>
+
+                            <TabItem Header="透明仿色" Width="80">
+                                <StackPanel Margin="10 10 0 0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <StackPanel>
+                                            <CheckBox x:Name="CheckBox_OutlineTransparent" Content="按轮廓透明过渡(对不带透明过渡图片使用的)" IsChecked="{Binding DitherUI.IsTransparent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Checked="CheckBox_OutlineTransparent_Changed" Unchecked="CheckBox_OutlineTransparent_Changed"/>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="透明度扩散" Width="90"/>
+                                                    <Slider x:Name="Slider_TransparentDiffusion"
+                                                        Width="400"
+                                                        Minimum="0.01"
+                                                        Maximum="1.5"
+                                                        TickFrequency="0.01"
+                                                        Value="{Binding DitherUI.TransparentDiffusion ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        IsSnapToTickEnabled="True"
+                                                        Margin="5 0 0 0"
+                                                        PreviewMouseUp="Slider_MouseUp"
+                                                    />
+
+                                                    <!--<Button BorderThickness="0" Background="Transparent" Height="12" Width="10" Margin="2 0 0 0">
+                                                        <Path Data="M341.3 512l256-256v512z" Fill="Black" Stretch="Fill" Width="10" Height="12" Margin="-2"/>
+                                                    </Button>
+
+                                                    <Button BorderThickness="0" Background="Transparent" Height="12" Width="10" Margin="5 0 0 0">
+                                                        <Path Data="M682.7 512l-256 256V256z" Fill="Black" Stretch="Fill" Width="10" Height="12" Margin="-2"/>
+                                                    </Button>-->
+
+                                                    <TextBlock x:Name="TextBlock_TransparentDiffusion" Text="{Binding DitherUI.TransparentDiffusionStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Width="40" Margin="10 0 0 0"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
+                                                <TextBlock Text="边缘明暗度" Width="90"/>
+                                                <Slider x:Name="Slider_Lightness"
+                                                    Width="400"
+                                                    Minimum="-1.0"
+                                                    Maximum="1.0"
+                                                    TickFrequency="0.01"
+                                                    Value="{Binding DitherUI.Lightness, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    IsSnapToTickEnabled="True"
+                                                    Margin="5 0 0 0"
+                                                    PreviewMouseUp="Slider_MouseUp"
+                                                />
+                                                <!--<Button BorderThickness="0" Background="Transparent" Height="12" Width="10" Margin="2 0 0 0">
+                                                    <Path Data="M341.3 512l256-256v512z" Fill="Black" Stretch="Fill" Width="10" Height="12" Margin="-2"/>
+                                                </Button>
+
+                                                <Button BorderThickness="0" Background="Transparent" Height="12" Width="10" Margin="5 0 0 0">
+                                                    <Path Data="M682.7 512l-256 256V256z" Fill="Black" Stretch="Fill" Width="10" Height="12" Margin="-2"/>
+                                                </Button>-->
+
+                                                <TextBlock x:Name="TextBlock_Lightness" Text="{Binding DitherUI.LightnessStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Width="40" Margin="10 0 0 0"/>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
+                                                <TextBlock Text="整体透明度" Width="90"/>
+                                                <Slider x:Name="Slider_Alpha"
+                                                    Width="400"
+                                                    Minimum="-255"
+                                                    Maximum="255"
+                                                    TickFrequency="1"
+                                                    Value="{Binding DitherUI.Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    IsSnapToTickEnabled="True"
+                                                    Margin="5 0 0 0"
+                                                    PreviewMouseUp="Slider_MouseUp"
+                                                />
+
+                                                <!--<Button BorderThickness="0" Background="Transparent" Height="12" Width="10" Margin="2 0 0 0">
+                                                    <Path Data="M341.3 512l256-256v512z" Fill="Black" Stretch="Fill" Width="10" Height="12" Margin="-2"/>
+                                                </Button>
+
+                                                <Button BorderThickness="0" Background="Transparent" Height="12" Width="10" Margin="5 0 0 0">
+                                                    <Path Data="M682.7 512l-256 256V256z" Fill="Black" Stretch="Fill" Width="10" Height="12" Margin="-2"/>
+                                                </Button>-->
+
+                                                <TextBlock x:Name="TextBlock_Alpha" Text="{Binding DitherUI.Alpha, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Width="40" Margin="10 0 0 0"/>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0 20 0 0">
+                                                <Button Content="重置所有图像" Height="30" Margin="0 0 0 0" Click="Button_ResetAll_Click"/>
+                                                <Button Content="重置当前图像" Height="30" Margin="60 0 0 0" Click="Button_ResetNowIndex_Click"/>
+                                                <Button x:Name="Button_Test" Content="测试载入" d:Visibility="Visible" Visibility="Hidden" Height="30" Margin="20 0 0 0" Click="Button_Test_Click"/>
+                                                <Button Content="应用到所有图片" Margin="60 0 0 0" Click="Button_ApplyToAllImg_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </TabItem>
+
+                            <TabItem Header="图片叠加" Width="80">
+                                <StackPanel Orientation="Vertical" Margin="10 10 0 0">
+                                    <ComboBox x:Name="ComboBox_OverlayMode" SelectedItem="{Binding OverlayUI.OverlayMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0 0 0 0"/>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
+                                        <StackPanel Margin="0 0 0 0">
+                                            <TextBlock Text="X偏移" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                            <TextBox TextWrapping="NoWrap" Text="{Binding OverlayUI.OverlayXOffsetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_Overlay_PreviewTextInput" Width="60" Margin="0 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+
+                                        <StackPanel Margin="20 0 0 0">
+                                            <TextBlock Text="Y偏移" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                            <TextBox TextWrapping="NoWrap" Text="{Binding OverlayUI.OverlayYOffsetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_Overlay_PreviewTextInput" Width="60" Margin="0 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <Button Height="27" Content="应用到所有叠加图片" Width="150" HorizontalAlignment="Left" Margin="0 15 0 0" Click="Button_ApplyToAllOverlayImg_Click"/>
+                                </StackPanel>
+                            </TabItem>
+
+                            <TabItem Header="图片绘制" Width="80" Visibility="Collapsed">
+
+                            </TabItem>
+
+                            <TabItem Header="色盘编辑" Width="80" Visibility="Collapsed">
+
+                            </TabItem>
+
+                            <TabItem Header="导出/生成" Width="80">
+                                <StackPanel Orientation="Horizontal" Margin="10 10 0 0">
+                                    <GroupBox Header="导出全部图片" Height="150" VerticalAlignment="Top">
+                                        <StackPanel Margin="0 5 0 0">
+                                            <Button Content="全部图片" Click="Button_ExportAllImage_Click" FontSize="18" Height="27" Width="100" Margin="0 0 0 0"/>
+                                            <Button Content="色盘下图片" Click="Button_ExportAllPaletteImage_Click" FontSize="18" Height="27" Width="100" Margin="0 20 0 0"/>
+                                        </StackPanel>
+                                    </GroupBox>
+
+                                    <GroupBox Header="生成色盘" Margin="20 0 0 0" Height="165" VerticalAlignment="Top">
+                                        <StackPanel Margin="0 5 0 0" HorizontalAlignment="Left">
+                                            <StackPanel Orientation="Horizontal">
+                                                <CheckBox x:Name="CheckBox_PlayerColor" Content="所属色" Margin="0 3 0 0" Checked="CheckBox_PlayerColor_Changed" Unchecked="CheckBox_PlayerColor_Changed"/>
+                                                <Button x:Name="Button_EditPlayerColor" Content="所属色拾取" Margin="10 0 0 0" IsEnabled="False" Click="Button_EditPlayerColor_Click"/>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0 7 0 0" HorizontalAlignment="Left" MouseEnter="StackPanel_PaletteColorNum_MouseEnter" MouseLeave="StackPanel_PaletteColorNum_MouseLeave">
+                                                <TextBlock Text="色盘颜色数量"/>
+                                                <TextBox x:Name="TextBox_PalColorNum" Text="256" Width="40"/>
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0 5 0 0">
+                                                <TextBlock Text="色盘背景/头部颜色" HorizontalAlignment="Left"/>
+
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Grid Margin="0 0 0 0">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Path Width="16" Height="16" Margin="14 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
+                                                            <Path Width="16" Height="16" Margin="24 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
+                                                            <Path Width="16" Height="16" Margin="24 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel x:Name="StackPanel_PaletteHeaderColor" Orientation="Horizontal">
+                                                            <Button Width="20" Height="20" Background="Transparent" Margin="12 0 0 0" Click="Button_SetPalHeaderColor_Click"/>
+                                                            <Button Width="20" Height="20" Background="Transparent" Margin="20 0 0 0" Click="Button_SetPalHeaderColor_Click" MouseRightButtonDown="ClearPalHeaderColor"/>
+                                                            <Button Width="20" Height="20" Background="Transparent" Margin="20 0 0 0" Click="Button_SetPalHeaderColor_Click" MouseRightButtonDown="ClearPalHeaderColor"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="0"/>
+                                                            <TextBlock Text="1" Margin="30 0 0 0"/>
+                                                            <TextBlock Text="2" Margin="30 0 0 0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <StackPanel Margin="25 -15 0 0">
+                                                        <TextBlock Text="左键设置" FontSize="14"/>
+                                                        <TextBlock Text="右键删除" FontSize="14"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0 5 0 0" HorizontalAlignment="Right">
+                                                <ComboBox x:Name="ComboBox_CreatePalMode" FontSize="15" Width="150" Height="25" Margin="0 0 0 0" MouseEnter="ComboBox_CreatePalMode_MouseEnter" MouseLeave="ComboBox_CreatePalMode_MouseLeave"/>
+                                                <Button x:Name="Button_CreatePal" Content="生成" FontSize="20" Height="28" Width="50" Margin="10 0 0 0" HorizontalAlignment="Right" Click="Button_CreatePal_Click"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </GroupBox>
+
+                                    <GroupBox Header="生成SHP" Margin="20 0 0 0" Height="165" Width="200" VerticalAlignment="Top">
+                                        <StackPanel Margin="0 5 0 0" HorizontalAlignment="Left">
+                                            <TextBlock Text="储存方式"/>
+                                            <ComboBox x:Name="ComboBox_ShpCompression" FontSize="15" Width="150" Height="25" HorizontalAlignment="Left" Margin="0 0 0 0"/>
+                                            <CheckBox x:Name="CheckBox_ShpShadow" Content="影子帧(绘制为1号色)" Margin="0 7 0 0"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox x:Name="TextBox_ShpShadowFrameStart" Width="55"/>
+                                                <TextBlock Text="~"/>
+                                                <TextBox x:Name="TextBox_ShpShadowFrameEnd" Width="55"/>
+                                                <Button Content="列表后半" Margin="5 0 0 0" FontSize="14" Click="Button_ShpShadowFrameAutoSet_Click"/>
+                                            </StackPanel>
+                                            <Button x:Name="Button_CreateShp" Content="生成" FontSize="20" Height="28" Width="50" Margin="0 10 0 0" HorizontalAlignment="Right" Click="Button_CreateShp_Click"/>
+                                        </StackPanel>
+                                    </GroupBox>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+                    </StackPanel>
+                </StackPanel>
+
+                <!--色盘预览-->
+                <StackPanel Margin="10 -5 0 0" IsEnabled="{Binding UIEnable}">
+                    <GroupBox >
+                        <StackPanel>
+                            <ComboBox x:Name="ComboBox_Palette" Width="150" Height="25" HorizontalAlignment="Left" SelectionChanged="ComboBox_Palette_SelectionChanged" Margin="0 5 0 0"/>
+                            
+                            <StackPanel Margin="0 5 0 0">
+                                <DataGrid x:Name="DataGrid_Palette"
+                                    Width="224"
+                                    Height="580"
+                                    RowHeight="18"
+                                    CanUserAddRows="False"
+                                    AutoGenerateColumns="False"
+                                    SelectionMode="Extended"
+                                    SelectionUnit="Cell"
+                                    HeadersVisibility="None"
+                                    IsReadOnly="True"
+                                    ColumnWidth="Auto"
+                                    CanUserResizeRows="False"
+                                    GridLinesVisibility="None"
+                                    FontSize="14"
+                                    FontWeight="Bold"
+                                    ContextMenuOpening="DataGrid_ContextMenuOpening"
+                                    PreviewMouseRightButtonDown="DataGrid_Palette_MouseRightButtonDown"
+                                    AllowDrop="True"
+                                    Drop="DataGrid_Palette_Drop">
+
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu x:Name="DataGrid_PaletteContextMenu" Width="160" FontSize="15" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                            <MenuItem Header="禁用所选色号" Click="Button_PletteIndexDisable_Click"/>
+                                            <MenuItem Header="透明所选色号" Click="Button_PletteIndexTransparent_Click"/>
+                                            <Separator/>
+                                            <MenuItem Header="还原所选色号" Click="Button_PletteIndexReset_Click"/>
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
+
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Width="*">
+                                            <DataGridTemplateColumn.CellStyle>
+                                                <Style TargetType="DataGridCell">
+                                                    <Setter Property="Background" Value="{Binding [Col0_Color]}"/>
+                                                </Style>
+                                            </DataGridTemplateColumn.CellStyle>
+
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid Background="Black" Opacity="{Binding [Col0_DisableOpacity]}">
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Data="M1024 85.460255L938.539745 0l-426.455131 426.62436L85.460255 0 0.169228 85.460255l426.455132 426.455131L0.169228 938.539745 85.460255 1023.830772l426.624359-426.455132 426.455131 426.455132 85.460255-85.291027L597.37564 511.915386z"/>
+                                                        </Grid>
+                                                        <Grid Opacity="{Binding [Col0_TransparentOpacity]}">
+                                                            <Rectangle Fill="DarkGray" Opacity="0.6"/>
+                                                            <Path Fill="Black" Stretch="Fill" Width="25" Height="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Width="20" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                        </Grid>
+
+                                                        <TextBlock Text="{Binding [Col0]}" Foreground="{Binding [Col0_TextColor]}" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="*">
+                                            <DataGridTemplateColumn.CellStyle>
+                                                <Style TargetType="DataGridCell">
+                                                    <Setter Property="Background" Value="{Binding [Col1_Color]}"/>
+                                                </Style>
+                                            </DataGridTemplateColumn.CellStyle>
+
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid Background="Black" Opacity="{Binding [Col1_DisableOpacity]}">
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Data="M1024 85.460255L938.539745 0l-426.455131 426.62436L85.460255 0 0.169228 85.460255l426.455132 426.455131L0.169228 938.539745 85.460255 1023.830772l426.624359-426.455132 426.455131 426.455132 85.460255-85.291027L597.37564 511.915386z"/>
+                                                        </Grid>
+                                                        <Grid Opacity="{Binding [Col1_TransparentOpacity]}">
+                                                            <Rectangle Fill="DarkGray" Opacity="0.6"/>
+                                                            <Path Fill="Black" Stretch="Fill" Width="25" Height="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Width="20" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                        </Grid>
+
+                                                        <TextBlock Text="{Binding [Col1]}" Foreground="{Binding [Col1_TextColor]}" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="*">
+                                            <DataGridTemplateColumn.CellStyle>
+                                                <Style TargetType="DataGridCell">
+                                                    <Setter Property="Background" Value="{Binding [Col2_Color]}"/>
+                                                </Style>
+                                            </DataGridTemplateColumn.CellStyle>
+
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid Background="Black" Opacity="{Binding [Col2_DisableOpacity]}">
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Data="M1024 85.460255L938.539745 0l-426.455131 426.62436L85.460255 0 0.169228 85.460255l426.455132 426.455131L0.169228 938.539745 85.460255 1023.830772l426.624359-426.455132 426.455131 426.455132 85.460255-85.291027L597.37564 511.915386z"/>
+                                                        </Grid>
+                                                        <Grid Opacity="{Binding [Col2_TransparentOpacity]}">
+                                                            <Rectangle Fill="DarkGray" Opacity="0.6"/>
+                                                            <Path Fill="Black" Stretch="Fill" Width="25" Height="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Width="20" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                        </Grid>
+
+                                                        <TextBlock Text="{Binding [Col2]}" Foreground="{Binding [Col2_TextColor]}" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="*">
+                                            <DataGridTemplateColumn.CellStyle>
+                                                <Style TargetType="DataGridCell">
+                                                    <Setter Property="Background" Value="{Binding [Col3_Color]}"/>
+                                                </Style>
+                                            </DataGridTemplateColumn.CellStyle>
+
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid Background="Black" Opacity="{Binding [Col3_DisableOpacity]}">
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Data="M1024 85.460255L938.539745 0l-426.455131 426.62436L85.460255 0 0.169228 85.460255l426.455132 426.455131L0.169228 938.539745 85.460255 1023.830772l426.624359-426.455132 426.455131 426.455132 85.460255-85.291027L597.37564 511.915386z"/>
+                                                        </Grid>
+                                                        <Grid Opacity="{Binding [Col3_TransparentOpacity]}">
+                                                            <Rectangle Fill="DarkGray" Opacity="0.6"/>
+                                                            <Path Fill="Black" Stretch="Fill" Width="25" Height="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Width="20" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                        </Grid>
+
+                                                        <TextBlock Text="{Binding [Col3]}" Foreground="{Binding [Col3_TextColor]}" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="*">
+                                            <DataGridTemplateColumn.CellStyle>
+                                                <Style TargetType="DataGridCell">
+                                                    <Setter Property="Background" Value="{Binding [Col4_Color]}"/>
+                                                </Style>
+                                            </DataGridTemplateColumn.CellStyle>
+
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid Background="Black" Opacity="{Binding [Col4_DisableOpacity]}">
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Data="M1024 85.460255L938.539745 0l-426.455131 426.62436L85.460255 0 0.169228 85.460255l426.455132 426.455131L0.169228 938.539745 85.460255 1023.830772l426.624359-426.455132 426.455131 426.455132 85.460255-85.291027L597.37564 511.915386z"/>
+                                                        </Grid>
+                                                        <Grid Opacity="{Binding [Col4_TransparentOpacity]}">
+                                                            <Rectangle Fill="DarkGray" Opacity="0.6"/>
+                                                            <Path Fill="Black" Stretch="Fill" Width="25" Height="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Width="20" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                        </Grid>
+
+                                                        <TextBlock Text="{Binding [Col4]}" Foreground="{Binding [Col4_TextColor]}" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="*">
+                                            <DataGridTemplateColumn.CellStyle>
+                                                <Style TargetType="DataGridCell">
+                                                    <Setter Property="Background" Value="{Binding [Col5_Color]}"/>
+                                                </Style>
+                                            </DataGridTemplateColumn.CellStyle>
+
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid Background="Black" Opacity="{Binding [Col5_DisableOpacity]}">
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Data="M1024 85.460255L938.539745 0l-426.455131 426.62436L85.460255 0 0.169228 85.460255l426.455132 426.455131L0.169228 938.539745 85.460255 1023.830772l426.624359-426.455132 426.455131 426.455132 85.460255-85.291027L597.37564 511.915386z"/>
+                                                        </Grid>
+                                                        <Grid Opacity="{Binding [Col5_TransparentOpacity]}">
+                                                            <Rectangle Fill="DarkGray" Opacity="0.6"/>
+                                                            <Path Fill="Black" Stretch="Fill" Width="25" Height="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Width="20" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                        </Grid>
+
+                                                        <TextBlock Text="{Binding [Col5]}" Foreground="{Binding [Col5_TextColor]}" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="*">
+                                            <DataGridTemplateColumn.CellStyle>
+                                                <Style TargetType="DataGridCell">
+                                                    <Setter Property="Background" Value="{Binding [Col6_Color]}"/>
+                                                </Style>
+                                            </DataGridTemplateColumn.CellStyle>
+
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid Background="Black" Opacity="{Binding [Col6_DisableOpacity]}">
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Data="M1024 85.460255L938.539745 0l-426.455131 426.62436L85.460255 0 0.169228 85.460255l426.455132 426.455131L0.169228 938.539745 85.460255 1023.830772l426.624359-426.455132 426.455131 426.455132 85.460255-85.291027L597.37564 511.915386z"/>
+                                                        </Grid>
+                                                        <Grid Opacity="{Binding [Col6_TransparentOpacity]}">
+                                                            <Rectangle Fill="DarkGray" Opacity="0.6"/>
+                                                            <Path Fill="Black" Stretch="Fill" Width="25" Height="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Width="20" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                        </Grid>
+
+                                                        <TextBlock Text="{Binding [Col6]}" Foreground="{Binding [Col6_TextColor]}" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="*">
+                                            <!-- 定义单元格的样式 -->
+                                            <DataGridTemplateColumn.CellStyle>
+                                                <Style TargetType="DataGridCell">
+                                                    <Setter Property="Background" Value="{Binding [Col7_Color]}"/>
+                                                </Style>
+                                            </DataGridTemplateColumn.CellStyle>
+
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid Background="Black" Opacity="{Binding [Col7_DisableOpacity]}">
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Data="M1024 85.460255L938.539745 0l-426.455131 426.62436L85.460255 0 0.169228 85.460255l426.455132 426.455131L0.169228 938.539745 85.460255 1023.830772l426.624359-426.455132 426.455131 426.455132 85.460255-85.291027L597.37564 511.915386z"/>
+                                                        </Grid>
+                                                        <Grid Opacity="{Binding [Col7_TransparentOpacity]}">
+                                                            <Rectangle Fill="DarkGray" Opacity="0.6"/>
+                                                            <Path Fill="Black" Stretch="Fill" Width="25" Height="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                            <Path Fill="MediumVioletRed" Stretch="Fill" Width="20" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Data="M1023.99999999 1018.66666666l-896 0L1023.99999999 122.66666666z"/>
+                                                        </Grid>
+
+                                                        <TextBlock Text="{Binding [Col7]}" Foreground="{Binding [Col7_TextColor]}" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="False">
+                                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridCell}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+
+                            <Button Content="载入最后保存的色盘" Margin="0 10 0 0" Click="Button_LoadLastSavePalette_Click" IsEnabled="{Binding UIEnable}"/>
+                            <Button Content="载入色盘(或文件拖入上方)" Margin="0 10 0 0" Click="Button_LoadPalette_Click" IsEnabled="{Binding UIEnable}"/>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0 0 20 7">
+            <TextBlock Text="操作进度:" FontSize="16" Margin="0 0 0 0"/>
+            <TextBlock x:Name="TextBlock_Progress" FontSize="16" d:Text="0 / 0" Text="{Binding ProgressUi, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Width="100" Margin="10 0 0 0"/>
+        </StackPanel>
+
+        <StackPanel x:Name="StackPanel_Tips" Margin="16 120 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" Panel.ZIndex="1" IsHitTestVisible="False">
+            <TextBlock Text="操作提示：" FontSize="30" HorizontalAlignment="Center"/>
+            <TextBlock Text="将图片拖到对应列表载入" FontSize="20" HorizontalAlignment="Center" Margin="0 10 0 0"/>
+            <TextBlock Text="←操作列表 | 叠加列表→" FontSize="20" HorizontalAlignment="Center"/>
+            <TextBlock Text="支持PNG、GIF、SHP格式" FontSize="17" HorizontalAlignment="Center" Margin="0 10 0 0"/>
+            <TextBlock Text="SHP是以转成图片加载进来" FontSize="17" HorizontalAlignment="Center" Margin="0 10 0 0"/>
+            <TextBlock Text="需要提前选择好原本色盘" FontSize="17" HorizontalAlignment="Center" Margin="0 0 0 0"/>
+            <TextBlock Text="双击列表项可显示和调整图片" FontSize="18" HorizontalAlignment="Center" Margin="0 10 0 0"/>
+            <TextBlock Text="选中按Del键移除图片(保留空位)" Margin="0 20 0 0" HorizontalAlignment="Center"/>
+            <TextBlock Text="选中按Ctrl+Del键移除图片(下方上移)" Margin="0 5 0 0" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <Border x:Name="Border_PaletteTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="400 625 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
+            <TextBlock Text="单位和建筑16-31号为玩家所属色，240-255号色不随光照变化，不使用240-255号色可填写(240)" TextWrapping="Wrap" Width="230" Height="60"/>
+        </Border>
+
+        <Border x:Name="Border_ArtTranslucencyTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="550 565 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
+            <TextBlock Text="art.ini/artmd.ini中的透明度数值设置预览，仅预览，不影响导出图片和生成色盘，实际效果需要在art中的Translucency调整" TextWrapping="Wrap" Width="215" Height="80"/>
+        </Border>
+
+        <Border x:Name="Border_CreatePaletteModeTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="420 580 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
+            <StackPanel>
+                <TextBlock FontWeight="Bold" Text="主要颜色 (生成速度慢)："/>
+                <TextBlock Text="根据图片占比最高的颜色生成，会合并难以看出区别的相似颜色"/>
+                <TextBlock Text="如果有极少像素点的突出颜色可能会被忽略"/>
+                <TextBlock FontWeight="Bold" Text="主要颜色补小像素点 (生成速度慢)：" Margin="0 10 0 0"/>
+                <TextBlock Text="根据图片占比最高的颜色生成，会合并难以看出区别的相似颜色"/>
+                <TextBlock Text="会给占比最低的几个颜色替换为极少像素点的突出颜色"/>
+                <TextBlock FontWeight="Bold" Text="OctreeQuantizer (生成速度快)：" Margin="0 10 0 0"/>
+                <TextBlock Text="八叉树颜色量化算法，效果基本等同于Palette Studio生成的色盘"/>
+            </StackPanel>
+        </Border>
+
+        <Border x:Name="Border_ResizeTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="400 600 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
+            <TextBlock Text="调整缩放和画布会取消透明仿色效果，调整缩放会取消画布调整，应按照 缩放-画布调整-透明仿色 的顺序进行" TextWrapping="Wrap" Width="225" Height="80"/>
+        </Border>
+
+        <Border x:Name="Border_PlayerColorTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="600 600 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
+            <TextBlock Text="颜色和游戏中可能存在差别，仅作为参考" TextWrapping="Wrap" Width="200" Height="40"/>
+        </Border>
+    </Grid>
+</Window>
