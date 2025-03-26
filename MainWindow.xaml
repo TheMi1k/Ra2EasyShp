@@ -220,7 +220,7 @@
                                     </StackPanel>
                                 </Border>
 
-                                <StackPanel Orientation="Horizontal" Margin="10 0 0 0">
+                                <StackPanel Orientation="Horizontal" Margin="10 0 0 0" Background="Transparent" MouseEnter="ViewScale_MouseEnter" MouseLeave="ViewScale_MouseLeave">
                                     <TextBlock Text="预览缩放"/>
                                     <TextBlock Text="{Binding ImageViewScaleTransformStr}" Margin="5 0 0 0"/>
                                 </StackPanel>
@@ -912,6 +912,10 @@
 
         <Border x:Name="Border_PlayerColorTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="600 600 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
             <TextBlock Text="颜色和游戏中可能存在差别，仅作为参考" TextWrapping="Wrap" Width="200" Height="40"/>
+        </Border>
+
+        <Border x:Name="Border_ViewScaleTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="750 570 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
+            <TextBlock Text="预览窗口中Ctrl+鼠标滚轮进行缩放" TextWrapping="Wrap" Width="140" Height="40"/>
         </Border>
     </Grid>
 </Window>

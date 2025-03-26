@@ -2300,5 +2300,15 @@ namespace Ra2EasyShp
         {
             Border_PlayerColorTip.Visibility = Visibility.Collapsed;
         }
+
+        private void ViewScale_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Border_ViewScaleTip.Visibility = Visibility.Visible;
+        }
+
+        private void ViewScale_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Border_ViewScaleTip.Visibility = Visibility.Collapsed;
+        }
     }
 }
