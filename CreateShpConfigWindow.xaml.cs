@@ -1,21 +1,11 @@
 ﻿using Ra2EasyShp.Data;
 using Ra2EasyShp.Funcs;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using System.Xml.Linq;
 
 namespace Ra2EasyShp
 {
@@ -25,6 +15,8 @@ namespace Ra2EasyShp
     public partial class CreateShpConfigWindow : Window
     {
         byte[] _shpData;
+        private string _customSavePath = string.Empty;
+
         public CreateShpConfigWindow(byte[] shpData)
         {
             InitializeComponent();
@@ -41,28 +33,19 @@ namespace Ra2EasyShp
         {
             try
             {
-                string savePath = string.Empty;
-                string nameFirst = TextBox_FileNameFirst.Text;
-                string name = TextBox_FileName.Text;
+                string _saveFile = string.Empty;
 
-                if (CheckBox_MapTypeForName.IsChecked == true)
+                if (string.IsNullOrEmpty(_customSavePath))
                 {
-                    if (string.IsNullOrEmpty(nameFirst) || string.IsNullOrEmpty(name))
-                    {
-                        throw new Exception("启用地图类型命名前缀和名称不能为空");
-                    }
+                    string savePath = string.Empty;
+                    string name = TextBox_FileName.Text;
 
-                    if (nameFirst.Length != 1 || int.TryParse(nameFirst, out _))
-                    {
-                        throw new Exception("前缀只能为一个字母");
-                    }
-
-                    if (!IsValidString(nameFirst) || !IsValidString(name))
+                    if (!string.IsNullOrEmpty(name) && !IsValidString(name))
                     {
                         throw new Exception("名称只能为数字和字母");
                     }
 
-                    char[] mapType = { 'a', 'u', 't', 'd', 'l', 'g' };
+                    string saveFileName = string.IsNullOrEmpty(name) ? "输出" : name;
 
                     savePath = GetPath.CreateSavePath(Enums.PathType.SHP);
                     if (!Directory.Exists(savePath))
@@ -70,26 +53,42 @@ namespace Ra2EasyShp
                         Directory.CreateDirectory(savePath);
                     }
 
-                    foreach (var c in mapType)
-                    {
-                        File.WriteAllBytes($@"{savePath}\{nameFirst}{c}{name}.shp", _shpData);
-                    }
+                    File.WriteAllBytes(Path.Combine(savePath, $"{saveFileName}.shp"), _shpData);
+
+                    _saveFile = Path.Combine(savePath, $"{saveFileName}.shp");
                 }
                 else
                 {
-                    savePath = GetPath.CreateSavePath(Enums.PathType.SHP);
-                    if (!Directory.Exists(savePath))
-                    {
-                        Directory.CreateDirectory(savePath);
-                    }
+                    File.WriteAllBytes(_customSavePath, _shpData);
 
-                    string saveFileName = string.IsNullOrEmpty(name) ? "输出" : name;
-                    File.WriteAllBytes($@"{savePath}\{saveFileName}.shp", _shpData);
+                    _saveFile = _customSavePath;
                 }
 
-                if (OpenSaveSuccessWindow(savePath))
+                string path = Path.GetDirectoryName(_saveFile);
+
+                if (CheckBox_MapTypeForName.IsChecked == true)
                 {
-                    Process.Start("explorer.exe", savePath);
+                    char[] mapTypeArray = { 'a', 'u', 't', 'd', 'l', 'g' };
+                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(_saveFile);
+
+                    if (fileNameWithoutExtension.ToCharArray().Length > 1)
+                    {
+                        foreach (var mapType in mapTypeArray)
+                        {
+                            char[] renameChar = fileNameWithoutExtension.ToCharArray();
+                            renameChar[1] = mapType;
+                            string rename = new string(renameChar);
+                            if (rename != fileNameWithoutExtension)
+                            {
+                                File.Copy(_saveFile, Path.Combine(path, $"{rename}.shp"), true);
+                            }
+                        }
+                    }
+                }
+
+                if (OpenSaveSuccessWindow(path))
+                {
+                    Process.Start("explorer.exe", path);
                 }
 
                 this.Close();
@@ -102,7 +101,7 @@ namespace Ra2EasyShp
 
         private void Button_Tip_Click(object sender, RoutedEventArgs e)
         {
-            ShowMessageBox("将文件命名为 前缀字母 * 名称生成多份\n* 为地图类型，例如 capill.shp，cgpill.shp等\nc为前缀，a、g等第二个字母为地图类型，pill为名称");
+            ShowMessageBox("保存后将文件复制多份，名称第二个字母修改为地图类型字母\n例如 c(a)pill.shp，c(g)pill.shp等\n\n如果有同名文件会被覆盖");
         }
 
         private bool ShowMessageBox(string text, MessageBoxButton type = MessageBoxButton.OK)
@@ -148,14 +147,46 @@ namespace Ra2EasyShp
 
         private void CheckBox_MapTypeForName_Changed(object sender, RoutedEventArgs e)
         {
-            if (CheckBox_MapTypeForName.IsChecked == true)
+            //if (CheckBox_MapTypeForName.IsChecked == true)
+            //{
+            //    StackPanel_MapTypeForName.Visibility = Visibility.Visible;
+            //}
+            //else
+            //{
+            //    StackPanel_MapTypeForName.Visibility = Visibility.Collapsed;
+            //}
+        }
+
+        private void CheckBox_SetSavePath(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
-                StackPanel_MapTypeForName.Visibility = Visibility.Visible;
-            }
-            else
+                Title = "选择保存文件",
+                Filter = "shp文件(*.shp)|*.shp",
+                FileName = string.Empty,
+                RestoreDirectory = true,
+                DefaultExt = "shp"
+            };
+
+            if (saveFileDialog.ShowDialog() == false)
             {
-                StackPanel_MapTypeForName.Visibility = Visibility.Collapsed;
+                _customSavePath = string.Empty;
+                CheckBox_CustomSavePath.IsChecked = false;
+                return;
             }
+
+            StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
+            StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
+
+            _customSavePath = saveFileDialog.FileName;
+            TextBox_SavePath.Text = _customSavePath;
+        }
+
+        private void CheckBox_ClearSavePath(object sender, RoutedEventArgs e)
+        {
+            StackPanel_SaveFileName.Visibility = Visibility.Visible;
+            StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
+            _customSavePath = string.Empty;
         }
     }
 }

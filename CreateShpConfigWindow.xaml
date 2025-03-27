@@ -5,23 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ra2EasyShp"
         mc:Ignorable="d"
-        Title="SHP保存选项" Height="210" Width="260" ResizeMode="NoResize">
+        Title="SHP保存选项" Height="280" Width="260" ResizeMode="NoResize">
     <Grid>
         <StackPanel Margin="10 10 0 0">
             <StackPanel>
-                <GroupBox Header="命名(为空保存为 输出.shp)" Width="225" HorizontalAlignment="Left">
+                <GroupBox Header="保存选项" Width="225" HorizontalAlignment="Left">
                     <StackPanel Margin="5 5 0 0">
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel x:Name="StackPanel_MapTypeForName" Orientation="Horizontal" d:Visibility="Visible"  Visibility="Collapsed">
-                                <TextBox x:Name="TextBox_FileNameFirst" Width="30"/>
-                                <TextBlock Text="*" Margin="2 0 0 0"/>
-                            </StackPanel>
-                            <TextBox x:Name="TextBox_FileName" Width="120" HorizontalAlignment="Left" Margin="2 0 0 0"/>
-                            <TextBlock Text=".shp" Margin="5 0 0 0"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
-                            <CheckBox x:Name="CheckBox_MapTypeForName" Content="地图类型命名" Checked="CheckBox_MapTypeForName_Changed" Unchecked="CheckBox_MapTypeForName_Changed"/>
+                        <CheckBox x:Name="CheckBox_CustomSavePath" Content="自定义保存目录" Margin="0 3 0 0" Checked="CheckBox_SetSavePath" Unchecked="CheckBox_ClearSavePath"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                            <CheckBox x:Name="CheckBox_MapTypeForName" Content="创建地图类型命名副本" Checked="CheckBox_MapTypeForName_Changed" Unchecked="CheckBox_MapTypeForName_Changed"/>
                             <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Click="Button_Tip_Click"/>
+                        </StackPanel>
+
+                        <StackPanel x:Name="StackPanel_SaveFileName" Margin="0 5 0 0">
+                            <TextBlock Text="命名(为空保存为 输出.shp)"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox x:Name="TextBox_FileName" Width="120" HorizontalAlignment="Left" Margin="2 0 0 0"/>
+                                <TextBlock Text=".shp" Margin="5 0 0 0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <StackPanel x:Name="StackPanel_CustomSaveFileName" Margin="0 5 0 0" Visibility="Collapsed">
+                            <TextBlock Text="保存目录"/>
+                            <TextBox x:Name="TextBox_SavePath" FontSize="14" Width="200" Height="22" IsReadOnly="True" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>

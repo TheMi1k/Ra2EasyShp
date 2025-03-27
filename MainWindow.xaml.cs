@@ -20,6 +20,9 @@ using System.Data;
 using System.Reflection;
 using Image = System.Windows.Controls.Image;
 using Point = System.Windows.Point;
+using System.Windows.Media.Media3D;
+using System.Windows.Media.Effects;
+using ImageProcessor.Processors;
 
 namespace Ra2EasyShp
 {
@@ -165,7 +168,7 @@ namespace Ra2EasyShp
                     Y1 = l - 1000,
                     X2 = l - 1000,
                     Y2 = l,
-                    StrokeThickness = 2,
+                    StrokeThickness = 1.5,
                     Stroke = System.Windows.Media.Brushes.Black,
                 };
                 RenderOptions.SetEdgeMode(lineL, EdgeMode.Aliased);
@@ -180,7 +183,7 @@ namespace Ra2EasyShp
                     Y1 = r2,
                     X2 = r1 + 1000,
                     Y2 = r2 + 1000,
-                    StrokeThickness = 2,
+                    StrokeThickness = 1.5,
                     Stroke = System.Windows.Media.Brushes.Black,
                 };
                 RenderOptions.SetEdgeMode(lineR, EdgeMode.Aliased);
@@ -296,7 +299,7 @@ namespace Ra2EasyShp
                 ImageBrush imageBrush = new ImageBrush
                 {
                     ImageSource = ImageTypeConvert.BitmapToImageSource(new Bitmap(img)),
-                    Stretch = Stretch.None
+                    Stretch = Stretch.None,
                 };
 
                 //Grid_ImgView.Background = imageBrush;
@@ -306,106 +309,103 @@ namespace Ra2EasyShp
 
         private async void Img_Drop(object sender, DragEventArgs e)
         {
-            StackPanel_Tips.Visibility = Visibility.Collapsed;
-
-            var dataGrid = sender as DataGrid;
-            if (dataGrid == null)
-            {
-                return;
-            }
-
-            if (!Directory.Exists(GData.TempPath))
-            {
-                Directory.CreateDirectory(GData.TempPath);
-            }
-
-            var point = e.GetPosition(dataGrid);
-            var row = dataGrid.InputHitTest(point) as DependencyObject;
-
-            while (row != null && !(row is DataGridRow))
-            {
-                row = VisualTreeHelper.GetParent(row);
-            }
-
-            int insertIndex = GData.ImageData.Count;
-            if (row is DataGridRow dataGridRow)
-            {
-                insertIndex = dataGrid.ItemContainerGenerator.IndexFromContainer(dataGridRow);
-            }
-
-            GData.UIData.NowIndex = 0;
-            LoadImageOption(GData.UIData.NowIndex);
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-
-            System.Windows.Point position = e.GetPosition((UIElement)sender);
-
-            Grid_Main.IsEnabled = false;
-
-            if (position.X <= 140)
-            {
-                try
-                {
-                    await ImageListManage.OpenFile(files, insertIndex, false);
-
-                    await ReloadImageSource(0);
-                }
-                catch (Exception ex)
-                {
-                    ShowMessageBox($"加载图片错误\n{ex.Message}");
-                }
-            }
-            else
-            {
-                try
-                {
-                    await ImageListManage.OpenFile(files, insertIndex, true);
-
-                    await ReloadImageSource(0);
-                }
-                catch (Exception ex)
-                {
-                    ShowMessageBox($"加载图片错误\n{ex.Message}");
-                }
-            }
-
-            Grid_Main.IsEnabled = true;
-        }
-
-        private async void Img_DropToEnd(object sender, DragEventArgs e)
-        {
-            System.Windows.Point position = e.GetPosition((UIElement)sender);
-
-            StackPanel_Tips.Visibility = Visibility.Collapsed;
-
-            GData.UIData.NowIndex = 0;
-            LoadImageOption(GData.UIData.NowIndex);
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-
-            Grid_Main.IsEnabled = false;
-
             try
             {
+                Grid_Main.IsEnabled = false;
+
+                StackPanel_Tips.Visibility = Visibility.Collapsed;
+
+                var dataGrid = sender as DataGrid;
+                if (dataGrid == null)
+                {
+                    return;
+                }
+
+                if (!Directory.Exists(GData.TempPath))
+                {
+                    Directory.CreateDirectory(GData.TempPath);
+                }
+
+                var point = e.GetPosition(dataGrid);
+                var row = dataGrid.InputHitTest(point) as DependencyObject;
+
+                while (row != null && !(row is DataGridRow))
+                {
+                    row = VisualTreeHelper.GetParent(row);
+                }
+
+                int insertIndex = GData.ImageData.Count;
+                if (row is DataGridRow dataGridRow)
+                {
+                    insertIndex = dataGrid.ItemContainerGenerator.IndexFromContainer(dataGridRow);
+                }
+
+                GData.UIData.NowIndex = 0;
+                LoadImageOption(GData.UIData.NowIndex);
+
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                System.Windows.Point position = e.GetPosition((UIElement)sender);
+
                 if (position.X <= 140)
                 {
-                    await ImageListManage.OpenFile(files, GData.ImageData.Count, false);
-
-                    await ReloadImageSource(0);
+                    await ImageListManage.OpenFile(files, insertIndex, false);
                 }
                 else
                 {
-                    await ImageListManage.OpenFile(files, GData.ImageData.Count, true);
-
-                    await ReloadImageSource(0);
+                    await ImageListManage.OpenFile(files, insertIndex, true);
                 }
+
+                await ReloadImageSource(0);
             }
             catch (Exception ex)
             {
                 ShowMessageBox($"加载图片错误\n{ex.Message}");
             }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
+        }
 
-            Grid_Main.IsEnabled = true;
+        private async void Img_DropToEnd(object sender, DragEventArgs e)
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                StackPanel_Tips.Visibility = Visibility.Collapsed;
+
+                Button btn = sender as Button;
+                if (btn == null)
+                {
+                    return;
+                }
+
+                GData.UIData.NowIndex = 0;
+                LoadImageOption(GData.UIData.NowIndex);
+
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (btn.Tag.ToString() == "EditList")
+                {
+                    await ImageListManage.OpenFile(files, GData.ImageData.Count, false);
+                }
+                else
+                {
+                    await ImageListManage.OpenFile(files, GData.ImageData.Count, true);
+                }
+
+                await ReloadImageSource(0);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox($"加载图片错误\n{ex.Message}");
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
 
         /// <summary>
@@ -540,6 +540,10 @@ namespace Ra2EasyShp
             }
 
             var dataGrid = triggeredControl as System.Windows.Controls.DataGrid;
+            if (dataGrid.SelectedCells.Count == 0)
+            {
+                return;
+            }
             DataGridCellInfo cellInfo = dataGrid.SelectedCells[0];
             var rowData = cellInfo.Item;
 
@@ -554,20 +558,16 @@ namespace Ra2EasyShp
             {
                 GData.UIData.NowIndex = item.Index;
 
+                if (LocalImageManage.GetBaseImageOriginalSize(GData.UIData.NowIndex, out int originalWidth, out int originalHeight))
                 {
-                    if (LocalImageManage.GetBaseImageOriginalSize(GData.UIData.NowIndex, out int width, out int height))
-                    {
-                        GData.UIData.ResizeUI.ImageOriginalWidth = width;
-                        GData.UIData.ResizeUI.ImageOriginalHeight = height;
-                    }
+                    GData.UIData.ResizeUI.ImageOriginalWidth = originalWidth;
+                    GData.UIData.ResizeUI.ImageOriginalHeight = originalHeight;
                 }
 
+                if (LocalImageManage.GetBaseImageNowSize(GData.UIData.NowIndex, out int nowWidth, out int nowHeight))
                 {
-                    if (LocalImageManage.GetBaseImageNowSize(GData.UIData.NowIndex, out int width, out int height))
-                    {
-                        GData.UIData.ResizeUI.ImageNowWidth = width;
-                        GData.UIData.ResizeUI.ImageNowHeight = height;
-                    }
+                    GData.UIData.ResizeUI.ImageNowWidth = nowWidth;
+                    GData.UIData.ResizeUI.ImageNowHeight = nowHeight;
                 }
 
                 await ReloadImageSource(GData.UIData.NowIndex);
@@ -582,132 +582,227 @@ namespace Ra2EasyShp
 
         private async void Button_ExportAllImage_Click(object sender, RoutedEventArgs e)
         {
-            if (GData.ImageData.Count == 0)
+            try
             {
-                return;
-            }
-
-            Grid_Main.IsEnabled = false;
-
-            string savePath = GetPath.CreateSavePath(Enums.PathType.PNG);
-            if (!Directory.Exists(savePath))
-            {
-                Directory.CreateDirectory(savePath);
-            }
-
-            int sucCount = 0;
-            int failCount = 0;
-
-            GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
-
-            await Task.Run(async () =>
-            {
-                int imgOutIndex = 0;
-                for (int index = 0; index < GData.ImageData.Count; index++)
+                if (GData.ImageData.Count == 0)
                 {
-                    try
-                    {
-                        string imgName = $"{imgOutIndex.ToString().PadLeft(5, '0')}.png";
-
-                        using (Bitmap result = await ImageManage.MergeBitmaps(
-                            index, 
-                            index,
-                            GData.ImageData[index].OverlayImage.OffsetX,
-                            GData.ImageData[index].OverlayImage.OffsetY, 
-                            GData.ImageData[index].OverlayImage.OverlayMode))
-                        {
-                            result?.Save($@"{savePath}\{imgName}", System.Drawing.Imaging.ImageFormat.Png);
-                        }
-
-                        sucCount += 1;
-
-                        GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
-
-                        imgOutIndex += 1;
-                    }
-                    catch
-                    {
-                        failCount += 1;
-                        imgOutIndex += 1;
-                    }
+                    return;
                 }
-            });
 
-            Grid_Main.IsEnabled = true;
+                Grid_Main.IsEnabled = false;
 
-            if (OpenSaveSuccessWindow(savePath))
+                string savePath = GetPath.CreateSavePath(Enums.PathType.PNG);
+                if (!Directory.Exists(savePath))
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+
+                int sucCount = 0;
+                int failCount = 0;
+
+                GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
+
+                await Task.Run(async () =>
+                {
+                    int imgOutIndex = 0;
+                    for (int index = 0; index < GData.ImageData.Count; index++)
+                    {
+                        try
+                        {
+                            string imgName = $"{imgOutIndex.ToString().PadLeft(5, '0')}.png";
+
+                            using (Bitmap result = await ImageManage.MergeBitmaps(
+                                index,
+                                index,
+                                GData.ImageData[index].OverlayImage.OffsetX,
+                                GData.ImageData[index].OverlayImage.OffsetY,
+                                GData.ImageData[index].OverlayImage.OverlayMode))
+                            {
+                                result?.Save($@"{savePath}\{imgName}", System.Drawing.Imaging.ImageFormat.Png);
+                            }
+
+                            sucCount += 1;
+
+                            GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
+
+                            imgOutIndex += 1;
+                        }
+                        catch
+                        {
+                            failCount += 1;
+                            imgOutIndex += 1;
+                        }
+                    }
+                });
+
+                if (OpenSaveSuccessWindow(savePath))
+                {
+                    Process.Start("explorer.exe", savePath);
+                }
+            }
+            catch (Exception ex)
             {
-                Process.Start("explorer.exe", savePath);
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
             }
         }
 
         private async void Button_ExportAllPaletteImage_Click(object sender, RoutedEventArgs e)
         {
-            if (GData.ImageData.Count == 0)
+            try
             {
-                return;
-            }
+                Grid_Main.IsEnabled = false;
 
-            if ((Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedItem != Enums.ViewPlayerColor.无)
-            {
-                ShowMessageBox("请先将预览所属色改为 [无]");
-                return;
-            }
-
-            Grid_Main.IsEnabled = false;
-
-            string savePath = GetPath.CreateSavePath(Enums.PathType.PNG);
-            if (!Directory.Exists(savePath))
-            {
-                Directory.CreateDirectory(savePath);
-            }
-
-            int sucCount = 0;
-            int failCount = 0;
-
-            GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
-
-            await Task.Run(async () =>
-            {
-                int imgOutIndex = 0;
-                for (int index = 0; index < GData.ImageData.Count; index++)
+                if (GData.ImageData.Count == 0)
                 {
-                    try
-                    {
-                        string imgName = $"{imgOutIndex.ToString().PadLeft(5, '0')}.png";
-
-                        using (Bitmap result = await ImageManage.MergeBitmaps(
-                            index,
-                            index,
-                            GData.ImageData[index].OverlayImage.OffsetX,
-                            GData.ImageData[index].OverlayImage.OffsetY,
-                            GData.ImageData[index].OverlayImage.OverlayMode))
-                        {
-                            using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(result, GData.NowPalette))
-                            {
-                                bitmapOnPal?.Save($@"{savePath}\{imgName}", System.Drawing.Imaging.ImageFormat.Png);
-                            }
-                        }
-
-                        sucCount += 1;
-
-                        GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
-
-                        imgOutIndex += 1;
-                    }
-                    catch
-                    {
-                        failCount += 1;
-                        imgOutIndex += 1;
-                    }
+                    return;
                 }
-            });
 
-            Grid_Main.IsEnabled = true;
+                if ((Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedItem != Enums.ViewPlayerColor.无)
+                {
+                    throw new Exception("请先将预览所属色改为 [无]");
+                }
 
-            if (OpenSaveSuccessWindow(savePath))
+                string savePath = GetPath.CreateSavePath(Enums.PathType.PNG);
+                if (!Directory.Exists(savePath))
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+
+                int sucCount = 0;
+                int failCount = 0;
+
+                GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
+
+                await Task.Run(async () =>
+                {
+                    int imgOutIndex = 0;
+                    for (int index = 0; index < GData.ImageData.Count; index++)
+                    {
+                        try
+                        {
+                            string imgName = $"{imgOutIndex.ToString().PadLeft(5, '0')}.png";
+
+                            using (Bitmap result = await ImageManage.MergeBitmaps(
+                                index,
+                                index,
+                                GData.ImageData[index].OverlayImage.OffsetX,
+                                GData.ImageData[index].OverlayImage.OffsetY,
+                                GData.ImageData[index].OverlayImage.OverlayMode))
+                            {
+                                using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(result, GData.NowPalette, true))
+                                {
+                                    bitmapOnPal?.Save($@"{savePath}\{imgName}", System.Drawing.Imaging.ImageFormat.Png);
+                                }
+                            }
+
+                            sucCount += 1;
+
+                            GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
+
+                            imgOutIndex += 1;
+                        }
+                        catch
+                        {
+                            failCount += 1;
+                            imgOutIndex += 1;
+                        }
+                    }
+                });
+
+                if (OpenSaveSuccessWindow(savePath))
+                {
+                    Process.Start("explorer.exe", savePath);
+                }
+            }
+            catch (Exception ex)
             {
-                Process.Start("explorer.exe", savePath);
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
+        }
+
+        private async void Button_ExportAllPaletteImageNoBackground_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                if ((Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedItem != Enums.ViewPlayerColor.无)
+                {
+                    throw new Exception("请先将预览所属色改为 [无]");
+                }
+
+                string savePath = GetPath.CreateSavePath(Enums.PathType.PNG);
+                if (!Directory.Exists(savePath))
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+
+                int sucCount = 0;
+                int failCount = 0;
+
+                GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
+
+                await Task.Run(async () =>
+                {
+                    int imgOutIndex = 0;
+                    for (int index = 0; index < GData.ImageData.Count; index++)
+                    {
+                        try
+                        {
+                            string imgName = $"{imgOutIndex.ToString().PadLeft(5, '0')}.png";
+
+                            using (Bitmap result = await ImageManage.MergeBitmaps(
+                                index,
+                                index,
+                                GData.ImageData[index].OverlayImage.OffsetX,
+                                GData.ImageData[index].OverlayImage.OffsetY,
+                                GData.ImageData[index].OverlayImage.OverlayMode))
+                            {
+                                using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(result, GData.NowPalette, false))
+                                {
+                                    bitmapOnPal?.Save($@"{savePath}\{imgName}", System.Drawing.Imaging.ImageFormat.Png);
+                                }
+                            }
+
+                            sucCount += 1;
+
+                            GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
+
+                            imgOutIndex += 1;
+                        }
+                        catch
+                        {
+                            failCount += 1;
+                            imgOutIndex += 1;
+                        }
+                    }
+                });
+
+                if (OpenSaveSuccessWindow(savePath))
+                {
+                    Process.Start("explorer.exe", savePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
             }
         }
 
@@ -754,7 +849,7 @@ namespace Ra2EasyShp
                             LoadImageOption(GData.UIData.NowIndex);
                         });
 
-                        await Task.Delay(50);
+                        await Task.Delay(70);
 
                         gcCount++;
                         if (gcCount > 5)
@@ -777,6 +872,50 @@ namespace Ra2EasyShp
             });
         }
 
+        private async void Button_PreviousFrame_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (GData.UIData.NowIndex - 1 < 0)
+                {
+                    GData.UIData.NowIndex = GData.ImageData.Count - 1;
+                }
+                else
+                {
+                    GData.UIData.NowIndex--;
+                }
+
+                await ReloadImageSource(GData.UIData.NowIndex);
+                LoadImageOption(GData.UIData.NowIndex);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+        }
+
+        private async void Button_NextFrame_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (GData.UIData.NowIndex + 1 >= GData.ImageData.Count)
+                {
+                    GData.UIData.NowIndex = 0;
+                }
+                else
+                {
+                    GData.UIData.NowIndex++;
+                }
+
+                await ReloadImageSource(GData.UIData.NowIndex);
+                LoadImageOption(GData.UIData.NowIndex);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+        }
+
         private async void Button_Test_Click(object sender, RoutedEventArgs e)
         {
             GData.UIData.NowIndex = 0;
@@ -789,7 +928,7 @@ namespace Ra2EasyShp
             //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
             //string[] files = Directory.GetFiles(folderPath);
-            string[] files = { @"C:\Users\Milk\Desktop\QQ20250323-005711.png" };
+            string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
 
 
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月18日17时8分5秒\输出.shp" };
@@ -849,50 +988,62 @@ namespace Ra2EasyShp
         /// <param name="e"></param>
         private async void Button_ApplyToAllImg_Click(object sender, RoutedEventArgs e)
         {
-            if (GData.ImageData.Count == 0)
+            try
             {
-                return;
-            }
+                Grid_Main.IsEnabled = false;
 
-            Grid_Main.IsEnabled = false;
-
-            RadioButton_ViewMode_OutImg.IsChecked = true;
-
-            object locker = new object();
-            int maxCount = GData.ImageData.Count;
-            int sucCount = 0;
-            GData.UIData.SetProgressUI(0, maxCount);
-
-            await Task.Run(() =>
-            {
-                Parallel.For(0, GData.ImageData.Count, i =>
+                if (GData.ImageData.Count == 0)
                 {
-                    GData.UIData.DitherUI.SetOutImageData(i);
-                    ImageManage.ConvertImage(i);
+                    return;
+                }
 
-                    lock (locker)
+                RadioButton_ViewMode_OutImg.IsChecked = true;
+
+                object locker = new object();
+                int maxCount = GData.ImageData.Count;
+                int sucCount = 0;
+                GData.UIData.SetProgressUI(0, maxCount);
+
+                await Task.Run(() =>
+                {
+                    Parallel.For(0, GData.ImageData.Count, i =>
                     {
-                        sucCount++;
-                    }
+                        GData.UIData.DitherUI.SetOutImageData(i);
+                        ImageManage.ConvertImage(i);
 
-                    GData.UIData.SetProgressUI(sucCount, maxCount);
+                        lock (locker)
+                        {
+                            sucCount++;
+                        }
+
+                        GData.UIData.SetProgressUI(sucCount, maxCount);
+                    });
                 });
-            });
 
-            GC.Collect();
+                GC.Collect();
 
-            await ReloadImageSource(GData.UIData.NowIndex);
+                await ReloadImageSource(GData.UIData.NowIndex);
 
-            Grid_Main.IsEnabled = true;
-
-            ShowMessageBox("应用到所有图像完成");
+                ShowMessageBox("应用到所有图像完成");
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
 
         private async void Button_CreatePal_Click(object sender, RoutedEventArgs e)
         {
-            int palColorNum;
             try
             {
+                int palColorNum;
+
+                Grid_Main.IsEnabled = false;
+
                 palColorNum = int.Parse(TextBox_PalColorNum.Text);
                 if (palColorNum < 2 || palColorNum > 256)
                 {
@@ -903,8 +1054,6 @@ namespace Ra2EasyShp
                 {
                     return;
                 }
-
-                Grid_Main.IsEnabled = false;
 
                 bool isPlayerColor = (bool)CheckBox_PlayerColor.IsChecked;
 
@@ -917,7 +1066,6 @@ namespace Ra2EasyShp
 
                 if (!window.Result)
                 {
-                    Grid_Main.IsEnabled = true;
                     return;
                 }
 
@@ -947,8 +1095,10 @@ namespace Ra2EasyShp
             {
                 ShowMessageBox($"生成色盘失败\n{ex.Message}");
             }
-
-            Grid_Main.IsEnabled = true;
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
 
         /// <summary>
@@ -965,24 +1115,28 @@ namespace Ra2EasyShp
 
             if (RadioButton_ArtTranslucency_none.IsChecked == true)
             {
+                Image_input.Opacity = 1.0;
                 Image_output.Opacity = 1.0;
                 Image_outputOverlay.Opacity = 1.0;
                 Image_PaletteImg.Opacity = 1.0;
             }
             else if (RadioButton_ArtTranslucency_25.IsChecked == true)
             {
+                Image_input.Opacity = 0.75;
                 Image_output.Opacity = 0.75;
                 Image_outputOverlay.Opacity = 0.75;
                 Image_PaletteImg.Opacity = 0.75;
             }
             else if (RadioButton_ArtTranslucency_50.IsChecked == true)
             {
+                Image_input.Opacity = 0.5;
                 Image_output.Opacity = 0.5;
                 Image_outputOverlay.Opacity = 0.5;
                 Image_PaletteImg.Opacity = 0.5;
             }
             else if (RadioButton_ArtTranslucency_75.IsChecked == true)
             {
+                Image_input.Opacity = 0.25;
                 Image_output.Opacity = 0.25;
                 Image_outputOverlay.Opacity = 0.25;
                 Image_PaletteImg.Opacity = 0.25;
@@ -1032,13 +1186,13 @@ namespace Ra2EasyShp
                     LoadRa2Grids();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                ShowMessageBox(ex.Message);
             }
         }
 
-        private void Button_ClearList1_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DataGrid_Images_ClearEditList_Click(object sender, RoutedEventArgs e)
         {
             if (GData.ImageData.Count != 0)
             {
@@ -1061,12 +1215,11 @@ namespace Ra2EasyShp
                 catch (Exception ex)
                 {
                     ShowMessageBox(ex.Message);
-                    return;
                 }
             }
         }
 
-        private void Button_ClearList2_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DataGrid_Images_ClearOverlayList_Click(object sender, RoutedEventArgs e)
         {
             if (GData.ImageData.Count != 0)
             {
@@ -1088,46 +1241,52 @@ namespace Ra2EasyShp
                 catch (Exception ex)
                 {
                     ShowMessageBox(ex.Message);
-                    return;
                 }
             }
         }
 
         private void ListView_Images_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.Control)
+            try
             {
-                ImageListManage.DeleteItemShift(DataGrid_Images.SelectedCells.ToList());
+                if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    ImageListManage.DeleteItemShift(DataGrid_Images.SelectedCells.ToList());
 
-                GData.UIData.NowIndex = 0;
-                Image_input.Source = null;
-                Image_output.Source = null;
-                Image_PaletteImg.Source = null;
-                Image_outputOverlay.Source = null;
+                    GData.UIData.NowIndex = 0;
+                    Image_input.Source = null;
+                    Image_output.Source = null;
+                    Image_PaletteImg.Source = null;
+                    Image_outputOverlay.Source = null;
 
-                GData.UIData.SetAllDefault();
+                    GData.UIData.SetAllDefault();
 
-                DataGrid_Images.ItemsSource = null;
-                DataGrid_Images.ItemsSource = GData.ImageData;
-                return;
+                    DataGrid_Images.ItemsSource = null;
+                    DataGrid_Images.ItemsSource = GData.ImageData;
+                    return;
+                }
+
+                if (e.Key == Key.Delete)
+                {
+                    ImageListManage.DeleteItem(DataGrid_Images.SelectedCells.ToList());
+
+                    GData.UIData.NowIndex = 0;
+                    Image_input.Source = null;
+                    Image_output.Source = null;
+                    Image_PaletteImg.Source = null;
+                    Image_outputOverlay.Source = null;
+
+                    GData.UIData.SetAllDefault();
+
+                    DataGrid_Images.ItemsSource = null;
+                    DataGrid_Images.ItemsSource = GData.ImageData;
+
+                    return;
+                }
             }
-
-            if (e.Key == Key.Delete)
+            catch (Exception ex)
             {
-                ImageListManage.DeleteItem(DataGrid_Images.SelectedCells.ToList());
-
-                GData.UIData.NowIndex = 0;
-                Image_input.Source = null;
-                Image_output.Source = null;
-                Image_PaletteImg.Source = null;
-                Image_outputOverlay.Source = null;
-
-                GData.UIData.SetAllDefault();
-
-                DataGrid_Images.ItemsSource = null;
-                DataGrid_Images.ItemsSource = GData.ImageData;
-
-                return;
+                ShowMessageBox(ex.Message);
             }
         }
 
@@ -1175,35 +1334,65 @@ namespace Ra2EasyShp
             _insertListName = Enums.ListName.空;
 
             var dataGrid = sender as DataGrid;
-            if (dataGrid == null) return;
+            if (dataGrid == null)
+            {
+                return;
+            }
 
-            // 获取鼠标点击的位置
             var point = e.GetPosition(dataGrid);
-            var hit = dataGrid.InputHitTest(point) as DependencyObject;
+            int columnIndex = -1;
+            int rowIndex = -1;
 
-            while (hit != null && !(hit is DataGridRow))
+            DependencyObject hit = (DependencyObject)e.OriginalSource;
+
+            while (hit != null && !(hit is DataGridCell))
             {
                 hit = VisualTreeHelper.GetParent(hit);
             }
 
-            if (hit is DataGridRow dataGridRow)
+            if (hit is DataGridCell cell)
             {
-                _insertIndex = dataGrid.ItemContainerGenerator.IndexFromContainer(dataGridRow);
-                if (point.X < 41)
+                columnIndex = cell.Column.DisplayIndex;
+
+                DependencyObject rowHit = cell;
+                while (rowHit != null && !(rowHit is DataGridRow))
                 {
-                    MenuItem1.Header = $"往两个列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
-                    _insertListName = Enums.ListName.全部;
+                    rowHit = VisualTreeHelper.GetParent(rowHit);
                 }
-                else if (point.X < 141)
+
+                if (rowHit is DataGridRow row)
                 {
-                    MenuItem1.Header = $"往操作列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
-                    _insertListName = Enums.ListName.操作;
+                    rowIndex = row.GetIndex();
                 }
-                else
-                {
-                    MenuItem1.Header = $"往叠加列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
-                    _insertListName = Enums.ListName.叠加;
-                }
+            }
+
+            if (columnIndex == -1 ||  rowIndex == -1)
+            {
+                DataGridContextMenu.IsOpen = false;
+                return;
+            }
+
+            _insertIndex = rowIndex;
+            if (columnIndex == 0)
+            {
+                MenuItem1.Header = $"往两个列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
+                _insertListName = Enums.ListName.全部;
+
+                MenuItem_DataGrid_Images_Paste.Header = $"粘贴到操作列表{_insertIndex.ToString().PadLeft(5, '0')}";
+            }
+            else if (columnIndex == 1)
+            {
+                MenuItem1.Header = $"往操作列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
+                _insertListName = Enums.ListName.操作;
+
+                MenuItem_DataGrid_Images_Paste.Header = $"粘贴到操作列表{_insertIndex.ToString().PadLeft(5, '0')}";
+            }
+            else if (columnIndex == 2)
+            {
+                MenuItem1.Header = $"往叠加列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
+                _insertListName = Enums.ListName.叠加;
+
+                MenuItem_DataGrid_Images_Paste.Header = $"粘贴到叠加列表{_insertIndex.ToString().PadLeft(5, '0')}";
             }
             else
             {
@@ -1211,21 +1400,14 @@ namespace Ra2EasyShp
                 return;
             }
 
-            if (hit is DataGridRow || hit is System.Windows.Controls.DataGridCell)
-            {
-                // 在鼠标右键点击位置显示上下文菜单
-                DataGridContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
-                DataGridContextMenu.PlacementRectangle = new Rect(point.X, point.Y + 10, 0, 0);
-                DataGridContextMenu.PlacementTarget = DataGrid_Images;
-                DataGridContextMenu.IsOpen = true;
-            }
-            else
-            {
-                DataGridContextMenu.IsOpen = false;
-            }
+            // 在鼠标右键点击位置显示上下文菜单
+            DataGridContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
+            DataGridContextMenu.PlacementRectangle = new Rect(point.X, point.Y + 10, 0, 0);
+            DataGridContextMenu.PlacementTarget = DataGrid_Images;
+            DataGridContextMenu.IsOpen = true;
         }
 
-        private void InsertMenuItem_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DataGrid_Images_Insert_Click(object sender, RoutedEventArgs e)
         {
             if (_insertIndex == -1 || _insertListName == Enums.ListName.空)
             {
@@ -1336,6 +1518,8 @@ namespace Ra2EasyShp
         {
             try
             {
+                Grid_Main.IsEnabled = false;
+
                 if (GData.ImageData.Count == 0)
                 {
                     return;
@@ -1356,8 +1540,6 @@ namespace Ra2EasyShp
                 }
 
                 Enums.ShpCompressionMode shpCompressionMode = (Enums.ShpCompressionMode)ComboBox_ShpCompression.SelectedItem;
-
-                Grid_Main.IsEnabled = false;
 
                 byte[] shpData = null;
                 await Task.Run(() =>
@@ -1400,8 +1582,10 @@ namespace Ra2EasyShp
             {
                 ShowMessageBox($"生成SHP失败\n{ex.Message}");
             }
-
-            Grid_Main.IsEnabled = true;
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
 
         private async void Button_LoadLastSavePalette_Click(object sender, RoutedEventArgs e)
@@ -1414,35 +1598,7 @@ namespace Ra2EasyShp
             Grid_Main.IsEnabled = false;
             await LoadPalette(GData.LastSavePalettePath);
 
-            if (RadioButton_ViewMode_OutImgOnPalette.IsChecked == true)
-            {
-                Grid_PaletteImg.Visibility = Visibility;
-
-                if (GData.NowPalette == null || GData.NowPalette.Count == 0)
-                {
-                    return;
-                }
-
-                await Task.Run(async () =>
-                {
-                    using (Bitmap bitmap = await ImageManage.MergeBitmaps(
-                        GData.UIData.NowIndex,
-                        GData.UIData.NowIndex,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetX,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetY,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OverlayMode
-                    ))
-                    {
-                        using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette))
-                        {
-                            await Dispatcher.InvokeAsync(() =>
-                            {
-                                Image_PaletteImg.Source = ImageTypeConvert.BitmapToImageSource(bitmapOnPal);
-                            });
-                        }
-                    }
-                });
-            }
+            await ReloadImageSource(GData.UIData.NowIndex);
 
             Grid_Main.IsEnabled = true;
         }
@@ -1473,35 +1629,7 @@ namespace Ra2EasyShp
             Grid_Main.IsEnabled = false;
             await LoadPalette(fileName);
 
-            if (RadioButton_ViewMode_OutImgOnPalette.IsChecked == true)
-            {
-                Grid_PaletteImg.Visibility = Visibility;
-
-                if (GData.NowPalette == null || GData.NowPalette.Count == 0)
-                {
-                    return;
-                }
-
-                await Task.Run(async () =>
-                {
-                    using (Bitmap bitmap = await ImageManage.MergeBitmaps(
-                        GData.UIData.NowIndex,
-                        GData.UIData.NowIndex,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetX,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetY,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OverlayMode
-                    ))
-                    {
-                        using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette))
-                        {
-                            await Dispatcher.InvokeAsync(() =>
-                            {
-                                Image_PaletteImg.Source = ImageTypeConvert.BitmapToImageSource(bitmapOnPal);
-                            });
-                        }
-                    }
-                });
-            }
+            await ReloadImageSource(GData.UIData.NowIndex);
 
             Grid_Main.IsEnabled = true;
         }
@@ -1513,35 +1641,7 @@ namespace Ra2EasyShp
             Grid_Main.IsEnabled = false;
             await LoadPalette(palPath);
 
-            if (RadioButton_ViewMode_OutImgOnPalette.IsChecked == true)
-            {
-                Grid_PaletteImg.Visibility = Visibility;
-
-                if (GData.NowPalette == null || GData.NowPalette.Count == 0)
-                {
-                    return;
-                }
-
-                await Task.Run(async () =>
-                {
-                    using (Bitmap bitmap = await ImageManage.MergeBitmaps(
-                        GData.UIData.NowIndex,
-                        GData.UIData.NowIndex,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetX,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetY,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OverlayMode
-                    ))
-                    {
-                        using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette))
-                        {
-                            await Dispatcher.InvokeAsync(() =>
-                            {
-                                Image_PaletteImg.Source = ImageTypeConvert.BitmapToImageSource(bitmapOnPal);
-                            });
-                        }
-                    }
-                });
-            }
+            await ReloadImageSource(GData.UIData.NowIndex);
 
             Grid_Main.IsEnabled = true;
         }
@@ -1721,6 +1821,8 @@ namespace Ra2EasyShp
 
                 await ImageManage.Resize(GData.UIData.ResizeUI.ImageNowWidth, GData.UIData.ResizeUI.ImageNowHeight);
 
+                GData.UIData.ResizeUI.ResetReMargin();
+
                 await ReloadImageSource(GData.UIData.NowIndex);
 
                 if (CheckBox_Ra2Grids.IsChecked == true)
@@ -1745,11 +1847,13 @@ namespace Ra2EasyShp
                 return;
             }
 
-            Grid_Main.IsEnabled = false;
-
             try
             {
+                Grid_Main.IsEnabled = false;
+
                 await ImageManage.CancelResize();
+
+                GData.UIData.ResizeUI.ResetReMargin();
 
                 await ReloadImageSource(GData.UIData.NowIndex);
 
@@ -1764,8 +1868,10 @@ namespace Ra2EasyShp
             {
                 ShowMessageBox(ex.Message);
             }
-
-            Grid_Main.IsEnabled = true;
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
 
         private void TextBox_Resize_LostFocus(object sender, RoutedEventArgs e)
@@ -1819,13 +1925,20 @@ namespace Ra2EasyShp
                     throw new Exception("没有图片信息，请双击列表选择一张图片后再调整");
                 }
 
+                int left = int.Parse(GData.UIData.ResizeUI.ReMarginLeft);
+                int top = int.Parse(GData.UIData.ResizeUI.ReMarginTop);
+                int right = int.Parse(GData.UIData.ResizeUI.ReMarginRight);
+                int bottom = int.Parse(GData.UIData.ResizeUI.ReMarginBottom);
+
                 await ImageManage.ReMargin(
-                    int.Parse(GData.UIData.ResizeUI.ReMarginLeft),
-                    int.Parse(GData.UIData.ResizeUI.ReMarginTop),
-                    int.Parse(GData.UIData.ResizeUI.ReMarginRight),
-                    int.Parse(GData.UIData.ResizeUI.ReMarginBottom),
+                    left,
+                    top,
+                    right,
+                    bottom,
                     GData.UIData.ResizeUI.ReMarginCutImage
                     );
+
+                GData.UIData.ResizeUI.NowReMargin = new Thickness(left, top, right, bottom);
 
                 await ReloadImageSource(GData.UIData.NowIndex);
 
@@ -1856,6 +1969,8 @@ namespace Ra2EasyShp
             try
             {
                 await ImageManage.CancelReMargin();
+
+                GData.UIData.ResizeUI.ResetReMargin();
 
                 await ReloadImageSource(GData.UIData.NowIndex);
 
@@ -1900,35 +2015,7 @@ namespace Ra2EasyShp
             Grid_Main.IsEnabled = false;
             await LoadPalette(files[0]);
 
-            if (RadioButton_ViewMode_OutImgOnPalette.IsChecked == true)
-            {
-                Grid_PaletteImg.Visibility = Visibility;
-
-                if (GData.NowPalette == null || GData.NowPalette.Count == 0)
-                {
-                    return;
-                }
-
-                await Task.Run(async () =>
-                {
-                    using (Bitmap bitmap = await ImageManage.MergeBitmaps(
-                        GData.UIData.NowIndex,
-                        GData.UIData.NowIndex,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetX,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetY,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OverlayMode
-                    ))
-                    {
-                        using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette))
-                        {
-                            await Dispatcher.InvokeAsync(() =>
-                            {
-                                Image_PaletteImg.Source = ImageTypeConvert.BitmapToImageSource(bitmapOnPal);
-                            });
-                        }
-                    }
-                });
-            }
+            await ReloadImageSource(GData.UIData.NowIndex);
 
             Grid_Main.IsEnabled = true;
         }
@@ -1937,34 +2024,9 @@ namespace Ra2EasyShp
         {
             GData.PlayerColorView = (Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedIndex;
 
-            if (!GData.UIData.ImgIsPlaying && RadioButton_ViewMode_OutImgOnPalette.IsChecked == true)
+            if (!GData.UIData.ImgIsPlaying)
             {
-                Grid_PaletteImg.Visibility = Visibility;
-
-                if (GData.NowPalette == null || GData.NowPalette.Count == 0)
-                {
-                    return;
-                }
-
-                await Task.Run(async () =>
-                {
-                    using (Bitmap bitmap = await ImageManage.MergeBitmaps(
-                        GData.UIData.NowIndex,
-                        GData.UIData.NowIndex,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetX,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OffsetY,
-                        GData.ImageData[GData.UIData.NowIndex].OverlayImage.OverlayMode
-                    ))
-                    {
-                        using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette))
-                        {
-                            await Dispatcher.InvokeAsync(() =>
-                            {
-                                Image_PaletteImg.Source = ImageTypeConvert.BitmapToImageSource(bitmapOnPal);
-                            });
-                        }
-                    }
-                });
+                await ReloadImageSource(GData.UIData.NowIndex);
             }
         }
 
@@ -1995,6 +2057,11 @@ namespace Ra2EasyShp
 
         private async Task ReloadImageSource(int index)
         {
+            if (index > GData.ImageData.Count - 1)
+            {
+                return;
+            }
+
             if (RadioButton_ViewMode_InImg.IsChecked == true)
             {
                 Image_input.Source = LocalImageManage.LoadBaseImageSource(index);
@@ -2028,7 +2095,7 @@ namespace Ra2EasyShp
                     GData.ImageData[index].OverlayImage.OverlayMode
                     ))
                 {
-                    using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette))
+                    using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette, true))
                     {
                         Image_PaletteImg.Source = ImageTypeConvert.BitmapToImageSource(bitmapOnPal);
                     }
@@ -2208,6 +2275,14 @@ namespace Ra2EasyShp
                     {
                         DataGrid_Palette.SelectedCells.Clear();
                         GData.UIData.ViewImagePointPaletteIndex = -1;
+
+                        if (RadioButton_ViewMode_InImg.IsChecked == true && _isReMarginOnImageClick)
+                        {
+                            _reMarginLine1.X2 = (int)position.X + 0.5;
+                            _reMarginLine1.Y2 = (int)position.Y + 0.5;
+                            _reMarginLine2.X2 = (int)position.X + 0.5;
+                            _reMarginLine2.Y2 = (int)position.Y + 0.5;
+                        }
                     }
                 }
             }
@@ -2218,13 +2293,6 @@ namespace Ra2EasyShp
                 GData.UIData.ViewImagePointY = -1;
                 GData.UIData.ViewImagePointPaletteIndex = -1;
             }
-        }
-
-        private void Image_ViewImg_MouseLeave(object sender, MouseEventArgs e)
-        {
-            //GData.UIData.ViewImagePointX = -1;
-            //GData.UIData.ViewImagePointY = -1;
-            //GData.UIData.ViewImagePointPaletteIndex = -1;
         }
 
         private void Image_PaletteImg_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -2246,69 +2314,270 @@ namespace Ra2EasyShp
             Image_PaletteImg.IsHitTestVisible = true;
         }
 
-
-
-
-
-
-        private void StackPanel_PaletteColorNum_MouseEnter(object sender, MouseEventArgs e)
+        private bool _isReMarginOnImageClick = false;
+        private System.Windows.Shapes.Line _reMarginLine1 = new System.Windows.Shapes.Line()
         {
-            Border_PaletteTip.Visibility = Visibility.Visible;
+            StrokeThickness = 0.5,
+            Stroke = System.Windows.Media.Brushes.Black,
+            IsHitTestVisible = false
+        };
+        private System.Windows.Shapes.Line _reMarginLine2 = new System.Windows.Shapes.Line()
+        {
+            StrokeThickness = 0.25,
+            Stroke = System.Windows.Media.Brushes.White,
+            IsHitTestVisible = false
+        };
+
+        private void Button_ReMarginOnImage_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                if (_isReMarginOnImageClick)
+                {
+                    Button_ReMarginOnImage.Content = "拖动设置";
+                    _isReMarginOnImageClick = false;
+
+                    Grid_InImg.Children.Remove(_reMarginLine1);
+                    Grid_InImg.Children.Remove(_reMarginLine2);
+                    return;
+                }
+
+                _isReMarginOnImageClick = true;
+                Button_ReMarginOnImage.Content = "取消";
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
         }
 
-        private void StackPanel_PaletteColorNum_MouseLeave(object sender, MouseEventArgs e)
+        private void Image_input_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Border_PaletteTip.Visibility = Visibility.Collapsed;
+            try
+            {
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                if (!_isReMarginOnImageClick)
+                {
+                    return;
+                }
+
+                if (e.ChangedButton == MouseButton.Right)
+                {
+                    _isReMarginOnImageClick = false;
+                    Button_ReMarginOnImage.Content = "拖动设置";
+                    Grid_InImg.Children.Remove(_reMarginLine1);
+                    Grid_InImg.Children.Remove(_reMarginLine2);
+                    return;
+                }
+
+                Point position = e.GetPosition(Image_input);
+
+                _reMarginLine1.X1 = (int)position.X + 0.5;
+                _reMarginLine1.Y1 = (int)position.Y + 0.5;
+                _reMarginLine1.X2 = (int)position.X + 0.5;
+                _reMarginLine1.Y2 = (int)position.Y + 0.5;
+
+                _reMarginLine2.X1 = (int)position.X + 0.5;
+                _reMarginLine2.Y1 = (int)position.Y + 0.5;
+                _reMarginLine2.X2 = (int)position.X + 0.5;
+                _reMarginLine2.Y2 = (int)position.Y + 0.5;
+
+                Grid_InImg.Children.Remove(_reMarginLine1);
+                Grid_InImg.Children.Remove(_reMarginLine2);
+                Grid_InImg.Children.Add(_reMarginLine1);
+                Grid_InImg.Children.Add(_reMarginLine2);
+            }
+            catch (Exception ex)
+            {
+                _isReMarginOnImageClick = false;
+                Button_ReMarginOnImage.Content = "拖动设置";
+                Grid_InImg.Children.Remove(_reMarginLine1);
+                Grid_InImg.Children.Remove(_reMarginLine2);
+
+                ShowMessageBox(ex.Message);
+            }
         }
 
-        private void ArtTranslucency_MouseEnter(object sender, MouseEventArgs e)
+        private async void Image_input_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            Border_ArtTranslucencyTip.Visibility = Visibility.Visible;
+            try
+            {
+                if (!_isReMarginOnImageClick)
+                {
+                    return;
+                }
+
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                Button_ReMarginOnImage.Content = "拖动设置";
+                _isReMarginOnImageClick = false;
+                Grid_InImg.Children.Remove(_reMarginLine1);
+                Grid_InImg.Children.Remove(_reMarginLine2);
+
+                if (e.ChangedButton == MouseButton.Right)
+                {
+                    return;
+                }
+
+                int offsetX = (int)(_reMarginLine1.X2 - _reMarginLine1.X1);
+                int offsetY = (int)(_reMarginLine2.Y2 - _reMarginLine2.Y1);
+
+                int left = (int)GData.UIData.ResizeUI.NowReMargin.Left;
+                int top = (int)GData.UIData.ResizeUI.NowReMargin.Top;
+                int right = (int)GData.UIData.ResizeUI.NowReMargin.Right;
+                int bottom = (int)GData.UIData.ResizeUI.NowReMargin.Bottom;
+
+                if (offsetX < 0)
+                {
+                    left -= (Math.Abs(offsetX) * 2);
+                    if (left < 0)
+                    {
+                        right += Math.Abs(left);
+                        left = 0;
+                    }
+                }
+                else
+                {
+                    right -= (Math.Abs(offsetX) * 2);
+                    if (right < 0)
+                    {
+                        left += Math.Abs(right);
+                        right = 0;
+                    }
+                }
+
+                if (offsetY < 0)
+                {
+                    top -= (Math.Abs(offsetY) * 2);
+                    if (top < 0)
+                    {
+                        bottom += Math.Abs(top);
+                        top = 0;
+                    }
+                }
+                else
+                {
+                    bottom -= (Math.Abs(offsetY) * 2);
+                    if (bottom < 0)
+                    {
+                        top += Math.Abs(bottom);
+                        bottom = 0;
+                    }
+                }
+
+                await ImageManage.ReMargin(
+                    left,
+                    top,
+                    right,
+                    bottom,
+                    GData.UIData.ResizeUI.ReMarginCutImage
+                    );
+
+                GData.UIData.ResizeUI.NowReMargin = new Thickness(left, top, right, bottom);
+
+                await ReloadImageSource(GData.UIData.NowIndex);
+
+                GData.UIData.ResizeUI.ReMarginLeft = GData.UIData.ResizeUI.NowReMargin.Left.ToString();
+                GData.UIData.ResizeUI.ReMarginTop = GData.UIData.ResizeUI.NowReMargin.Top.ToString();
+                GData.UIData.ResizeUI.ReMarginRight = GData.UIData.ResizeUI.NowReMargin.Right.ToString();
+                GData.UIData.ResizeUI.ReMarginBottom = GData.UIData.ResizeUI.NowReMargin.Bottom.ToString();
+
+                if (CheckBox_Ra2Grids.IsChecked == true)
+                {
+                    LoadRa2Grids();
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
         }
 
-        private void ArtTranslucency_MouseLeave(object sender, MouseEventArgs e)
+        private void MenuItem_DataGrid_Images_Copy_Click(object sender, RoutedEventArgs e)
         {
-            Border_ArtTranslucencyTip.Visibility = Visibility.Collapsed;
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                ImageListManage.CopyItem(DataGrid_Images.SelectedCells.ToList());
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
 
-        private void ComboBox_CreatePalMode_MouseEnter(object sender, MouseEventArgs e)
+        private void MenuItem_DataGrid_Images_Paste_Click(object sender, RoutedEventArgs e)
         {
-            Border_CreatePaletteModeTip.Visibility = Visibility.Visible;
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                if (_insertIndex == -1 || _insertListName == Enums.ListName.空)
+                {
+                    return;
+                }
+
+                ImageListManage.PasteItem(_insertListName, _insertIndex);
+
+                _insertIndex = -1;
+                _insertListName = Enums.ListName.空;
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
 
-        private void ComboBox_CreatePalMode_MouseLeave(object sender, MouseEventArgs e)
+        private void Button_PasteToListEnd_Click(object sender, RoutedEventArgs e)
         {
-            Border_CreatePaletteModeTip.Visibility = Visibility.Collapsed;
-        }
+            try
+            {
+                Grid_Main.IsEnabled = false;
 
-        private void Resize_MouseEnter(object sender, MouseEventArgs e)
-        {
-            Border_ResizeTip.Visibility = Visibility.Visible;
-        }
+                Button btn = sender as Button;
+                if (btn == null)
+                {
+                    return;
+                }
 
-        private void Resize_MouseLeave(object sender, MouseEventArgs e)
-        {
-            Border_ResizeTip.Visibility = Visibility.Collapsed;
-        }
-
-        private void PlayerColor_MouseEnter(object sender, MouseEventArgs e)
-        {
-            Border_PlayerColorTip.Visibility = Visibility.Visible;
-        }
-
-        private void PlayerColor_MouseLeave(object sender, MouseEventArgs e)
-        {
-            Border_PlayerColorTip.Visibility = Visibility.Collapsed;
-        }
-
-        private void ViewScale_MouseEnter(object sender, MouseEventArgs e)
-        {
-            Border_ViewScaleTip.Visibility = Visibility.Visible;
-        }
-
-        private void ViewScale_MouseLeave(object sender, MouseEventArgs e)
-        {
-            Border_ViewScaleTip.Visibility = Visibility.Collapsed;
+                if (btn.Tag.ToString() == "EditList")
+                {
+                    ImageListManage.PasteItem(Enums.ListName.操作, GData.ImageData.Count);
+                }
+                else
+                {
+                    ImageListManage.PasteItem(Enums.ListName.叠加, GData.ImageData.Count);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
     }
 }

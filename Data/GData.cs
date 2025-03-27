@@ -6,7 +6,7 @@ namespace Ra2EasyShp.Data
 {
     public class GData
     {
-        internal const double VERSION = 1.0;
+        internal const double VERSION = 1.1;
 
         internal static int[,] BayerMatrix = {
             {  0, 32,  8, 40,  2, 34, 10, 42 },

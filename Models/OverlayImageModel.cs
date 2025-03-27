@@ -42,6 +42,23 @@ namespace Ra2EasyShp.Models
             Frame = 0;
             FileType = Enums.FileType.Png;
             OverlayMode = Enums.OverlayMode.叠加在上;
+            IsChanged = false;
+        }
+
+        internal OverlayImageModel Copy()
+        {
+            return new OverlayImageModel()
+            {
+                ImgPath = ImgPath,
+                ImgTempPath = ImgTempPath,
+                Name = Name,
+                OffsetX = OffsetX,
+                OffsetY = OffsetY,
+                Frame = Frame,
+                FileType = Enums.FileType.Png,
+                OverlayMode = OverlayMode,
+                IsChanged = IsChanged
+            };
         }
 
         private string _name { get; set; } = string.Empty;

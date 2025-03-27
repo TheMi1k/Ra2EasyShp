@@ -173,6 +173,21 @@ namespace Ra2EasyShp.Funcs
 
                 insertIndex++;
             }
+
+            if (GData.ImageData.Count != 0)
+            {
+                if (LocalImageManage.GetBaseImageOriginalSize(0, out int originalWidth, out int originalHeight))
+                {
+                    GData.UIData.ResizeUI.ImageOriginalWidth = originalWidth;
+                    GData.UIData.ResizeUI.ImageOriginalHeight = originalHeight;
+                }
+
+                if (LocalImageManage.GetBaseImageNowSize(0, out int nowWidth, out int nowHeight))
+                {
+                    GData.UIData.ResizeUI.ImageNowWidth = nowWidth;
+                    GData.UIData.ResizeUI.ImageNowHeight = nowHeight;
+                }
+            }
         }
 
         internal static ImageDataModel LoadPng(string filePath, bool isOverlay)
@@ -257,7 +272,7 @@ namespace Ra2EasyShp.Funcs
                                     model.EditImage.OutImgTempPath = GetPath.CreateImageTempPath();
                                     LocalImageManage.SaveImageToTemp(image, model.EditImage.OutImgTempPath);
 
-                                    model.EditImage.Name = Path.GetFileName(filePath);
+                                    model.EditImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
                                     model.EditImage.ImgPath = filePath;
                                     model.EditImage.FileType = Enums.FileType.Gif;
                                     model.EditImage.Frame = frameIndex;
@@ -281,7 +296,7 @@ namespace Ra2EasyShp.Funcs
                                     //model.OverlayImage.Img = new Bitmap(image);
                                     model.OverlayImage.ImgPath = filePath;
 
-                                    model.OverlayImage.Name = Path.GetFileName(filePath);
+                                    model.EditImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
                                     model.OverlayImage.FileType = Enums.FileType.Gif;
                                     model.OverlayImage.Frame = frameIndex;
 
@@ -350,7 +365,7 @@ namespace Ra2EasyShp.Funcs
                             model.EditImage.OutImgTempPath = GetPath.CreateImageTempPath();
                             LocalImageManage.SaveBitmapToTemp(bitmapDic[frameIndex], model.EditImage.OutImgTempPath);
 
-                            model.EditImage.Name = Path.GetFileName(filePath);
+                            model.EditImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
                             model.EditImage.ImgPath = filePath;
                             model.EditImage.FileType = Enums.FileType.Shp;
                             model.EditImage.Frame = frameIndex;
@@ -372,7 +387,7 @@ namespace Ra2EasyShp.Funcs
                         if (isFrameExist)
                         {
                             //model.OverlayImage.Img = new Bitmap(bitmapDic[frameIndex]);
-                            model.OverlayImage.Name = Path.GetFileName(filePath);
+                            model.EditImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
                             model.OverlayImage.ImgPath = filePath;
                             model.OverlayImage.FileType = Enums.FileType.Shp;
                             model.OverlayImage.Frame = frameIndex;
@@ -601,6 +616,213 @@ namespace Ra2EasyShp.Funcs
             }
 
             ClearLastEmptyItem();
+
+            // 重新设置index
+            int indexNum = 0;
+            foreach (var item in GData.ImageData)
+            {
+                item.Index = indexNum;
+                indexNum++;
+            }
+        }
+
+        // Clipboard
+
+        private static List<EditImageModel> _editListClipboard = new List<EditImageModel>();
+        private static List<OverlayImageModel> _overlayListClipboard = new List<OverlayImageModel>();
+
+        internal static void CopyItem(List<DataGridCellInfo> infoList)
+        {
+            if (infoList.Count == 0)
+            {
+                return;
+            }
+
+            int columnIndexTemp = infoList[0].Column.DisplayIndex;
+            foreach (var cellInfo in infoList)
+            {
+                if (cellInfo.Column.DisplayIndex != columnIndexTemp)
+                {
+                    throw new Exception("复制、粘贴只能在单个列表操作");
+                }
+            }
+
+            foreach (var item in _editListClipboard)
+            {
+                item.ClearItem();
+            }
+            _editListClipboard.Clear();
+
+            foreach (var item in _overlayListClipboard)
+            {
+                item.ClearItem();
+            }
+            _overlayListClipboard.Clear();
+
+            foreach (var cellInfo in infoList)
+            {
+                int columnIndex = cellInfo.Column.DisplayIndex;
+
+                var rowData = cellInfo.Item;
+                ImageDataModel item = rowData as ImageDataModel;
+
+                if (columnIndex == 0 || columnIndex == 1)
+                {
+                    _editListClipboard.Add(item.EditImage.Copy());
+                }
+                else if (columnIndex == 2)
+                {
+                    _overlayListClipboard.Add(item.OverlayImage.Copy());
+                }
+            }
+
+            if (_editListClipboard.Count != 0)
+            {
+                foreach (var editClipboardItem in _editListClipboard)
+                {
+                    if (!string.IsNullOrEmpty(editClipboardItem.ImgTempPath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(editClipboardItem.ImgTempPath, copyName);
+                        editClipboardItem.ImgTempPath = copyName;
+                    }
+
+                    if (!string.IsNullOrEmpty(editClipboardItem.OutImgTempPath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(editClipboardItem.OutImgTempPath, copyName);
+                        editClipboardItem.OutImgTempPath = copyName;
+                    }
+
+                    if (!string.IsNullOrEmpty(editClipboardItem.ImgReMarginPath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(editClipboardItem.ImgReMarginPath, copyName);
+                        editClipboardItem.ImgReMarginPath = copyName;
+                    }
+
+                    if (!string.IsNullOrEmpty(editClipboardItem.ImgResizePath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(editClipboardItem.ImgResizePath, copyName);
+                        editClipboardItem.ImgResizePath = copyName;
+                    }
+                }
+            }
+            else if (_overlayListClipboard.Count != 0)
+            {
+                foreach (var overlayClipboardItem in _overlayListClipboard)
+                {
+                    if (!string.IsNullOrEmpty(overlayClipboardItem.ImgTempPath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(overlayClipboardItem.ImgTempPath, copyName);
+                        overlayClipboardItem.ImgTempPath = copyName;
+                    }
+                }
+            }
+        }
+
+        internal static void PasteItem(Enums.ListName cell, int pasteIndex)
+        {
+            if (_editListClipboard.Count == 0 && _overlayListClipboard.Count == 0)
+            {
+                return;
+            }
+
+            int pasteList;
+            if (cell == Enums.ListName.全部 || cell == Enums.ListName.操作)
+            {
+                pasteList = 1;
+            }
+            else if (cell == Enums.ListName.叠加)
+            {
+                pasteList = 2;
+            }
+            else
+            {
+                return;
+            }
+
+            int index;
+            if (_editListClipboard.Count == 0)
+            {
+                index = 2;
+            }
+            else
+            {
+                index = 1;
+            }
+
+            if (pasteList != index)
+            {
+                throw new Exception("粘贴只能应用于复制源相同的列表");
+            }
+            
+            if (index == 1)
+            {
+                foreach (var editClipboardItem in _editListClipboard)
+                {
+                    if (pasteIndex > GData.ImageData.Count - 1)
+                    {
+                        GData.ImageData.Add(new ImageDataModel());
+                    }
+
+                    GData.ImageData[pasteIndex].EditImage.ClearItem(); // 清理原先该位置的信息
+                    GData.ImageData[pasteIndex].EditImage = editClipboardItem.Copy(); // 将剪切板内容复制到列表
+
+                    if (!string.IsNullOrEmpty(editClipboardItem.ImgTempPath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(editClipboardItem.ImgTempPath, copyName);
+                        GData.ImageData[pasteIndex].EditImage.ImgTempPath = copyName;
+                    }
+
+                    if (!string.IsNullOrEmpty(editClipboardItem.OutImgTempPath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(editClipboardItem.OutImgTempPath, copyName);
+                        GData.ImageData[pasteIndex].EditImage.OutImgTempPath = copyName;
+                    }
+
+                    if (!string.IsNullOrEmpty(editClipboardItem.ImgReMarginPath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(editClipboardItem.ImgReMarginPath, copyName);
+                        GData.ImageData[pasteIndex].EditImage.ImgReMarginPath = copyName;
+                    }
+
+                    if (!string.IsNullOrEmpty(editClipboardItem.ImgResizePath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(editClipboardItem.ImgResizePath, copyName);
+                        GData.ImageData[pasteIndex].EditImage.ImgResizePath = copyName;
+                    }
+
+                    pasteIndex++;
+                }
+            }
+            else
+            {
+                foreach (var overlayClipboardItem in _overlayListClipboard)
+                {
+                    if (pasteIndex > GData.ImageData.Count - 1)
+                    {
+                        GData.ImageData.Add(new ImageDataModel());
+                    }
+                    GData.ImageData[pasteIndex].OverlayImage.ClearItem();
+                    GData.ImageData[pasteIndex].OverlayImage = overlayClipboardItem.Copy();
+
+                    if (!string.IsNullOrEmpty(overlayClipboardItem.ImgTempPath))
+                    {
+                        string copyName = GetPath.CreateImageTempPath();
+                        File.Copy(overlayClipboardItem.ImgTempPath, copyName);
+                        GData.ImageData[pasteIndex].OverlayImage.ImgTempPath = copyName;
+                    }
+
+                    pasteIndex++;
+                }
+            }
 
             // 重新设置index
             int indexNum = 0;

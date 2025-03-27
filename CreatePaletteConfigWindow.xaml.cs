@@ -3,21 +3,10 @@ using Ra2EasyShp.Funcs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Xml.Linq;
 
 namespace Ra2EasyShp
 {
@@ -27,6 +16,7 @@ namespace Ra2EasyShp
     public partial class CreatePaletteConfigWindow : Window
     {
         public bool Result { get; private set; } = false;
+        private string _customSavePath = string.Empty;
 
         private List<Ra2PaletteColor> _palette;
         public CreatePaletteConfigWindow(List<Ra2PaletteColor> colorList)
@@ -46,8 +36,8 @@ namespace Ra2EasyShp
             {
                 StackPanel stackPanel = new StackPanel()
                 {
-                    Width = 28,
-                    Height = 384,
+                    Width = 20,
+                    Height = 320,
                     VerticalAlignment = VerticalAlignment.Top,
                     HorizontalAlignment = HorizontalAlignment.Left,
                     Orientation = Orientation.Vertical,
@@ -57,8 +47,8 @@ namespace Ra2EasyShp
                 {
                     stackPanel.Children.Add(new System.Windows.Shapes.Rectangle()
                     {
-                        Width = 28,
-                        Height = 12,
+                        Width = 20,
+                        Height = 10,
                         VerticalAlignment = VerticalAlignment.Top,
                         HorizontalAlignment = HorizontalAlignment.Left,
                         Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb((byte)Clamp(colorList[index].R * 4), (byte)Clamp(colorList[index].G * 4), (byte)Clamp(colorList[index].B * 4))),
@@ -75,46 +65,16 @@ namespace Ra2EasyShp
         {
             try
             {
-                string savePath = string.Empty;
-                string name = TextBox_FileName.Text;
-
-                if (CheckBox_MapTypeForName.IsChecked == true)
+                if (string.IsNullOrEmpty(_customSavePath))
                 {
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        throw new Exception("名称不能为空");
-                    }
+                    string savePath = string.Empty;
+                    string name = TextBox_FileName.Text;
 
-                    if (!IsValidString(name))
+                    if (!string.IsNullOrEmpty(name) && !IsValidString(name))
                     {
                         throw new Exception("名称只能为数字和字母");
                     }
 
-                    string[] mapType = { "urb", "ubn", "tem", "sno", "lun", "des" };
-
-                    savePath = GetPath.CreateSavePath(Enums.PathType.Palette);
-                    if (!Directory.Exists(savePath))
-                    {
-                        Directory.CreateDirectory(savePath);
-                    }
-
-                    foreach (var type in mapType)
-                    {
-                        using (BinaryWriter bw = new BinaryWriter(File.Open($@"{savePath}\{name}{type}.pal", FileMode.Create)))
-                        {
-                            foreach (var color in _palette)
-                            {
-                                bw.Write((byte)color.R);
-                                bw.Write((byte)color.G);
-                                bw.Write((byte)color.B);
-                            }
-                        }
-                    }
-
-                    GData.LastSavePalettePath = $@"{savePath}\{name}{mapType[0]}.pal";
-                }
-                else
-                {
                     savePath = GetPath.CreateSavePath(Enums.PathType.Palette);
                     if (!Directory.Exists(savePath))
                     {
@@ -135,10 +95,37 @@ namespace Ra2EasyShp
 
                     GData.LastSavePalettePath = $@"{savePath}\{saveFileName}.pal";
                 }
-
-                if (OpenSaveSuccessWindow(savePath))
+                else
                 {
-                    Process.Start("explorer.exe", savePath);
+                    using (BinaryWriter bw = new BinaryWriter(File.Open(_customSavePath, FileMode.Create)))
+                    {
+                        foreach (var color in _palette)
+                        {
+                            bw.Write((byte)color.R);
+                            bw.Write((byte)color.G);
+                            bw.Write((byte)color.B);
+                        }
+                    }
+
+                    GData.LastSavePalettePath = _customSavePath;
+                }
+
+                string path = Path.GetDirectoryName(GData.LastSavePalettePath);
+
+                if (CheckBox_MapTypeForName.IsChecked == true)
+                {
+                    string[] mapTypeArray = { "urb", "ubn", "tem", "sno", "lun", "des" };
+                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(GData.LastSavePalettePath);
+
+                    foreach (var mapType in mapTypeArray)
+                    {
+                        File.Copy(GData.LastSavePalettePath, Path.Combine(path, $"{fileNameWithoutExtension}{mapType}.pal"), true);
+                    }
+                }
+
+                if (OpenSaveSuccessWindow(path))
+                {
+                    Process.Start("explorer.exe", path);
                 }
 
                 this.Close();
@@ -202,7 +189,39 @@ namespace Ra2EasyShp
 
         private void Button_Tip_Click(object sender, RoutedEventArgs e)
         {
-            ShowMessageBox("将文件命名为 名称 * 生成多份\n* 为地图类型，例如 unitsno.pal，unittem.pal\nunit为名称，sno、tem为地图类型");
+            ShowMessageBox("保存后将文件复制多份，名称后加上地图类型后缀\n例如 unit(sno).pal，unit(tem).pal\n\n如果有同名文件会被覆盖");
+        }
+
+        private void CheckBox_SetSavePath(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "选择保存文件",
+                Filter = "Pal色盘文件(*.pal)|*.pal",
+                FileName = string.Empty,
+                RestoreDirectory = true,
+                DefaultExt = "pal"
+            };
+
+            if (saveFileDialog.ShowDialog() == false)
+            {
+                _customSavePath = string.Empty;
+                CheckBox_CustomSavePath.IsChecked = false;
+                return;
+            }
+
+            StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
+            StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
+
+            _customSavePath = saveFileDialog.FileName;
+            TextBox_SavePath.Text = _customSavePath;
+        }
+
+        private void CheckBox_ClearSavePath(object sender, RoutedEventArgs e)
+        {
+            StackPanel_SaveFileName.Visibility = Visibility.Visible;
+            StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
+            _customSavePath = string.Empty;
         }
     }
 }

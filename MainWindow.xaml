@@ -37,7 +37,7 @@
                 <StackPanel>
                     <DataGrid x:Name="DataGrid_Images"
                         Drop="Img_Drop" AllowDrop="True"
-                        Height="{Binding MainWindowSize.DataGrid_ImagesH, Mode=TwoWay}" d:Height="750" Width="260"
+                        Height="{Binding MainWindowSize.DataGrid_ImagesH, Mode=TwoWay}" d:Height="720" Width="260"
                         IsEnabled="{Binding UIEnable}"
                         MouseDoubleClick="DataGrid_Images_DoubleClick"
                         AutoGenerateColumns="False"
@@ -52,12 +52,25 @@
                         ContextMenuOpening="DataGrid_ContextMenuOpening"
                         PreviewMouseRightButtonDown="DataGrid_MouseRightButtonDown"
                     >
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="DeepSkyBlue"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.CellStyle>
+                        
                         <DataGrid.ContextMenu>
                             <ContextMenu x:Name="DataGridContextMenu" FontSize="15" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                <MenuItem x:Name="MenuItem1" Click="InsertMenuItem_Click" Margin="0 0 0 0" HorizontalAlignment="Left" Width="300"/>
+                                <MenuItem x:Name="MenuItem1" Click="MenuItem_DataGrid_Images_Insert_Click" Margin="0 0 0 0" HorizontalAlignment="Left" Width="300"/>
                                 <Separator/>
-                                <MenuItem Header="清空操作列表" Click="Button_ClearList1_Click"/>
-                                <MenuItem Header="清空叠加列表" Click="Button_ClearList2_Click"/>
+                                <MenuItem Header="复制选中项" Click="MenuItem_DataGrid_Images_Copy_Click"/>
+                                <MenuItem x:Name="MenuItem_DataGrid_Images_Paste" Header="粘贴" Click="MenuItem_DataGrid_Images_Paste_Click"/>
+                                <Separator/>
+                                <MenuItem Header="清空操作列表" Click="MenuItem_DataGrid_Images_ClearEditList_Click"/>
+                                <MenuItem Header="清空叠加列表" Click="MenuItem_DataGrid_Images_ClearOverlayList_Click"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
 
@@ -100,9 +113,15 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <Grid Height="30" Width="260" Background="LightGray" AllowDrop="True" Drop="Img_DropToEnd" IsEnabled="{Binding UIEnable}">
-                        <Line X1="141" Y1="1" X2="141" Y2="29" Stroke="Gray"/>
-                        <TextBlock Text="拖放到这添加到列表尾部" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0 0 0 0"/>
+                    <Grid Height="30" Width="260" IsEnabled="{Binding UIEnable}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                            <Button Tag="EditList" Width="130" Height="30" Click="Button_PasteToListEnd_Click" AllowDrop="True" Drop="Img_DropToEnd">
+                                <TextBlock Text="拖放/粘贴到末尾"/>
+                            </Button>
+                            <Button Tag="OverlayList" Width="130" Height="30" Click="Button_PasteToListEnd_Click" AllowDrop="True" Drop="Img_DropToEnd">
+                                <TextBlock Text="拖放/粘贴到末尾" Margin="0 0 0 0"/>
+                            </Button>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
 
@@ -112,7 +131,7 @@
                             <!--图片预览窗口-->
                             <StackPanel Margin="0 0 0 0">
                                 <Border x:Name="Border_ImgView" d:Width="600" d:Height="500" Width="{Binding MainWindowSize.Border_ImgViewW, Mode=TwoWay}" Height="{Binding MainWindowSize.Border_ImgViewH, Mode=TwoWay}" BorderThickness="1" BorderBrush="Gray" Margin="0 0 0 0">
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="Grid_ImgView_PreviewMouseWheel">
+                                    <ScrollViewer x:Name="ScrollViewer_ImgView" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="Grid_ImgView_PreviewMouseWheel">
                                         <Grid x:Name="Grid_ImgView" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <Grid.LayoutTransform>
                                                 <ScaleTransform ScaleX="{Binding ImageViewScaleTransform}" ScaleY="{Binding ImageViewScaleTransform}"/>
@@ -125,7 +144,8 @@
                                                     Stretch="None"
                                                     HorizontalAlignment="Left" VerticalAlignment="Top"
                                                     PreviewMouseMove="Image_ViewImg_MouseMove"
-                                                    MouseLeave="Image_ViewImg_MouseLeave"
+                                                    PreviewMouseDown="Image_input_MouseDown"
+                                                    PreviewMouseUp="Image_input_MouseUp"
                                                 />
                                             </Grid>
 
@@ -136,7 +156,6 @@
                                                     Stretch="None"
                                                     HorizontalAlignment="Left" VerticalAlignment="Top"
                                                     PreviewMouseMove="Image_ViewImg_MouseMove"
-                                                    MouseLeave="Image_ViewImg_MouseLeave"
                                                 />
                                             </Grid>
 
@@ -158,7 +177,6 @@
                                                     HorizontalAlignment="Left"
                                                     VerticalAlignment="Top"
                                                     PreviewMouseMove="Image_ViewImg_MouseMove"
-                                                    MouseLeave="Image_ViewImg_MouseLeave"
                                                     PreviewMouseRightButtonDown="Image_PaletteImg_MouseRightButtonDown">
 
                                                     <Image.ContextMenu>
@@ -209,7 +227,13 @@
                                 </Border>
 
                                 <Border BorderThickness="1" BorderBrush="Gray" Width="220" Margin="5 0 0 0">
-                                    <StackPanel Orientation="Horizontal" Margin="0 0 0 0" Background="Transparent" MouseEnter="ArtTranslucency_MouseEnter" MouseLeave="ArtTranslucency_MouseLeave">
+                                    <StackPanel Orientation="Horizontal" Margin="0 0 0 0" Background="Transparent">
+                                        <StackPanel.ToolTip>
+                                            <ToolTip Background="LightYellow">
+                                                <TextBlock Text="art.ini/artmd.ini中的透明度数值设置预览，仅预览，不影响导出图片和生成色盘，实际效果需要在art中的Translucency调整" TextWrapping="Wrap" Width="215" Height="80"/>
+                                            </ToolTip>
+                                        </StackPanel.ToolTip>
+                                        
                                         <TextBlock Text="透明度"/>
                                         <StackPanel Orientation="Horizontal">
                                             <RadioButton x:Name="RadioButton_ArtTranslucency_none" Content="无" Margin="5 1 0 0" IsChecked="True" Checked="RadioButton_ArtTranslucencyChanged"/>
@@ -220,7 +244,13 @@
                                     </StackPanel>
                                 </Border>
 
-                                <StackPanel Orientation="Horizontal" Margin="10 0 0 0" Background="Transparent" MouseEnter="ViewScale_MouseEnter" MouseLeave="ViewScale_MouseLeave">
+                                <StackPanel Orientation="Horizontal" Margin="10 0 0 0" Background="Transparent">
+                                    <StackPanel.ToolTip>
+                                        <ToolTip Background="LightYellow">
+                                            <TextBlock Text="预览窗口中Ctrl+鼠标滚轮进行缩放" TextWrapping="Wrap" Width="140" Height="40"/>
+                                        </ToolTip>
+                                    </StackPanel.ToolTip>
+                                    
                                     <TextBlock Text="预览缩放"/>
                                     <TextBlock Text="{Binding ImageViewScaleTransformStr}" Margin="5 0 0 0"/>
                                 </StackPanel>
@@ -231,14 +261,29 @@
                     <StackPanel Orientation="Horizontal" Margin="0 10 0 0" Width="600" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="当前序号:" FontSize="16"/>
-                            <TextBlock x:Name="TextBlock_NowIndex" Text="{Binding IndexStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  FontSize="16" Width="60" Margin="10 0 0 0"/>
+                            <TextBlock x:Name="TextBlock_NowIndex" Text="{Binding IndexStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  FontSize="16" Width="50" Margin="10 0 0 0"/>
                         </StackPanel>
 
                         <Button Content="预览背景色/图片" Height="25" AllowDrop="True" Drop="SetBackgroundImage" Click="SelectViewBackgroundColor_Click" Margin="5 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
 
-                        <Button x:Name="Button_Play" Content="播放" Width="60" Height="25" Click="Button_Play_Click" Margin="20 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                        <StackPanel Orientation="Horizontal" Margin="20 0 0 0" >
+                            <Button VerticalAlignment="Top" Height="25" Width="12" Click="Button_PreviousFrame_Click" IsEnabled="{Binding UIEnable}">
+                                <Path Stretch="Fill" Fill="Black" Data="M630.4 41.6l-416 428.8c-6.4 9.6-9.6 19.2-9.6 28.8 0 9.6 3.2 22.4 9.6 28.8l416 428.8c12.8 16 35.2 16 48 0 12.8-16 12.8-41.6 0-54.4L288 499.2 678.4 96c12.8-16 12.8-41.6 0-54.4-12.8-16-35.2-16-48 0z"/>
+                            </Button>
 
-                        <StackPanel Orientation="Horizontal" Margin="10 0 0 0" Background="Transparent" MouseEnter="PlayerColor_MouseEnter" MouseLeave="PlayerColor_MouseLeave">
+                            <Button x:Name="Button_Play" Content="播放" Width="40" Height="25" Margin="5 0 0 0" Click="Button_Play_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+
+                            <Button VerticalAlignment="Top" Height="25" Width="12" Margin="5 0 0 0" Click="Button_NextFrame_Click" IsEnabled="{Binding UIEnable}">
+                                <Path Stretch="Fill" Fill="Black" Data="M329.6 969.6l416-428.8c6.4-9.6 9.6-19.2 9.6-28.8 0-9.6-3.2-22.4-9.6-28.8l-416-428.8c-12.8-16-35.2-16-48 0s-16 41.6 0 54.4L668.8 512 281.6 915.2c-12.8 16-12.8 41.6 0 54.4 12.8 16 35.2 16 48 0z"/>
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="10 0 0 0" Background="Transparent">
+                            <StackPanel.ToolTip>
+                                <ToolTip Background="LightYellow">
+                                    <TextBlock Text="颜色和游戏中可能存在差别，仅作为参考"/>
+                                </ToolTip>
+                            </StackPanel.ToolTip>
                             <TextBlock Text="预览所属色" Margin="0 3 0 0"/>
                             <ComboBox x:Name="ComboBox_PlayerColorView" Width="70" Height="25" VerticalAlignment="Top" Margin="5 0 0 0" SelectionChanged="ComboBox_PlayerColorView_Changed"/>
                         </StackPanel>
@@ -279,41 +324,57 @@
                                         </StackPanel>
                                     </GroupBox>
 
-                                    <StackPanel Margin="10 65 0 0" VerticalAlignment="Top" Background="Transparent" MouseEnter="Resize_MouseEnter" MouseLeave="Resize_MouseLeave">
+                                    <StackPanel Margin="10 65 0 0" VerticalAlignment="Top" Background="Transparent">
+                                        <StackPanel.ToolTip>
+                                            <ToolTip Background="LightYellow">
+                                                <TextBlock Text="调整缩放和画布会取消透明仿色效果，调整缩放会取消画布调整，应按照 缩放-画布调整-透明仿色 的顺序进行" TextWrapping="Wrap" Width="225" Height="80"/>
+                                            </ToolTip>
+                                        </StackPanel.ToolTip>
+
                                         <Path Width="60" Height="40" Fill="Black" Stretch="Fill" Data="M545.3 407.1h-421c-14.5 0-26.3 11.8-26.3 26.3v155.2c0 14.5 11.8 26.3 26.3 26.3h421V721c0 10.2 11.1 16.5 19.8 11.4l356.4-209c8.7-5.1 8.7-17.6 0-22.7l-356.4-209c-8.8-5.2-19.8 1.2-19.8 11.4v104zM598 651.9v-89.6H150.7V459.8H598v-87.6L848.7 512 598 651.9z"/>
                                     </StackPanel>
 
                                     <GroupBox Header="画布调整" Margin="10 0 0 0" Width="210" Height="175" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                        <StackPanel Margin="10 0 0 0">
-                                            <StackPanel Margin="60 0 0 0">
-                                                <TextBlock Text="顶部" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
-                                                <TextBox Text="{Binding ResizeUI.ReMarginTop, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                            </StackPanel>
-
-                                            <StackPanel Orientation="Horizontal" Margin="0 -15 0 0">
-                                                <StackPanel>
-                                                    <TextBlock Text="左侧" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
-                                                    <TextBox Text="{Binding ResizeUI.ReMarginLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                                </StackPanel>
-
+                                        <Grid Margin="10 0 0 0">
+                                            <StackPanel>
                                                 <StackPanel Margin="60 0 0 0">
-                                                    <TextBlock Text="右侧" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
-                                                    <TextBox Text="{Binding ResizeUI.ReMarginRight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                    <TextBlock Text="顶部" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
+                                                    <TextBox Text="{Binding ResizeUI.ReMarginTop, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                </StackPanel>
+
+                                                <StackPanel Orientation="Horizontal" Margin="0 -15 0 0">
+                                                    <StackPanel>
+                                                        <TextBlock Text="左侧" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
+                                                        <TextBox Text="{Binding ResizeUI.ReMarginLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Margin="60 0 0 0">
+                                                        <TextBlock Text="右侧" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
+                                                        <TextBox Text="{Binding ResizeUI.ReMarginRight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <StackPanel Margin="60 -15 0 0">
+                                                    <TextBlock Text="底部" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
+                                                    <TextBox Text="{Binding ResizeUI.ReMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                </StackPanel>
+
+                                                <CheckBox Content="调整后优化画布尺寸" IsChecked="{Binding ResizeUI.ReMarginCutImage}" Margin="0 5 0 0"/>
+
+                                                <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                                                    <Button Content="还原到缩放" Click="Button_CancelReMargin_Click"/>
+                                                    <Button Content="应用" Width="60" Margin="40 0 0 0" Click="Button_ReMargin_Click"/>
                                                 </StackPanel>
                                             </StackPanel>
 
-                                            <StackPanel Margin="60 -15 0 0">
-                                                <TextBlock Text="底部" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
-                                                <TextBox Text="{Binding ResizeUI.ReMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                            </StackPanel>
-
-                                            <CheckBox Content="调整后优化画布尺寸" IsChecked="{Binding ResizeUI.ReMarginCutImage}" Margin="0 5 0 0"/>
-                                            
-                                            <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
-                                                <Button Content="还原到缩放" Click="Button_CancelReMargin_Click"/>
-                                                <Button Content="应用" Width="60" Margin="40 0 0 0" Click="Button_ReMargin_Click"/>
-                                            </StackPanel>
-                                        </StackPanel>
+                                            <Button x:Name="Button_ReMarginOnImage" Content="拖动设置" Width="58" Height="20" FontSize="13" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="-5 3 0 0" Click="Button_ReMarginOnImage_Click">
+                                                <Button.ToolTip>
+                                                    <ToolTip Background="LightYellow">
+                                                        <TextBlock Text="在原图显示模式下，鼠标左键拖动来调整"/>
+                                                    </ToolTip>
+                                                </Button.ToolTip>
+                                            </Button>
+                                        </Grid>
                                     </GroupBox>
                                 </StackPanel>
                             </TabItem>
@@ -439,9 +500,10 @@
                             <TabItem Header="导出/生成" Width="80">
                                 <StackPanel Orientation="Horizontal" Margin="10 10 0 0">
                                     <GroupBox Header="导出全部图片" Height="150" VerticalAlignment="Top">
-                                        <StackPanel Margin="0 5 0 0">
-                                            <Button Content="全部图片" Click="Button_ExportAllImage_Click" FontSize="18" Height="27" Width="100" Margin="0 0 0 0"/>
-                                            <Button Content="色盘下图片" Click="Button_ExportAllPaletteImage_Click" FontSize="18" Height="27" Width="100" Margin="0 20 0 0"/>
+                                        <StackPanel Margin="0 3 0 0">
+                                            <Button Content="仿色后" Click="Button_ExportAllImage_Click" FontSize="16" Height="24" Width="100" Margin="0 0 0 0"/>
+                                            <Button Content="色盘下" Click="Button_ExportAllPaletteImage_Click" FontSize="16" Height="24" Width="100" Margin="0 10 0 0"/>
+                                            <Button Content="色盘下无背景" Click="Button_ExportAllPaletteImageNoBackground_Click" FontSize="16" Height="24" Width="100" Margin="0 10 0 0"/>
                                         </StackPanel>
                                     </GroupBox>
 
@@ -452,7 +514,12 @@
                                                 <Button x:Name="Button_EditPlayerColor" Content="所属色拾取" Margin="10 0 0 0" IsEnabled="False" Click="Button_EditPlayerColor_Click"/>
                                             </StackPanel>
 
-                                            <StackPanel Orientation="Horizontal" Margin="0 7 0 0" HorizontalAlignment="Left" MouseEnter="StackPanel_PaletteColorNum_MouseEnter" MouseLeave="StackPanel_PaletteColorNum_MouseLeave">
+                                            <StackPanel Orientation="Horizontal" Margin="0 7 0 0" HorizontalAlignment="Left">
+                                                <StackPanel.ToolTip>
+                                                    <ToolTip Background="LightYellow">
+                                                        <TextBlock Text="单位和建筑16-31号为玩家所属色，240-255号色不随光照变化，不使用240-255号色可填写(240)" TextWrapping="Wrap" Width="230" Height="60"/>
+                                                    </ToolTip>
+                                                </StackPanel.ToolTip>
                                                 <TextBlock Text="色盘颜色数量"/>
                                                 <TextBox x:Name="TextBox_PalColorNum" Text="256" Width="40"/>
                                             </StackPanel>
@@ -489,7 +556,22 @@
                                             </StackPanel>
 
                                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0" HorizontalAlignment="Right">
-                                                <ComboBox x:Name="ComboBox_CreatePalMode" FontSize="15" Width="150" Height="25" Margin="0 0 0 0" MouseEnter="ComboBox_CreatePalMode_MouseEnter" MouseLeave="ComboBox_CreatePalMode_MouseLeave"/>
+                                                <ComboBox x:Name="ComboBox_CreatePalMode" FontSize="15" Width="150" Height="25" Margin="0 0 0 0">
+                                                    <ComboBox.ToolTip>
+                                                        <ToolTip Background="LightYellow">
+                                                            <StackPanel>
+                                                                <TextBlock FontWeight="Bold" Text="主要颜色 (生成速度慢)："/>
+                                                                <TextBlock Text="根据图片占比最高的颜色生成，会合并难以看出区别的相似颜色"/>
+                                                                <TextBlock Text="如果有极少像素点的突出颜色可能会被忽略"/>
+                                                                <TextBlock FontWeight="Bold" Text="主要颜色补小像素点 (生成速度慢)：" Margin="0 10 0 0"/>
+                                                                <TextBlock Text="根据图片占比最高的颜色生成，会合并难以看出区别的相似颜色"/>
+                                                                <TextBlock Text="会给占比最低的几个颜色替换为极少像素点的突出颜色"/>
+                                                                <TextBlock FontWeight="Bold" Text="OctreeQuantizer (生成速度快)：" Margin="0 10 0 0"/>
+                                                                <TextBlock Text="八叉树颜色量化算法，效果基本等同于Palette Studio生成的色盘"/>
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </ComboBox.ToolTip>
+                                                </ComboBox>
                                                 <Button x:Name="Button_CreatePal" Content="生成" FontSize="20" Height="28" Width="50" Margin="10 0 0 0" HorizontalAlignment="Right" Click="Button_CreatePal_Click"/>
                                             </StackPanel>
                                         </StackPanel>
@@ -884,38 +966,5 @@
             <TextBlock Text="选中按Del键移除图片(保留空位)" Margin="0 20 0 0" HorizontalAlignment="Center"/>
             <TextBlock Text="选中按Ctrl+Del键移除图片(下方上移)" Margin="0 5 0 0" HorizontalAlignment="Center"/>
         </StackPanel>
-
-        <Border x:Name="Border_PaletteTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="400 625 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
-            <TextBlock Text="单位和建筑16-31号为玩家所属色，240-255号色不随光照变化，不使用240-255号色可填写(240)" TextWrapping="Wrap" Width="230" Height="60"/>
-        </Border>
-
-        <Border x:Name="Border_ArtTranslucencyTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="550 565 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
-            <TextBlock Text="art.ini/artmd.ini中的透明度数值设置预览，仅预览，不影响导出图片和生成色盘，实际效果需要在art中的Translucency调整" TextWrapping="Wrap" Width="215" Height="80"/>
-        </Border>
-
-        <Border x:Name="Border_CreatePaletteModeTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="420 580 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
-            <StackPanel>
-                <TextBlock FontWeight="Bold" Text="主要颜色 (生成速度慢)："/>
-                <TextBlock Text="根据图片占比最高的颜色生成，会合并难以看出区别的相似颜色"/>
-                <TextBlock Text="如果有极少像素点的突出颜色可能会被忽略"/>
-                <TextBlock FontWeight="Bold" Text="主要颜色补小像素点 (生成速度慢)：" Margin="0 10 0 0"/>
-                <TextBlock Text="根据图片占比最高的颜色生成，会合并难以看出区别的相似颜色"/>
-                <TextBlock Text="会给占比最低的几个颜色替换为极少像素点的突出颜色"/>
-                <TextBlock FontWeight="Bold" Text="OctreeQuantizer (生成速度快)：" Margin="0 10 0 0"/>
-                <TextBlock Text="八叉树颜色量化算法，效果基本等同于Palette Studio生成的色盘"/>
-            </StackPanel>
-        </Border>
-
-        <Border x:Name="Border_ResizeTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="400 600 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
-            <TextBlock Text="调整缩放和画布会取消透明仿色效果，调整缩放会取消画布调整，应按照 缩放-画布调整-透明仿色 的顺序进行" TextWrapping="Wrap" Width="225" Height="80"/>
-        </Border>
-
-        <Border x:Name="Border_PlayerColorTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="600 600 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
-            <TextBlock Text="颜色和游戏中可能存在差别，仅作为参考" TextWrapping="Wrap" Width="200" Height="40"/>
-        </Border>
-
-        <Border x:Name="Border_ViewScaleTip" BorderBrush="Black" BorderThickness="1" Background="LightYellow" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="750 570 0 0" d:Visibility="Collapsed" Visibility="Collapsed">
-            <TextBlock Text="预览窗口中Ctrl+鼠标滚轮进行缩放" TextWrapping="Wrap" Width="140" Height="40"/>
-        </Border>
     </Grid>
 </Window>

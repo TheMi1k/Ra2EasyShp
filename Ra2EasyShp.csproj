@@ -229,6 +229,9 @@
     <None Include="Res\Palette\mousepal.pal">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Res\Palette\palette.pal">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Res\Palette\sdbtnanm.pal">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

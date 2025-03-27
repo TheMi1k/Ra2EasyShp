@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Windows;
 
 namespace Ra2EasyShp.Models
 {
@@ -15,6 +16,16 @@ namespace Ra2EasyShp.Models
             }    
             float a = (ImageOriginalWidth * 1.0f) / (ImageOriginalHeight * 1.0f);
             ImageNowHeight = (int)Math.Round(ImageNowWidth / a);
+        }
+
+        internal void ResetReMargin()
+        {
+            ReMarginLeft = "0";
+            ReMarginTop = "0";
+            ReMarginRight = "0";
+            ReMarginBottom = "0";
+
+            NowReMargin = new Thickness(0, 0, 0, 0);
         }
 
         internal int ImageOriginalWidth { get; set; } = 0;
@@ -138,5 +149,7 @@ namespace Ra2EasyShp.Models
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ReMarginCutImage"));
             }
         }
+
+        internal Thickness NowReMargin { get; set; } = new Thickness(0, 0, 0, 0);
     }
 }

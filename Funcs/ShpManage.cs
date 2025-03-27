@@ -51,7 +51,7 @@ namespace Ra2EasyShp.Funcs
             oB = GData.PlayerColorDic[GData.PlayerColorView][palIndex - 16][2];
         }
 
-        internal static Bitmap BitmapOnPalette(Bitmap bitmap, List<Ra2PaletteColor> palette)
+        internal static Bitmap BitmapOnPalette(Bitmap bitmap, List<Ra2PaletteColor> palette, bool background)
         {
             if (bitmap == null)
             {
@@ -84,7 +84,14 @@ namespace Ra2EasyShp.Funcs
 
                             if (pixel[3] == 0)
                             {
-                                resultPixel[3] = 255;
+                                if (background)
+                                {
+                                    resultPixel[3] = 255;
+                                }
+                                else
+                                {
+                                    resultPixel[3] = 0;
+                                }
                                 resultPixel[2] = (byte)(palette[0].R * 4);
                                 resultPixel[1] = (byte)(palette[0].G * 4);
                                 resultPixel[0] = (byte)(palette[0].B * 4);
@@ -619,7 +626,7 @@ namespace Ra2EasyShp.Funcs
                                     pixel[0] = (byte)(palette[0].B * 4);
                                     pixel[1] = (byte)(palette[0].G * 4);
                                     pixel[2] = (byte)(palette[0].R * 4);
-                                    pixel[3] = 255;
+                                    pixel[3] = 0;
                                 }
                             }
                         }
@@ -675,14 +682,21 @@ namespace Ra2EasyShp.Funcs
                                         pixel[0] = (byte)(palette[paletteIndex].B * 4);
                                         pixel[1] = (byte)(palette[paletteIndex].G * 4);
                                         pixel[2] = (byte)(palette[paletteIndex].R * 4);
-                                        pixel[3] = 255;
+                                        if (paletteIndex == 0)
+                                        {
+                                            pixel[3] = 0;
+                                        }
+                                        else
+                                        {
+                                            pixel[3] = 255;
+                                        }
                                     }
                                     else
                                     {
                                         pixel[0] = (byte)(palette[0].B * 4);
                                         pixel[1] = (byte)(palette[0].G * 4);
                                         pixel[2] = (byte)(palette[0].R * 4);
-                                        pixel[3] = 255;
+                                        pixel[3] = 0;
                                     }
                                 }
                             }
@@ -714,7 +728,14 @@ namespace Ra2EasyShp.Funcs
                                         pixel[0] = (byte)(palette[paletteIndex].B * 4);
                                         pixel[1] = (byte)(palette[paletteIndex].G * 4);
                                         pixel[2] = (byte)(palette[paletteIndex].R * 4);
-                                        pixel[3] = 255;
+                                        if (paletteIndex == 0)
+                                        {
+                                            pixel[3] = 0;
+                                        }
+                                        else
+                                        {
+                                            pixel[3] = 255;
+                                        }
                                         byteIndex++;
                                     }
                                     else
@@ -722,7 +743,7 @@ namespace Ra2EasyShp.Funcs
                                         pixel[0] = (byte)(palette[0].B * 4);
                                         pixel[1] = (byte)(palette[0].G * 4);
                                         pixel[2] = (byte)(palette[0].R * 4);
-                                        pixel[3] = 255;
+                                        pixel[3] = 0;
                                     }
                                 }
                             }

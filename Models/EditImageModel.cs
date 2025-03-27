@@ -1,10 +1,12 @@
 ﻿using Ra2EasyShp.Data;
 using Ra2EasyShp.Funcs;
+using System;
 using System.ComponentModel;
 using static Ra2EasyShp.Data.Enums;
 
 namespace Ra2EasyShp.Models
 {
+    [Serializable]
     public class EditImageModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -32,6 +34,29 @@ namespace Ra2EasyShp.Models
 
             Frame = 0;
             FileType = FileType.Png;
+        }
+
+        internal EditImageModel Copy()
+        {
+            return new EditImageModel()
+            {
+                ImgPath = ImgPath,
+                ImgTempPath = ImgTempPath,
+                OutImgTempPath = OutImgTempPath,
+                ImgReMarginPath = ImgReMarginPath,
+                ImgResizePath = ImgResizePath,
+
+                Name = Name,
+
+                Alpha = Alpha,
+                Lightness = Lightness,
+                TransparentDiffusion = TransparentDiffusion,
+                IsTransparent = IsTransparent,
+                IsChanged = IsChanged,
+
+                Frame = Frame,
+                FileType = FileType,
+            };
         }
 
         private string _name { get; set; } = string.Empty;
