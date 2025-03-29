@@ -15,14 +15,6 @@
             OctreeQuantizer
         }
 
-        public enum ListName
-        {
-            全部,
-            操作,
-            叠加,
-            空
-        }
-
         public enum ShpCompressionMode
         {
             最佳文件大小,

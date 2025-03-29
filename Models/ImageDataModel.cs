@@ -15,6 +15,7 @@ namespace Ra2EasyShp.Models
             {
                 _index = value;
                 IndexStr = value.ToString().PadLeft(5, '0');
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IndexStr"));
             }
         }
 

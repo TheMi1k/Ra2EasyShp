@@ -1,0 +1,63 @@
+﻿<Window x:Class="Ra2EasyShp.HotKeyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ra2EasyShp"
+        mc:Ignorable="d"
+        Title="快捷键查看" Height="410" Width="240" ResizeMode="NoResize" FontSize="15">
+    <Grid>
+        <StackPanel Margin="10 10 0 0">
+            <TextBlock Text="暂不支持自定义" HorizontalAlignment="Center"/>
+            <StackPanel Margin="0 10 0 0" HorizontalAlignment="Left">
+                <GroupBox Header="显示模式" Width="200">
+                    <StackPanel Margin="0 5 0 0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="原图" Width="70" TextAlignment="Right"/>
+                            <TextBox Text="Q" Width="100" IsReadOnly="True" Margin="5 0 0 0"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                            <TextBlock Text="仿色后" Width="70" TextAlignment="Right"/>
+                            <TextBox Text="W" Width="100" IsReadOnly="True" Margin="5 0 0 0"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                            <TextBlock Text="色盘下" Width="70" TextAlignment="Right"/>
+                            <TextBox Text="E" Width="100" IsReadOnly="True" Margin="5 0 0 0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="播放" Width="200" Margin="0 10 0 0">
+                    <StackPanel Margin="0 5 0 0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="播放/停止" Width="70" TextAlignment="Right"/>
+                            <TextBox Text="空格" Width="100" IsReadOnly="True" Margin="5 0 0 0"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                            <TextBlock Text="上一帧" Width="70" TextAlignment="Right"/>
+                            <TextBox Text="←" Width="100" IsReadOnly="True" Margin="5 0 0 0"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                            <TextBlock Text="下一帧" Width="70" TextAlignment="Right"/>
+                            <TextBox Text="→" Width="100" IsReadOnly="True" Margin="5 0 0 0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="画布调整" Width="200" Margin="0 10 0 0">
+                    <StackPanel Margin="0 5 0 0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="拖动设置" Width="70" TextAlignment="Right"/>
+                            <TextBox Text="C" Width="100" IsReadOnly="True" Margin="5 0 0 0"/>
+                        </StackPanel>
+                        <TextBlock Text="显示模式为原图下" FontSize="13" HorizontalAlignment="Left" Margin="10 0 0 0"/>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

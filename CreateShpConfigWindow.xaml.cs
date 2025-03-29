@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml.Linq;
 
 namespace Ra2EasyShp
@@ -15,11 +16,12 @@ namespace Ra2EasyShp
     public partial class CreateShpConfigWindow : Window
     {
         byte[] _shpData;
-        private string _customSavePath = string.Empty;
 
         public CreateShpConfigWindow(byte[] shpData)
         {
             InitializeComponent();
+
+            this.DataContext = GData.SaveConfigModel;
 
             _shpData = shpData;
         }
@@ -35,17 +37,22 @@ namespace Ra2EasyShp
             {
                 string _saveFile = string.Empty;
 
-                if (string.IsNullOrEmpty(_customSavePath))
+                if (GData.SaveConfigModel.IsShpCustomPath)
+                {
+                    File.WriteAllBytes(GData.SaveConfigModel.ShpCustomPath, _shpData);
+
+                    _saveFile = GData.SaveConfigModel.ShpCustomPath;
+                }
+                else
                 {
                     string savePath = string.Empty;
-                    string name = TextBox_FileName.Text;
 
-                    if (!string.IsNullOrEmpty(name) && !IsValidString(name))
+                    if (!string.IsNullOrEmpty(GData.SaveConfigModel.ShpName) && !IsValidString(GData.SaveConfigModel.ShpName))
                     {
                         throw new Exception("名称只能为数字和字母");
                     }
 
-                    string saveFileName = string.IsNullOrEmpty(name) ? "输出" : name;
+                    string saveFileName = string.IsNullOrEmpty(GData.SaveConfigModel.ShpName) ? "输出" : GData.SaveConfigModel.ShpName;
 
                     savePath = GetPath.CreateSavePath(Enums.PathType.SHP);
                     if (!Directory.Exists(savePath))
@@ -57,16 +64,10 @@ namespace Ra2EasyShp
 
                     _saveFile = Path.Combine(savePath, $"{saveFileName}.shp");
                 }
-                else
-                {
-                    File.WriteAllBytes(_customSavePath, _shpData);
-
-                    _saveFile = _customSavePath;
-                }
 
                 string path = Path.GetDirectoryName(_saveFile);
 
-                if (CheckBox_MapTypeForName.IsChecked == true)
+                if (GData.SaveConfigModel.IsShpMapType)
                 {
                     char[] mapTypeArray = { 'a', 'u', 't', 'd', 'l', 'g' };
                     string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(_saveFile);
@@ -145,48 +146,39 @@ namespace Ra2EasyShp
             return Regex.IsMatch(input, @"^[0-9a-zA-Z]+$");
         }
 
-        private void CheckBox_MapTypeForName_Changed(object sender, RoutedEventArgs e)
-        {
-            //if (CheckBox_MapTypeForName.IsChecked == true)
-            //{
-            //    StackPanel_MapTypeForName.Visibility = Visibility.Visible;
-            //}
-            //else
-            //{
-            //    StackPanel_MapTypeForName.Visibility = Visibility.Collapsed;
-            //}
-        }
-
         private void CheckBox_SetSavePath(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
-            {
-                Title = "选择保存文件",
-                Filter = "shp文件(*.shp)|*.shp",
-                FileName = string.Empty,
-                RestoreDirectory = true,
-                DefaultExt = "shp"
-            };
+            CheckBox checkBox = sender as CheckBox;
 
-            if (saveFileDialog.ShowDialog() == false)
+            if (checkBox != null && checkBox.IsMouseOver)
             {
-                _customSavePath = string.Empty;
-                CheckBox_CustomSavePath.IsChecked = false;
-                return;
+                Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Title = "选择保存文件",
+                    Filter = "shp文件(*.shp)|*.shp",
+                    FileName = string.Empty,
+                    RestoreDirectory = true,
+                    DefaultExt = "shp"
+                };
+
+                if (saveFileDialog.ShowDialog() == false)
+                {
+                    GData.SaveConfigModel.ShpCustomPath = string.Empty;
+                    GData.SaveConfigModel.IsShpCustomPath = false;
+                    return;
+                }
+
+                GData.SaveConfigModel.ShpCustomPath = saveFileDialog.FileName;
             }
 
             StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
             StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
-
-            _customSavePath = saveFileDialog.FileName;
-            TextBox_SavePath.Text = _customSavePath;
         }
 
         private void CheckBox_ClearSavePath(object sender, RoutedEventArgs e)
         {
             StackPanel_SaveFileName.Visibility = Visibility.Visible;
             StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
-            _customSavePath = string.Empty;
         }
     }
 }

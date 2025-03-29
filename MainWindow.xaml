@@ -10,6 +10,7 @@
         ResizeMode="CanResizeWithGrip"
         SizeChanged="Window_SizeChanged"
         StateChanged="Window_StateChanged"
+        PreviewKeyDown="Window_PreviewKeyDown"
         >
 
     <Window.Resources>
@@ -29,6 +30,7 @@
                     <MenuItem.Header>
                         <TextBlock Text="其他" Margin="15 0 0 0"/>
                     </MenuItem.Header>
+                    <MenuItem Header="查看快捷键" HorizontalContentAlignment="Left"  Click="MenuItem_HotKeyView_Click"/>
                     <MenuItem Header="关于" HorizontalContentAlignment="Left"  Click="MenuItem_About_Click"/>
                 </MenuItem>
             </Menu>
@@ -48,9 +50,11 @@
                         CanUserResizeRows="False"
                         CanUserReorderColumns="False"
                         SelectionUnit="Cell"
-                        PreviewKeyDown="ListView_Images_KeyDown"
+                        PreviewKeyDown="DataGrid_Images_KeyDown"
                         ContextMenuOpening="DataGrid_ContextMenuOpening"
-                        PreviewMouseRightButtonDown="DataGrid_MouseRightButtonDown"
+                        PreviewMouseRightButtonDown="DataGrid_Image_MouseRightButtonDown"
+                        PreviewMouseLeftButtonDown="DataGrid_Images_PreviewMouseDown"
+                        MouseEnter="DataGrid_Images_MouseEnter"
                     >
                         <DataGrid.CellStyle>
                             <Style TargetType="DataGridCell">
@@ -63,12 +67,45 @@
                         </DataGrid.CellStyle>
                         
                         <DataGrid.ContextMenu>
-                            <ContextMenu x:Name="DataGridContextMenu" FontSize="15" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                <MenuItem x:Name="MenuItem1" Click="MenuItem_DataGrid_Images_Insert_Click" Margin="0 0 0 0" HorizontalAlignment="Left" Width="300"/>
-                                <Separator/>
-                                <MenuItem Header="复制选中项" Click="MenuItem_DataGrid_Images_Copy_Click"/>
-                                <MenuItem x:Name="MenuItem_DataGrid_Images_Paste" Header="粘贴" Click="MenuItem_DataGrid_Images_Paste_Click"/>
-                                <Separator/>
+                            <ContextMenu x:Name="DataGridContextMenu" FontSize="15">
+                                <MenuItem x:Name="MenuItem1" Header="插入空项">
+                                    <MenuItem Click="MenuItem_DataGrid_Image_InsertAbove_Click">
+                                        <MenuItem.Header>
+                                            <StackPanel Orientation="Horizontal" Height="30">
+                                                <TextBlock Text="到上方" VerticalAlignment="Center"/>
+                                                <TextBox x:Name="TextBox_DataGrid_Image_InsertAbove" Text="1" Width="50" Height="20" Margin="10 0 0 0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="行" Margin="10 0 0 0" VerticalAlignment="Center"/>
+                                                <Path Width="15" Height="15" Stretch="Fill" Fill="Black" Margin="20 0 0 0" HorizontalAlignment="Right" VerticalAlignment="Center" Data="M345.781 890.168 0 544.571l77.181-77.187 268.601 268.234 601.781-601.786 77.186 77.366L345.781 890.168z"/>
+                                            </StackPanel>
+                                        </MenuItem.Header>
+                                    </MenuItem>
+
+                                    <MenuItem Click="MenuItem_DataGrid_Image_InsertBelow_Click">
+                                        <MenuItem.Header>
+                                            <StackPanel Orientation="Horizontal" Height="30">
+                                                <TextBlock Text="到下方" VerticalAlignment="Center"/>
+                                                <TextBox x:Name="TextBox_DataGrid_Image_InsertBelow" Text="1" Width="50" Height="20" Margin="10 0 0 0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="行" Margin="10 0 0 0" VerticalAlignment="Center"/>
+                                                <Path Width="15" Height="15" Stretch="Fill" Fill="Black" Margin="20 0 0 0" HorizontalAlignment="Right" VerticalAlignment="Center" Data="M345.781 890.168 0 544.571l77.181-77.187 268.601 268.234 601.781-601.786 77.186 77.366L345.781 890.168z"/>
+                                            </StackPanel>
+                                        </MenuItem.Header>
+                                    </MenuItem>
+                                </MenuItem>
+
+                                <Separator Height="2"/>
+
+                                <MenuItem x:Name="MenuItem_DataGrid_Images_Copy" Header="复制" InputGestureText="Ctrl+C" Click="MenuItem_DataGrid_Images_Copy_Click"/>
+                                <MenuItem x:Name="MenuItem_DataGrid_Images_Cut" Header="剪切" InputGestureText="Ctrl+X" Click="MenuItem_DataGrid_Images_Cut_Click"/>
+                                <MenuItem x:Name="MenuItem_DataGrid_Images_CutRemoveEmpty" Header="剪切不保留空行" InputGestureText="Ctrl+Shift+X" Click="MenuItem_DataGrid_Images_CutRemoveEmpty_Click"/>
+
+                                <Separator Height="2"/>
+                                
+                                <MenuItem x:Name="MenuItem_DataGrid_Images_Paste" Header="粘贴" InputGestureText="Ctrl+V" Click="MenuItem_DataGrid_Images_Paste_Click"/>
+                                <MenuItem x:Name="MenuItem_DataGrid_Images_PasteInsertAbove" Header="插入粘贴到上方" InputGestureText="Ctrl+Shift+V" Click="MenuItem_DataGrid_Images_PasteInsertAbove_Click"/>
+                                <MenuItem x:Name="MenuItem_DataGrid_Images_PasteInsertBelow" Header="插入粘贴到下方" InputGestureText="Ctrl+Alt+V" Click="MenuItem_DataGrid_Images_PasteInsertBelow_Click"/>
+
+                                <Separator Height="2"/>
+
                                 <MenuItem Header="清空操作列表" Click="MenuItem_DataGrid_Images_ClearEditList_Click"/>
                                 <MenuItem Header="清空叠加列表" Click="MenuItem_DataGrid_Images_ClearOverlayList_Click"/>
                             </ContextMenu>
@@ -267,13 +304,13 @@
                         <Button Content="预览背景色/图片" Height="25" AllowDrop="True" Drop="SetBackgroundImage" Click="SelectViewBackgroundColor_Click" Margin="5 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
 
                         <StackPanel Orientation="Horizontal" Margin="20 0 0 0" >
-                            <Button VerticalAlignment="Top" Height="25" Width="12" Click="Button_PreviousFrame_Click" IsEnabled="{Binding UIEnable}">
+                            <Button x:Name="Button_PreviousFrame" VerticalAlignment="Top" Height="25" Width="12" Click="Button_PreviousFrame_Click" IsEnabled="{Binding UIEnable}">
                                 <Path Stretch="Fill" Fill="Black" Data="M630.4 41.6l-416 428.8c-6.4 9.6-9.6 19.2-9.6 28.8 0 9.6 3.2 22.4 9.6 28.8l416 428.8c12.8 16 35.2 16 48 0 12.8-16 12.8-41.6 0-54.4L288 499.2 678.4 96c12.8-16 12.8-41.6 0-54.4-12.8-16-35.2-16-48 0z"/>
                             </Button>
 
                             <Button x:Name="Button_Play" Content="播放" Width="40" Height="25" Margin="5 0 0 0" Click="Button_Play_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
 
-                            <Button VerticalAlignment="Top" Height="25" Width="12" Margin="5 0 0 0" Click="Button_NextFrame_Click" IsEnabled="{Binding UIEnable}">
+                            <Button x:Name="Button_NextFrame" VerticalAlignment="Top" Height="25" Width="12" Margin="5 0 0 0" Click="Button_NextFrame_Click" IsEnabled="{Binding UIEnable}">
                                 <Path Stretch="Fill" Fill="Black" Data="M329.6 969.6l416-428.8c6.4-9.6 9.6-19.2 9.6-28.8 0-9.6-3.2-22.4-9.6-28.8l-416-428.8c-12.8-16-35.2-16-48 0s-16 41.6 0 54.4L668.8 512 281.6 915.2c-12.8 16-12.8 41.6 0 54.4 12.8 16 35.2 16 48 0z"/>
                             </Button>
                         </StackPanel>
@@ -296,7 +333,7 @@
 
                     <!--下方功能栏-->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10 0 0">
-                        <TabControl Width="600" Height="210" IsEnabled="{Binding UIEnable}">
+                        <TabControl x:Name="TabControl_Tools" Width="600" Height="210" IsEnabled="{Binding UIEnable}">
                             <TabItem Header="裁剪/缩放" Width="80">
                                 <StackPanel Margin="10 0 0 0" Orientation="Horizontal">
                                     <GroupBox Header="缩放" Width="160" Height="175" HorizontalAlignment="Left" VerticalAlignment="Top">

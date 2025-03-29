@@ -15,24 +15,24 @@
             <StackPanel Margin="0 5 0 0">
                 <GroupBox Header="保存选项" Width="225" Height="170">
                     <StackPanel Margin="5 0 0 0">
-                        <CheckBox x:Name="CheckBox_CustomSavePath" Content="自定义保存目录" Margin="0 3 0 0" Checked="CheckBox_SetSavePath" Unchecked="CheckBox_ClearSavePath"/>
+                        <CheckBox x:Name="CheckBox_CustomSavePath" Content="自定义保存目录" Margin="0 3 0 0" IsChecked="{Binding IsPaletteCustomPath, Mode=TwoWay}" Checked="CheckBox_SetSavePath" Unchecked="CheckBox_ClearSavePath"/>
                         
                         <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
-                            <CheckBox x:Name="CheckBox_MapTypeForName" Content="创建地图类型命名副本" Margin="0 0 0 0"/>
+                            <CheckBox x:Name="CheckBox_MapTypeForName" IsChecked="{Binding IsPaletteMapType, Mode=TwoWay}" Content="创建地图类型命名副本" Margin="0 0 0 0"/>
                             <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Click="Button_Tip_Click"/>
                         </StackPanel>
 
                         <StackPanel x:Name="StackPanel_SaveFileName" Margin="0 5 0 0">
                             <TextBlock Text="命名(为空保存为 色盘.pal)"/>
                             <StackPanel Orientation="Horizontal" Margin="0 3 0 0">
-                                <TextBox x:Name="TextBox_FileName" Width="120" HorizontalAlignment="Left"/>
+                                <TextBox x:Name="TextBox_FileName" Text="{Binding PaletteName, Mode=TwoWay}" Width="120" HorizontalAlignment="Left"/>
                                 <TextBlock Text=".pal" Margin="5 0 0 0"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel x:Name="StackPanel_CustomSaveFileName" Margin="0 5 0 0" Visibility="Collapsed">
                             <TextBlock Text="保存目录"/>
-                            <TextBox x:Name="TextBox_SavePath" FontSize="14" Width="200" Height="22" IsReadOnly="True" HorizontalAlignment="Left"/>
+                            <TextBox x:Name="TextBox_SavePath" Text="{Binding PaletteCustomPath, Mode=TwoWay}" FontSize="14" Width="200" Height="22" IsReadOnly="True" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>

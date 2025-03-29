@@ -20,9 +20,7 @@ using System.Data;
 using System.Reflection;
 using Image = System.Windows.Controls.Image;
 using Point = System.Windows.Point;
-using System.Windows.Media.Media3D;
-using System.Windows.Media.Effects;
-using ImageProcessor.Processors;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Ra2EasyShp
 {
@@ -35,6 +33,17 @@ namespace Ra2EasyShp
         {
             InitializeComponent();
 
+            //获取系统是以Left-handed（true）还是Right-handed（false）
+            var ifLeft = SystemParameters.MenuDropAlignment;
+            if (ifLeft)
+            {
+                // change to false
+                var t = typeof(SystemParameters);
+                var field = t.GetField("_menuDropAlignment", BindingFlags.NonPublic | BindingFlags.Static);
+                field.SetValue(null, false);
+                ifLeft = SystemParameters.MenuDropAlignment;
+            }
+
             Init();
 
             InitPlayerColor();
@@ -44,19 +53,7 @@ namespace Ra2EasyShp
 
         private void Init()
         {
-            string _getVersion()
-            {
-                string v = GData.VERSION.ToString();
-                if (!v.Contains('.'))
-                {
-                    v += ".0";
-                }
-
-                return v;
-            }
-
-            this.Title += $" v{_getVersion()}";
-            //this.Title += $" v1.0 beta.2";
+            this.Title += $" {GData.VERSION}";
 
             this.DataContext = GData.UIData;
 
@@ -311,8 +308,6 @@ namespace Ra2EasyShp
         {
             try
             {
-                Grid_Main.IsEnabled = false;
-
                 StackPanel_Tips.Visibility = Visibility.Collapsed;
 
                 var dataGrid = sender as DataGrid;
@@ -347,6 +342,8 @@ namespace Ra2EasyShp
 
                 System.Windows.Point position = e.GetPosition((UIElement)sender);
 
+                Grid_Main.IsEnabled = false;
+
                 if (position.X <= 140)
                 {
                     await ImageListManage.OpenFile(files, insertIndex, false);
@@ -372,8 +369,6 @@ namespace Ra2EasyShp
         {
             try
             {
-                Grid_Main.IsEnabled = false;
-
                 StackPanel_Tips.Visibility = Visibility.Collapsed;
 
                 Button btn = sender as Button;
@@ -386,6 +381,8 @@ namespace Ra2EasyShp
                 LoadImageOption(GData.UIData.NowIndex);
 
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                Grid_Main.IsEnabled = false;
 
                 if (btn.Tag.ToString() == "EditList")
                 {
@@ -808,7 +805,7 @@ namespace Ra2EasyShp
 
         private async void Button_Play_Click(object sender, RoutedEventArgs e)
         {
-            if (GData.ImageData.Count == 0)
+            if (GData.ImageData.Count < 2)
             {
                 GData.UIData.ImgIsPlaying = false;
                 Button_Play.Content = "播放";
@@ -847,6 +844,7 @@ namespace Ra2EasyShp
                         {
                             await ReloadImageSource(GData.UIData.NowIndex);
                             LoadImageOption(GData.UIData.NowIndex);
+
                         });
 
                         await Task.Delay(70);
@@ -876,6 +874,11 @@ namespace Ra2EasyShp
         {
             try
             {
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
                 if (GData.UIData.NowIndex - 1 < 0)
                 {
                     GData.UIData.NowIndex = GData.ImageData.Count - 1;
@@ -898,6 +901,11 @@ namespace Ra2EasyShp
         {
             try
             {
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
                 if (GData.UIData.NowIndex + 1 >= GData.ImageData.Count)
                 {
                     GData.UIData.NowIndex = 0;
@@ -924,11 +932,11 @@ namespace Ra2EasyShp
             StackPanel_Tips.Visibility = Visibility.Collapsed;
 
             //string folderPath = @"D:\RA2Scripts\VEH8-马牛";
-            //string folderPath = @"C:\Users\Milk\Desktop\数字图";
+            string folderPath = @"C:\Users\Milk\Desktop\数字图";
             //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
-            //string[] files = Directory.GetFiles(folderPath);
-            string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
+            string[] files = Directory.GetFiles(folderPath);
+            //string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
 
 
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月18日17时8分5秒\输出.shp" };
@@ -1194,95 +1202,38 @@ namespace Ra2EasyShp
 
         private void MenuItem_DataGrid_Images_ClearEditList_Click(object sender, RoutedEventArgs e)
         {
-            if (GData.ImageData.Count != 0)
+            try
             {
-                try
-                {
-                    Parallel.ForEach(GData.ImageData, item =>
-                    {
-                        item.EditImage.ClearItem();
-                    });
+                ImageListManage.ClearEditList();
 
-                    ImageListManage.ClearLastEmptyItem();
+                GData.UIData.NowIndex = 0;
+                Image_input.Source = null;
+                Image_output.Source = null;
+                Image_PaletteImg.Source = null;
 
-                    GData.UIData.NowIndex = 0;
-                    Image_input.Source = null;
-                    Image_output.Source = null;
-                    Image_PaletteImg.Source = null;
+                DataGrid_Images.Focus();
 
-                    GC.Collect();
-                }
-                catch (Exception ex)
-                {
-                    ShowMessageBox(ex.Message);
-                }
+                GC.Collect();
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
             }
         }
 
         private void MenuItem_DataGrid_Images_ClearOverlayList_Click(object sender, RoutedEventArgs e)
         {
-            if (GData.ImageData.Count != 0)
-            {
-                try
-                {
-                    Parallel.ForEach(GData.ImageData, item =>
-                    {
-                        item.OverlayImage.ClearItem();
-                    });
-
-                    ImageListManage.ClearLastEmptyItem();
-
-                    GData.UIData.NowIndex = 0;
-
-                    Image_outputOverlay.Source = null;
-
-                    GC.Collect();
-                }
-                catch (Exception ex)
-                {
-                    ShowMessageBox(ex.Message);
-                }
-            }
-        }
-
-        private void ListView_Images_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
             try
             {
-                if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.Control)
-                {
-                    ImageListManage.DeleteItemShift(DataGrid_Images.SelectedCells.ToList());
+                ImageListManage.ClearOverlayList();
 
-                    GData.UIData.NowIndex = 0;
-                    Image_input.Source = null;
-                    Image_output.Source = null;
-                    Image_PaletteImg.Source = null;
-                    Image_outputOverlay.Source = null;
+                GData.UIData.NowIndex = 0;
 
-                    GData.UIData.SetAllDefault();
+                Image_outputOverlay.Source = null;
 
-                    DataGrid_Images.ItemsSource = null;
-                    DataGrid_Images.ItemsSource = GData.ImageData;
-                    return;
-                }
+                DataGrid_Images.Focus();
 
-                if (e.Key == Key.Delete)
-                {
-                    ImageListManage.DeleteItem(DataGrid_Images.SelectedCells.ToList());
-
-                    GData.UIData.NowIndex = 0;
-                    Image_input.Source = null;
-                    Image_output.Source = null;
-                    Image_PaletteImg.Source = null;
-                    Image_outputOverlay.Source = null;
-
-                    GData.UIData.SetAllDefault();
-
-                    DataGrid_Images.ItemsSource = null;
-                    DataGrid_Images.ItemsSource = GData.ImageData;
-
-                    return;
-                }
+                GC.Collect();
             }
             catch (Exception ex)
             {
@@ -1326,109 +1277,56 @@ namespace Ra2EasyShp
             e.Handled = !Regex.IsMatch(newText, @"^-?\d*$");
         }
 
-        private int _insertIndex = -1;
-        private Enums.ListName _insertListName = Enums.ListName.空;
-        private void DataGrid_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private DataGridCell GetCellUnderMouse(DataGrid dataGrid, Point position)
         {
-            _insertIndex = -1;
-            _insertListName = Enums.ListName.空;
-
-            var dataGrid = sender as DataGrid;
-            if (dataGrid == null)
+            HitTestResult hitTestResult = VisualTreeHelper.HitTest(dataGrid, position);
+            if (hitTestResult != null)
             {
-                return;
-            }
-
-            var point = e.GetPosition(dataGrid);
-            int columnIndex = -1;
-            int rowIndex = -1;
-
-            DependencyObject hit = (DependencyObject)e.OriginalSource;
-
-            while (hit != null && !(hit is DataGridCell))
-            {
-                hit = VisualTreeHelper.GetParent(hit);
-            }
-
-            if (hit is DataGridCell cell)
-            {
-                columnIndex = cell.Column.DisplayIndex;
-
-                DependencyObject rowHit = cell;
-                while (rowHit != null && !(rowHit is DataGridRow))
+                DependencyObject obj = hitTestResult.VisualHit;
+                while (obj != null && !(obj is DataGridCell))
                 {
-                    rowHit = VisualTreeHelper.GetParent(rowHit);
+                    obj = VisualTreeHelper.GetParent(obj);
                 }
-
-                if (rowHit is DataGridRow row)
-                {
-                    rowIndex = row.GetIndex();
-                }
+                return obj as DataGridCell;
             }
-
-            if (columnIndex == -1 ||  rowIndex == -1)
-            {
-                DataGridContextMenu.IsOpen = false;
-                return;
-            }
-
-            _insertIndex = rowIndex;
-            if (columnIndex == 0)
-            {
-                MenuItem1.Header = $"往两个列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
-                _insertListName = Enums.ListName.全部;
-
-                MenuItem_DataGrid_Images_Paste.Header = $"粘贴到操作列表{_insertIndex.ToString().PadLeft(5, '0')}";
-            }
-            else if (columnIndex == 1)
-            {
-                MenuItem1.Header = $"往操作列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
-                _insertListName = Enums.ListName.操作;
-
-                MenuItem_DataGrid_Images_Paste.Header = $"粘贴到操作列表{_insertIndex.ToString().PadLeft(5, '0')}";
-            }
-            else if (columnIndex == 2)
-            {
-                MenuItem1.Header = $"往叠加列表 {_insertIndex.ToString().PadLeft(5, '0')} 位置插入行";
-                _insertListName = Enums.ListName.叠加;
-
-                MenuItem_DataGrid_Images_Paste.Header = $"粘贴到叠加列表{_insertIndex.ToString().PadLeft(5, '0')}";
-            }
-            else
-            {
-                DataGridContextMenu.IsOpen = false;
-                return;
-            }
-
-            // 在鼠标右键点击位置显示上下文菜单
-            DataGridContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
-            DataGridContextMenu.PlacementRectangle = new Rect(point.X, point.Y + 10, 0, 0);
-            DataGridContextMenu.PlacementTarget = DataGrid_Images;
-            DataGridContextMenu.IsOpen = true;
+            return null;
         }
 
-        private void MenuItem_DataGrid_Images_Insert_Click(object sender, RoutedEventArgs e)
+        private void DataGrid_Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (_insertIndex == -1 || _insertListName == Enums.ListName.空)
+            var point = e.GetPosition(DataGrid_Images);
+            DataGridCell cell = GetCellUnderMouse(DataGrid_Images, point);
+            if (cell == null)
             {
+                DataGridContextMenu.IsOpen = false;
                 return;
             }
 
-            var window = new ListInsertWindow(_insertIndex, _insertListName.ToString());
-            window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            window.Owner = this;
-            window.ShowDialog();
+            DataGridRow row = DataGridRow.GetRowContainingElement(cell);
+            DataGridColumn column = cell.Column;
 
-            if (window.InsertLineCount > 0)
+            if (row == null || column == null)
             {
-                ImageListManage.InsertEmptyItem(_insertListName, _insertIndex, window.InsertLineCount);
-
-                DataGrid_Images.ItemsSource = null;
-                DataGrid_Images.ItemsSource = GData.ImageData;
+                DataGridContextMenu.IsOpen = false;
+                return;
             }
 
-            _insertIndex = -1;
-            _insertListName = Enums.ListName.空;
+            // 现有选中项中不包含鼠标右键的选项
+            if (!DataGrid_Images.SelectedCells.Contains(new DataGridCellInfo(row.Item, column)))
+            {
+                // 取消已有选中
+                DataGrid_Images.SelectedCells.Clear();
+
+                DataGrid_Images.SelectedCells.Add(new DataGridCellInfo(row.Item, column));
+                DataGrid_Images.CurrentCell = new DataGridCellInfo(row.Item, column);
+                DataGrid_Images.Focus();
+            }
+
+            MenuItem_DataGrid_Images_Paste.IsEnabled = ImageListManage.IsCanPaste();
+            MenuItem_DataGrid_Images_PasteInsertAbove.IsEnabled = ImageListManage.IsCanPaste();
+            MenuItem_DataGrid_Images_PasteInsertBelow.IsEnabled = ImageListManage.IsCanPaste();
+
+            DataGridContextMenu.IsOpen = true;
         }
 
         private void DataGrid_ContextMenuOpening(object sender, ContextMenuEventArgs e)
@@ -2022,11 +1920,23 @@ namespace Ra2EasyShp
 
         private async void ComboBox_PlayerColorView_Changed(object sender, SelectionChangedEventArgs e)
         {
-            GData.PlayerColorView = (Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedIndex;
-
-            if (!GData.UIData.ImgIsPlaying)
+            try
             {
-                await ReloadImageSource(GData.UIData.NowIndex);
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                GData.PlayerColorView = (Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedIndex;
+
+                if (!GData.UIData.ImgIsPlaying)
+                {
+                    await ReloadImageSource(GData.UIData.NowIndex);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
             }
         }
 
@@ -2105,19 +2015,34 @@ namespace Ra2EasyShp
 
         private void DataGrid_Palette_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var dataGrid = sender as DataGrid;
-            if (dataGrid == null)
+            var point = e.GetPosition(DataGrid_Palette);
+            DataGridCell cell = GetCellUnderMouse(DataGrid_Palette, point);
+            if (cell == null)
             {
+                DataGrid_PaletteContextMenu.IsOpen = false;
                 return;
             }
 
-            // 获取鼠标点击的位置
-            var point = e.GetPosition(dataGrid);
+            DataGridRow row = DataGridRow.GetRowContainingElement(cell);
+            DataGridColumn column = cell.Column;
 
-            // 在鼠标右键点击位置显示上下文菜单
-            DataGrid_PaletteContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
-            DataGrid_PaletteContextMenu.PlacementRectangle = new Rect(point.X + 10, point.Y + 10, 0, 0);
-            DataGrid_PaletteContextMenu.PlacementTarget = DataGrid_Palette;
+            if (row == null || column == null)
+            {
+                DataGrid_PaletteContextMenu.IsOpen = false;
+                return;
+            }
+
+            // 现有选中项中不包含鼠标右键的选项
+            if (!DataGrid_Palette.SelectedCells.Contains(new DataGridCellInfo(row.Item, column)))
+            {
+                // 取消已有选中
+                DataGrid_Palette.SelectedCells.Clear();
+
+                DataGrid_Palette.SelectedCells.Add(new DataGridCellInfo(row.Item, column));
+                DataGrid_Palette.CurrentCell = new DataGridCellInfo(row.Item, column);
+                DataGrid_Palette.Focus();
+            }
+
             DataGrid_PaletteContextMenu.IsOpen = true;
         }
 
@@ -2511,7 +2436,20 @@ namespace Ra2EasyShp
             {
                 Grid_Main.IsEnabled = false;
 
-                ImageListManage.CopyItem(DataGrid_Images.SelectedCells.ToList());
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
+                {
+                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                }
+
+                ImageListManage.CopyItem(1, selectedDic[1]);
+                ImageListManage.CopyItem(2, selectedDic[2]);
             }
             catch (Exception ex)
             {
@@ -2520,6 +2458,7 @@ namespace Ra2EasyShp
             finally
             {
                 Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
             }
         }
 
@@ -2529,15 +2468,18 @@ namespace Ra2EasyShp
             {
                 Grid_Main.IsEnabled = false;
 
-                if (_insertIndex == -1 || _insertListName == Enums.ListName.空)
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
                 {
-                    return;
+                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
                 }
 
-                ImageListManage.PasteItem(_insertListName, _insertIndex);
+                if (selectedDic[1].Count > 0)
+                    ImageListManage.PasteItem(1, selectedDic[1].Min());
 
-                _insertIndex = -1;
-                _insertListName = Enums.ListName.空;
+                if (selectedDic[2].Count > 0)
+                    ImageListManage.PasteItem(2, selectedDic[2].Min());
             }
             catch (Exception ex)
             {
@@ -2546,6 +2488,7 @@ namespace Ra2EasyShp
             finally
             {
                 Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
             }
         }
 
@@ -2563,11 +2506,11 @@ namespace Ra2EasyShp
 
                 if (btn.Tag.ToString() == "EditList")
                 {
-                    ImageListManage.PasteItem(Enums.ListName.操作, GData.ImageData.Count);
+                    ImageListManage.PasteItemInsert(1, GData.ImageData.Count - 1, ImageListManage.PasteItemInsertMode.Below);
                 }
                 else
                 {
-                    ImageListManage.PasteItem(Enums.ListName.叠加, GData.ImageData.Count);
+                    ImageListManage.PasteItemInsert(2, GData.ImageData.Count - 1, ImageListManage.PasteItemInsertMode.Below);
                 }
             }
             catch (Exception ex)
@@ -2577,7 +2520,405 @@ namespace Ra2EasyShp
             finally
             {
                 Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
             }
+        }
+
+        private void DataGrid_Images_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            try
+            {
+                // 阻止按住触发
+                if (e.IsRepeat)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                // 删除保留空行
+                if ((e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.Control)
+                    || (e.Key == Key.D && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift)))
+                {
+                    var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                    ImageListManage.DeleteItemShift(1, selectedDic[1]);
+                    ImageListManage.DeleteItemShift(2, selectedDic[2]);
+
+                    //GData.UIData.NowIndex = 0;
+                    //Image_input.Source = null;
+                    //Image_output.Source = null;
+                    //Image_PaletteImg.Source = null;
+                    //Image_outputOverlay.Source = null;
+
+                    //GData.UIData.SetAllDefault();
+
+                    //DataGrid_Images.ItemsSource = null;
+                    //DataGrid_Images.ItemsSource = GData.ImageData;
+
+                    DataGrid_Images.Focus();
+                    e.Handled = true;
+                    return;
+                }
+
+                // 删除不保留空行
+                if (e.Key == Key.Delete
+                    || (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control))
+                {
+                    var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                    ImageListManage.DeleteItem(1, selectedDic[1]);
+                    ImageListManage.DeleteItem(2, selectedDic[2]);
+
+                    //GData.UIData.NowIndex = 0;
+                    //Image_input.Source = null;
+                    //Image_output.Source = null;
+                    //Image_PaletteImg.Source = null;
+                    //Image_outputOverlay.Source = null;
+
+                    //GData.UIData.SetAllDefault();
+
+                    //DataGrid_Images.ItemsSource = null;
+                    //DataGrid_Images.ItemsSource = GData.ImageData;
+
+                    DataGrid_Images.Focus();
+                    e.Handled = true;
+                    return;
+                }
+
+                // 复制
+                if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    MenuItem_DataGrid_Images_Copy.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                    DataGrid_Images.Focus();
+                    e.Handled = true;
+                    return;
+                }
+
+                // 粘贴
+                if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    MenuItem_DataGrid_Images_Paste.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                    DataGrid_Images.Focus();
+                    e.Handled = true;
+                    return;
+                }
+
+                // 剪切
+                if (e.Key == Key.X && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    MenuItem_DataGrid_Images_Cut.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                    DataGrid_Images.Focus();
+                    e.Handled = true;
+                    return;
+                }
+
+                // 剪切不保留空行
+                if (e.Key == Key.X && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+                {
+                    MenuItem_DataGrid_Images_CutRemoveEmpty.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                    DataGrid_Images.Focus();
+                    e.Handled = true;
+                    return;
+                }
+
+                // 插入粘贴到前面
+                if (e.Key == Key.V && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+                {
+                    MenuItem_DataGrid_Images_PasteInsertAbove.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                    DataGrid_Images.Focus();
+                    e.Handled = true;
+                    return;
+                }
+
+                // 插入粘贴到后面
+                if (e.Key == Key.V && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt))
+                {
+                    MenuItem_DataGrid_Images_PasteInsertBelow.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+                    DataGrid_Images.Focus();
+                    e.Handled = true;
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.FocusedElement is TextBox)
+                return;
+
+            if (Keyboard.FocusedElement is DataGridCell)
+                return;
+
+            if (!Grid_Main.IsEnabled)
+                return;
+
+            // 播放 下一帧
+            if (e.Key == Key.Right && Button_NextFrame.IsEnabled)
+            {
+                Button_NextFrame.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                e.Handled = true;
+            }
+
+            // 播放 上一帧
+            if (e.Key == Key.Left && Button_PreviousFrame.IsEnabled)
+            {
+                Button_PreviousFrame.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                e.Handled = true;
+            }
+
+            // 播放
+            if (e.Key == Key.Space && Button_Play.IsEnabled)
+            {
+                if (e.IsRepeat)
+                {
+                    e.Handled = true; // 阻止重复按键触发
+                    return;
+                }
+
+                Button_Play.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                e.Handled = true;
+            }
+
+            // 显示模式
+            if (RadioButton_ViewMode_InImg.IsEnabled)
+            {
+                // 原图
+                if (e.Key == Key.Q)
+                {
+                    RadioButton_ViewMode_InImg.IsChecked = true;
+                    e.Handled = true;
+                }
+                // 仿色后
+                if (e.Key == Key.W)
+                {
+                    RadioButton_ViewMode_OutImg.IsChecked = true;
+                    e.Handled = true;
+                }
+                // 色盘下
+                if (e.Key == Key.E)
+                {
+                    RadioButton_ViewMode_OutImgOnPalette.IsChecked = true;
+                    e.Handled = true;
+                }
+            }
+
+            if (TabControl_Tools.IsEnabled)
+            {
+                // 画布调整 拖动设置
+                if (RadioButton_ViewMode_InImg.IsChecked == true && e.Key == Key.C)
+                {
+                    if (e.IsRepeat)
+                    {
+                        e.Handled = true; // 阻止重复按键触发
+                        return;
+                    }
+
+                    Button_ReMarginOnImage.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void MenuItem_DataGrid_Image_InsertAbove_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int insertCount = int.Parse(TextBox_DataGrid_Image_InsertAbove.Text);
+                if (insertCount < 1)
+                {
+                    throw new Exception("最少插入1行");
+                }
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                if (selectedDic[1].Count > 0)
+                    ImageListManage.InsertEmptyItem(1, selectedDic[1].Min(), insertCount);
+
+                if (selectedDic[2].Count > 0)
+                    ImageListManage.InsertEmptyItem(2, selectedDic[2].Min(), insertCount);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+        }
+
+        private void MenuItem_DataGrid_Image_InsertBelow_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int insertCount = int.Parse(TextBox_DataGrid_Image_InsertBelow.Text);
+                if (insertCount < 1)
+                {
+                    throw new Exception("最少插入1行");
+                }
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+                if (selectedDic[1].Count == 0 && selectedDic[2].Count == 0)
+                {
+                    return;
+                }
+
+                if (selectedDic[1].Count > 0)
+                    ImageListManage.InsertEmptyItem(1, selectedDic[1].Max() + 1, insertCount);
+
+                if (selectedDic[2].Count > 0)
+                    ImageListManage.InsertEmptyItem(2, selectedDic[2].Max() + 1, insertCount);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+        }
+
+        private void MenuItem_DataGrid_Images_Cut_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
+                {
+                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                }
+
+                ImageListManage.CutItem(1, selectedDic[1], false);
+                ImageListManage.CutItem(2, selectedDic[2], false);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
+            }
+        }
+
+        private void DataGrid_Images_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid_Images.Focus();
+        }
+
+        private void DataGrid_Images_MouseEnter(object sender, MouseEventArgs e)
+        {
+            DataGrid_Images.Focus();
+        }
+
+        private void MenuItem_DataGrid_Images_PasteInsertAbove_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
+                {
+                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                }
+
+                if (selectedDic[1].Count > 0)
+                    ImageListManage.PasteItemInsert(1, selectedDic[1].Min(), ImageListManage.PasteItemInsertMode.Above);
+
+                if (selectedDic[2].Count > 0)
+                    ImageListManage.PasteItemInsert(2, selectedDic[2].Min(), ImageListManage.PasteItemInsertMode.Above);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
+            }
+
+            DataGrid_Images.Focus();
+        }
+
+        private void MenuItem_DataGrid_Images_PasteInsertBelow_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
+                {
+                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                }
+
+                if (selectedDic[1].Count > 0)
+                    ImageListManage.PasteItemInsert(1, selectedDic[1].Max(), ImageListManage.PasteItemInsertMode.Below);
+
+                if (selectedDic[2].Count > 0)
+                    ImageListManage.PasteItemInsert(2, selectedDic[2].Max(), ImageListManage.PasteItemInsertMode.Below);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
+            }
+
+            DataGrid_Images.Focus();
+        }
+
+        private void MenuItem_DataGrid_Images_CutRemoveEmpty_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
+                {
+                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                }
+
+                ImageListManage.CutItem(1, selectedDic[1], true);
+                ImageListManage.CutItem(2, selectedDic[2], true);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
+            }
+        }
+
+        private void MenuItem_HotKeyView_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new HotKeyWindow();
+            window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            window.Owner = this;
+            window.ShowDialog();
         }
     }
 }

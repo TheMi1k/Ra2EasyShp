@@ -106,6 +106,9 @@
     <Compile Include="Funcs\LocalImageManage.cs" />
     <Compile Include="Funcs\PaletteManage.cs" />
     <Compile Include="Funcs\ShpManage.cs" />
+    <Compile Include="HotKeyWindow.xaml.cs">
+      <DependentUpon>HotKeyWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Models\EditImageModel.cs" />
     <Compile Include="Models\ImageDataModel.cs" />
     <Compile Include="Models\MainWindowSizeModel.cs" />
@@ -114,6 +117,7 @@
     <Compile Include="Models\OverlayUIModel.cs" />
     <Compile Include="Models\DitherUIModel.cs" />
     <Compile Include="Models\ResizeUIModel.cs" />
+    <Compile Include="Models\SaveConfigModel.cs" />
     <Compile Include="PlayerColorEditWindow.xaml.cs">
       <DependentUpon>PlayerColorEditWindow.xaml</DependentUpon>
     </Compile>
@@ -124,9 +128,6 @@
     <Compile Include="Data\GData.cs" />
     <Compile Include="Funcs\ImageListManage.cs" />
     <Compile Include="Funcs\ImageTypeConvert.cs" />
-    <Compile Include="ListInsertWindow.xaml.cs">
-      <DependentUpon>ListInsertWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Models\ExportPaletteModel.cs" />
     <Compile Include="Models\UIDataModel.cs" />
     <Compile Include="Funcs\GetPath.cs" />
@@ -146,15 +147,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="HotKeyWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="PlayerColorEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CreatePaletteConfigWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ListInsertWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

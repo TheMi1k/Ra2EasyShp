@@ -6,7 +6,7 @@ namespace Ra2EasyShp.Data
 {
     public class GData
     {
-        internal const double VERSION = 1.1;
+        internal const string VERSION = "v1.1 beta.1";
 
         internal static int[,] BayerMatrix = {
             {  0, 32,  8, 40,  2, 34, 10, 42 },
@@ -26,6 +26,8 @@ namespace Ra2EasyShp.Data
         //internal static ObservableCollection<ImageInfoModel> ListViewData = new ObservableCollection<ImageInfoModel>();
 
         internal static ObservableCollection<ImageDataModel> ImageData = new ObservableCollection<ImageDataModel>();
+
+        internal static SaveConfigModel SaveConfigModel = new SaveConfigModel();
 
         public static UIDataModel UIData = new UIDataModel();
 
