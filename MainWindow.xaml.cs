@@ -61,11 +61,13 @@ namespace Ra2EasyShp
             {
                 if (GData.UIData.OverlayUI.OverlayMode == Enums.OverlayMode.叠加在上)
                 {
+                    Panel.SetZIndex(Grid_InImg, 0);
                     Panel.SetZIndex(Grid_OutImg, 0);
                     Panel.SetZIndex(Grid_OutImgOverlay, 1);
                 }
                 else
                 {
+                    Panel.SetZIndex(Grid_InImg, 1);
                     Panel.SetZIndex(Grid_OutImg, 1);
                     Panel.SetZIndex(Grid_OutImgOverlay, 0);
                 }
@@ -1123,28 +1125,24 @@ namespace Ra2EasyShp
 
             if (RadioButton_ArtTranslucency_none.IsChecked == true)
             {
-                Image_input.Opacity = 1.0;
                 Image_output.Opacity = 1.0;
                 Image_outputOverlay.Opacity = 1.0;
                 Image_PaletteImg.Opacity = 1.0;
             }
             else if (RadioButton_ArtTranslucency_25.IsChecked == true)
             {
-                Image_input.Opacity = 0.75;
                 Image_output.Opacity = 0.75;
                 Image_outputOverlay.Opacity = 0.75;
                 Image_PaletteImg.Opacity = 0.75;
             }
             else if (RadioButton_ArtTranslucency_50.IsChecked == true)
             {
-                Image_input.Opacity = 0.5;
                 Image_output.Opacity = 0.5;
                 Image_outputOverlay.Opacity = 0.5;
                 Image_PaletteImg.Opacity = 0.5;
             }
             else if (RadioButton_ArtTranslucency_75.IsChecked == true)
             {
-                Image_input.Opacity = 0.25;
                 Image_output.Opacity = 0.25;
                 Image_outputOverlay.Opacity = 0.25;
                 Image_PaletteImg.Opacity = 0.25;

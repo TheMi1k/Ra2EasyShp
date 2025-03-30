@@ -169,12 +169,12 @@
                             <StackPanel Margin="0 0 0 0">
                                 <Border x:Name="Border_ImgView" d:Width="600" d:Height="500" Width="{Binding MainWindowSize.Border_ImgViewW, Mode=TwoWay}" Height="{Binding MainWindowSize.Border_ImgViewH, Mode=TwoWay}" BorderThickness="1" BorderBrush="Gray" Margin="0 0 0 0">
                                     <ScrollViewer x:Name="ScrollViewer_ImgView" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="Grid_ImgView_PreviewMouseWheel">
-                                        <Grid x:Name="Grid_ImgView" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Grid x:Name="Grid_ImgView" HorizontalAlignment="Center" VerticalAlignment="Center"  Background="{Binding ViewBackground}">
                                             <Grid.LayoutTransform>
                                                 <ScaleTransform ScaleX="{Binding ImageViewScaleTransform}" ScaleY="{Binding ImageViewScaleTransform}"/>
                                             </Grid.LayoutTransform>
 
-                                            <Grid x:Name="Grid_InImg" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{Binding ViewBackground}">
+                                            <Grid x:Name="Grid_InImg" HorizontalAlignment="Left" VerticalAlignment="Top">
                                                 <Image x:Name="Image_input"
                                                     RenderOptions.BitmapScalingMode="NearestNeighbor"
                                                     RenderOptions.ClearTypeHint="Enabled"
@@ -186,7 +186,7 @@
                                                 />
                                             </Grid>
 
-                                            <Grid x:Name="Grid_OutImg" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden" Background="{Binding ViewBackground}">
+                                            <Grid x:Name="Grid_OutImg" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden">
                                                 <Image x:Name="Image_output"
                                                     RenderOptions.BitmapScalingMode="NearestNeighbor"
                                                     RenderOptions.ClearTypeHint="Enabled"
@@ -206,7 +206,7 @@
                                                 />
                                             </Grid>
 
-                                            <Grid x:Name="Grid_PaletteImg" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden" d:Margin="0 0 0 0" Background="{Binding ViewBackground}">
+                                            <Grid x:Name="Grid_PaletteImg" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden" d:Margin="0 0 0 0">
                                                 <Image x:Name="Image_PaletteImg"
                                                     RenderOptions.BitmapScalingMode="NearestNeighbor"
                                                     RenderOptions.ClearTypeHint="Enabled"
