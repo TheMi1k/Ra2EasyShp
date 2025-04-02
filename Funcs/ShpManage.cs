@@ -33,12 +33,23 @@ namespace Ra2EasyShp.Funcs
             internal byte[] FrameData;
         }
 
-        private static void ViewBitmapSetColor(byte r, byte g, byte b, List<Ra2PaletteColor> palette, out byte oR, out byte oG, out byte oB)
+        private static void ViewBitmapSetColor(byte r, byte g, byte b, List<Ra2PaletteColor> palette, bool backGround, out byte oA, out byte oR, out byte oG, out byte oB)
         {
             int palIndex = PaletteManage.GetPaletteIndex(r, g, b);
 
+            if (palIndex == 0 && !backGround)
+            {
+                oA = 0;
+                oR = 0;
+                oG = 0;
+                oB = 0;
+
+                return;
+            }
+
             if (palIndex < 16 || palIndex > 31 || GData.PlayerColorView == Enums.ViewPlayerColor.无)
             {
+                oA = (byte)255;
                 oR = (byte)(palette[palIndex].R * 4);
                 oG = (byte)(palette[palIndex].G * 4);
                 oB = (byte)(palette[palIndex].B * 4);
@@ -46,6 +57,7 @@ namespace Ra2EasyShp.Funcs
                 return;
             }
 
+            oA = (byte)255;
             oR = GData.PlayerColorDic[GData.PlayerColorView][palIndex - 16][0];
             oG = GData.PlayerColorDic[GData.PlayerColorView][palIndex - 16][1];
             oB = GData.PlayerColorDic[GData.PlayerColorView][palIndex - 16][2];
@@ -98,9 +110,9 @@ namespace Ra2EasyShp.Funcs
                             }
                             else
                             {
-                                ViewBitmapSetColor(pixel[2], pixel[1], pixel[0], palette, out byte oR, out byte oG, out byte oB);
+                                ViewBitmapSetColor(pixel[2], pixel[1], pixel[0], palette, background, out byte oA, out byte oR, out byte oG, out byte oB);
 
-                                resultPixel[3] = 255;
+                                resultPixel[3] = oA;
                                 resultPixel[2] = oR;
                                 resultPixel[1] = oG;
                                 resultPixel[0] = oB;
@@ -109,17 +121,16 @@ namespace Ra2EasyShp.Funcs
                     });
                 }
 
-                bitmap.UnlockBits(bitmapData);
-                resultBitmap.UnlockBits(resultBitmapData);
-
                 return resultBitmap;
             }
             catch
             {
+                return null;
+            }
+            finally
+            {
                 bitmap.UnlockBits(bitmapData);
                 resultBitmap.UnlockBits(resultBitmapData);
-
-                return null;
             }
         }
 

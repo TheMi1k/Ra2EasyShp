@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ra2EasyShp"
         mc:Ignorable="d"
-        Title="色盘保存选项" Height="640" Width="260" FontSize="15" ResizeMode="NoResize">
+        Title="色盘保存选项" Height="400" Width="430" FontSize="15" ResizeMode="NoResize">
     <Grid>
-        <StackPanel Margin="5 10 0 0">
-            <StackPanel x:Name="StackPanel_Color" Orientation="Horizontal" Height="320" Width="160" HorizontalAlignment="Center" Margin="-9 0 0 0">
+        <StackPanel Margin="5 10 0 0" Orientation="Horizontal">
+            <StackPanel x:Name="StackPanel_Color" Orientation="Horizontal" Height="320" Width="160" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 0 0 0">
 
             </StackPanel>
 
-            <StackPanel Margin="0 5 0 0">
+            <StackPanel Margin="10 70 0 0">
                 <GroupBox Header="保存选项" Width="225" Height="170">
                     <StackPanel Margin="5 0 0 0">
                         <CheckBox x:Name="CheckBox_CustomSavePath" Content="自定义保存目录" Margin="0 3 0 0" IsChecked="{Binding IsPaletteCustomPath, Mode=TwoWay}" Checked="CheckBox_SetSavePath" Unchecked="CheckBox_ClearSavePath"/>
@@ -36,11 +36,11 @@
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
-            </StackPanel>
-            
-            <StackPanel Orientation="Horizontal" Margin="30 20 0 0">
-                <Button Content="取消" Width="60" FontSize="20" Click="Button_Cancel_Click"/>
-                <Button Content="保存" Width="60" FontSize="20" Margin="40 0 0 0" Click="Button_Save_Click"/>
+
+                <StackPanel Orientation="Horizontal" Margin="30 20 0 0">
+                    <Button Content="取消" Width="60" FontSize="20" Click="Button_Cancel_Click"/>
+                    <Button Content="保存" Width="60" FontSize="20" Margin="40 0 0 0" Click="Button_Save_Click"/>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>

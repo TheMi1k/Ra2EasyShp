@@ -147,7 +147,5 @@ namespace Ra2EasyShp.Models
         public DitherUIModel DitherUI { get; set; } = new DitherUIModel();
 
         public OverlayUIModel OverlayUI { get; set; } = new OverlayUIModel();
-
-        public MainWindowSizeModel MainWindowSize { get; set; } = new MainWindowSizeModel();
     }
 }

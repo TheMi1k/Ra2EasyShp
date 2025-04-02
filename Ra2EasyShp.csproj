@@ -111,7 +111,6 @@
     </Compile>
     <Compile Include="Models\EditImageModel.cs" />
     <Compile Include="Models\ImageDataModel.cs" />
-    <Compile Include="Models\MainWindowSizeModel.cs" />
     <Compile Include="Models\OverlayImageModel.cs" />
     <Compile Include="Models\ImportPaletteModel.cs" />
     <Compile Include="Models\OverlayUIModel.cs" />

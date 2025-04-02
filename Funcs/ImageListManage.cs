@@ -636,7 +636,7 @@ namespace Ra2EasyShp.Funcs
         /// 删除项目，下方数据上移
         /// </summary>
         /// <param name="infoList"></param>
-        internal static void DeleteItemShift(int column, List<int> indexList)
+        internal static void DeleteItemRemoveEmpty(int column, List<int> indexList)
         {
             if (indexList.Count == 0 || GData.ImageData.Count == 0)
             {
@@ -912,7 +912,7 @@ namespace Ra2EasyShp.Funcs
 
                 if (removeEmpty)
                 {
-                    DeleteItemShift(column, indexList);
+                    DeleteItemRemoveEmpty(column, indexList);
                 }
                 else
                 {
@@ -933,7 +933,7 @@ namespace Ra2EasyShp.Funcs
 
                 if (removeEmpty)
                 {
-                    DeleteItemShift(column, indexList);
+                    DeleteItemRemoveEmpty(column, indexList);
                 }
                 else
                 {

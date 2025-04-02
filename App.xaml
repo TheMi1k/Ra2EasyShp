@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:Ra2EasyShp"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        
     </Application.Resources>
 </Application>

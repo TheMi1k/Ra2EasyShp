@@ -11,6 +11,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Windows.Ink;
 
 namespace Ra2EasyShp.Funcs
 {

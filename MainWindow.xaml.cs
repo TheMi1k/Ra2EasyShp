@@ -21,6 +21,7 @@ using System.Reflection;
 using Image = System.Windows.Controls.Image;
 using Point = System.Windows.Point;
 using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Controls.Primitives;
 
 namespace Ra2EasyShp
 {
@@ -196,28 +197,6 @@ namespace Ra2EasyShp
             }
         }
 
-        private int _mainWindowNormalW;
-        private int _mainWindowNormalH;
-        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (WindowState == WindowState.Maximized)
-            {
-                _mainWindowNormalW = GData.UIData.MainWindowSize.MainWindowW;
-                _mainWindowNormalH = GData.UIData.MainWindowSize.MainWindowH;
-                GData.UIData.MainWindowSize.MainWindowW = (int)ActualWidth;
-                GData.UIData.MainWindowSize.MainWindowH = (int)ActualHeight;
-            }
-        }
-
-        private void Window_StateChanged(object sender, EventArgs e)
-        {
-            if (WindowState == WindowState.Normal)
-            {
-                GData.UIData.MainWindowSize.MainWindowW = _mainWindowNormalW;
-                GData.UIData.MainWindowSize.MainWindowH = _mainWindowNormalH;
-            }
-        }
-
         private bool ShowMessageBox(string text, MessageBoxButton type = MessageBoxButton.OK)
         {
             try
@@ -261,6 +240,8 @@ namespace Ra2EasyShp
             if (!ShowMessageBox("请确定当前项目是否已经保存\n是否退出？", MessageBoxButton.YesNo))
             {
                 e.Cancel = true;
+
+                return;
             }
 
             try
@@ -934,11 +915,11 @@ namespace Ra2EasyShp
             StackPanel_Tips.Visibility = Visibility.Collapsed;
 
             //string folderPath = @"D:\RA2Scripts\VEH8-马牛";
-            string folderPath = @"C:\Users\Milk\Desktop\数字图";
+            //string folderPath = @"C:\Users\Milk\Desktop\数字图";
             //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
-            string[] files = Directory.GetFiles(folderPath);
-            //string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
+            //string[] files = Directory.GetFiles(folderPath);
+            string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
 
 
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月18日17时8分5秒\输出.shp" };
@@ -1275,56 +1256,54 @@ namespace Ra2EasyShp
             e.Handled = !Regex.IsMatch(newText, @"^-?\d*$");
         }
 
-        private DataGridCell GetCellUnderMouse(DataGrid dataGrid, Point position)
-        {
-            HitTestResult hitTestResult = VisualTreeHelper.HitTest(dataGrid, position);
-            if (hitTestResult != null)
-            {
-                DependencyObject obj = hitTestResult.VisualHit;
-                while (obj != null && !(obj is DataGridCell))
-                {
-                    obj = VisualTreeHelper.GetParent(obj);
-                }
-                return obj as DataGridCell;
-            }
-            return null;
-        }
-
         private void DataGrid_Image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var point = e.GetPosition(DataGrid_Images);
-            DataGridCell cell = GetCellUnderMouse(DataGrid_Images, point);
-            if (cell == null)
+            try
+            {
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+                while (dep != null && !(dep is DataGridCell || dep is DataGridColumnHeader || dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                if (dep == null || !(dep is DataGridCell cell))
+                {
+                    DataGridContextMenu.IsOpen = false;
+                    return;
+                }
+
+                DataGridRow row = DataGridRow.GetRowContainingElement(cell);
+                DataGridColumn column = cell.Column;
+
+                if (row == null || column == null)
+                {
+                    DataGridContextMenu.IsOpen = false;
+                    return;
+                }
+
+                // 现有选中项中不包含鼠标右键的选项
+                if (!DataGrid_Images.SelectedCells.Contains(new DataGridCellInfo(row.Item, column)))
+                {
+                    // 取消已有选中
+                    DataGrid_Images.SelectedCells.Clear();
+
+                    DataGrid_Images.SelectedCells.Add(new DataGridCellInfo(row.Item, column));
+                    DataGrid_Images.CurrentCell = new DataGridCellInfo(row.Item, column);
+                    DataGrid_Images.Focus();
+                }
+
+                MenuItem_DataGrid_Images_Paste.IsEnabled = ImageListManage.IsCanPaste();
+                MenuItem_DataGrid_Images_PasteInsertAbove.IsEnabled = ImageListManage.IsCanPaste();
+                MenuItem_DataGrid_Images_PasteInsertBelow.IsEnabled = ImageListManage.IsCanPaste();
+
+                DataGridContextMenu.IsOpen = true;
+            }
+            catch (Exception ex)
             {
                 DataGridContextMenu.IsOpen = false;
-                return;
+                ShowMessageBox(ex.Message);
             }
-
-            DataGridRow row = DataGridRow.GetRowContainingElement(cell);
-            DataGridColumn column = cell.Column;
-
-            if (row == null || column == null)
-            {
-                DataGridContextMenu.IsOpen = false;
-                return;
-            }
-
-            // 现有选中项中不包含鼠标右键的选项
-            if (!DataGrid_Images.SelectedCells.Contains(new DataGridCellInfo(row.Item, column)))
-            {
-                // 取消已有选中
-                DataGrid_Images.SelectedCells.Clear();
-
-                DataGrid_Images.SelectedCells.Add(new DataGridCellInfo(row.Item, column));
-                DataGrid_Images.CurrentCell = new DataGridCellInfo(row.Item, column);
-                DataGrid_Images.Focus();
-            }
-
-            MenuItem_DataGrid_Images_Paste.IsEnabled = ImageListManage.IsCanPaste();
-            MenuItem_DataGrid_Images_PasteInsertAbove.IsEnabled = ImageListManage.IsCanPaste();
-            MenuItem_DataGrid_Images_PasteInsertBelow.IsEnabled = ImageListManage.IsCanPaste();
-
-            DataGridContextMenu.IsOpen = true;
         }
 
         private void DataGrid_ContextMenuOpening(object sender, ContextMenuEventArgs e)
@@ -2013,35 +1992,48 @@ namespace Ra2EasyShp
 
         private void DataGrid_Palette_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var point = e.GetPosition(DataGrid_Palette);
-            DataGridCell cell = GetCellUnderMouse(DataGrid_Palette, point);
-            if (cell == null)
+            try
+            {
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+                while (dep != null && !(dep is DataGridCell || dep is DataGridColumnHeader || dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                if (dep == null || !(dep is DataGridCell cell))
+                {
+                    DataGrid_PaletteContextMenu.IsOpen = false;
+                    return;
+                }
+
+                DataGridRow row = DataGridRow.GetRowContainingElement(cell);
+                DataGridColumn column = cell.Column;
+
+                if (row == null || column == null)
+                {
+                    DataGrid_PaletteContextMenu.IsOpen = false;
+                    return;
+                }
+
+                // 现有选中项中不包含鼠标右键的选项
+                if (!DataGrid_Palette.SelectedCells.Contains(new DataGridCellInfo(row.Item, column)))
+                {
+                    // 取消已有选中
+                    DataGrid_Palette.SelectedCells.Clear();
+
+                    DataGrid_Palette.SelectedCells.Add(new DataGridCellInfo(row.Item, column));
+                    DataGrid_Palette.CurrentCell = new DataGridCellInfo(row.Item, column);
+                    DataGrid_Palette.Focus();
+                }
+
+                DataGrid_PaletteContextMenu.IsOpen = true;
+            }
+            catch (Exception ex)
             {
                 DataGrid_PaletteContextMenu.IsOpen = false;
-                return;
+                ShowMessageBox(ex.Message);
             }
-
-            DataGridRow row = DataGridRow.GetRowContainingElement(cell);
-            DataGridColumn column = cell.Column;
-
-            if (row == null || column == null)
-            {
-                DataGrid_PaletteContextMenu.IsOpen = false;
-                return;
-            }
-
-            // 现有选中项中不包含鼠标右键的选项
-            if (!DataGrid_Palette.SelectedCells.Contains(new DataGridCellInfo(row.Item, column)))
-            {
-                // 取消已有选中
-                DataGrid_Palette.SelectedCells.Clear();
-
-                DataGrid_Palette.SelectedCells.Add(new DataGridCellInfo(row.Item, column));
-                DataGrid_Palette.CurrentCell = new DataGridCellInfo(row.Item, column);
-                DataGrid_Palette.Focus();
-            }
-
-            DataGrid_PaletteContextMenu.IsOpen = true;
         }
 
         private async void Button_PletteIndexDisable_Click(object sender, RoutedEventArgs e)
@@ -2534,50 +2526,20 @@ namespace Ra2EasyShp
                 }
 
                 // 删除保留空行
-                if ((e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.Control)
-                    || (e.Key == Key.D && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift)))
+                if (e.Key == Key.Delete
+                    || (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control))
                 {
-                    var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
-
-                    ImageListManage.DeleteItemShift(1, selectedDic[1]);
-                    ImageListManage.DeleteItemShift(2, selectedDic[2]);
-
-                    //GData.UIData.NowIndex = 0;
-                    //Image_input.Source = null;
-                    //Image_output.Source = null;
-                    //Image_PaletteImg.Source = null;
-                    //Image_outputOverlay.Source = null;
-
-                    //GData.UIData.SetAllDefault();
-
-                    //DataGrid_Images.ItemsSource = null;
-                    //DataGrid_Images.ItemsSource = GData.ImageData;
-
+                    MenuItem_DataGrid_Images_DeleteItem.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
                     DataGrid_Images.Focus();
                     e.Handled = true;
                     return;
                 }
 
                 // 删除不保留空行
-                if (e.Key == Key.Delete
-                    || (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control))
+                if ((e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.Control)
+                    || (e.Key == Key.D && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift)))
                 {
-                    var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
-
-                    ImageListManage.DeleteItem(1, selectedDic[1]);
-                    ImageListManage.DeleteItem(2, selectedDic[2]);
-
-                    //GData.UIData.NowIndex = 0;
-                    //Image_input.Source = null;
-                    //Image_output.Source = null;
-                    //Image_PaletteImg.Source = null;
-                    //Image_outputOverlay.Source = null;
-
-                    //GData.UIData.SetAllDefault();
-
-                    //DataGrid_Images.ItemsSource = null;
-                    //DataGrid_Images.ItemsSource = GData.ImageData;
-
+                    MenuItem_DataGrid_Images_DeleteItemRemoveEmpty.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
                     DataGrid_Images.Focus();
                     e.Handled = true;
                     return;
@@ -2812,6 +2774,66 @@ namespace Ra2EasyShp
 
         private void DataGrid_Images_MouseEnter(object sender, MouseEventArgs e)
         {
+            DataGrid_Images.Focus();
+        }
+
+        private void MenuItem_DataGrid_Images_DeleteItem_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                ImageListManage.DeleteItem(1, selectedDic[1]);
+                ImageListManage.DeleteItem(2, selectedDic[2]);
+
+                GData.UIData.NowIndex = 0;
+                Image_input.Source = null;
+                Image_output.Source = null;
+                Image_PaletteImg.Source = null;
+                Image_outputOverlay.Source = null;
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
+            }
+
+            DataGrid_Images.Focus();
+        }
+
+        private void MenuItem_DataGrid_Images_DeleteItemRemoveEmpty_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
+
+                ImageListManage.DeleteItemRemoveEmpty(1, selectedDic[1]);
+                ImageListManage.DeleteItemRemoveEmpty(2, selectedDic[2]);
+
+                GData.UIData.NowIndex = 0;
+                Image_input.Source = null;
+                Image_output.Source = null;
+                Image_PaletteImg.Source = null;
+                Image_outputOverlay.Source = null;
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+                DataGrid_Images.Focus();
+            }
+
             DataGrid_Images.Focus();
         }
 
