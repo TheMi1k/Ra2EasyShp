@@ -146,39 +146,38 @@ namespace Ra2EasyShp
             return Regex.IsMatch(input, @"^[0-9a-zA-Z]+$");
         }
 
-        private void CheckBox_SetSavePath(object sender, RoutedEventArgs e)
+        private void CheckBox_CustomSaveMode(object sender, RoutedEventArgs e)
         {
-            CheckBox checkBox = sender as CheckBox;
-
-            if (checkBox != null && checkBox.IsMouseOver)
-            {
-                Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
-                {
-                    Title = "选择保存文件",
-                    Filter = "shp文件(*.shp)|*.shp",
-                    FileName = string.Empty,
-                    RestoreDirectory = true,
-                    DefaultExt = "shp"
-                };
-
-                if (saveFileDialog.ShowDialog() == false)
-                {
-                    GData.SaveConfigModel.ShpCustomPath = string.Empty;
-                    GData.SaveConfigModel.IsShpCustomPath = false;
-                    return;
-                }
-
-                GData.SaveConfigModel.ShpCustomPath = saveFileDialog.FileName;
-            }
+            if (!(sender is CheckBox checkBox) || !checkBox.IsMouseOver)
+                return;
 
             StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
             StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
         }
 
-        private void CheckBox_ClearSavePath(object sender, RoutedEventArgs e)
+        private void CheckBox_AutoSaveMode(object sender, RoutedEventArgs e)
         {
+            if (!(sender is CheckBox checkBox) || !checkBox.IsMouseOver)
+                return;
+
             StackPanel_SaveFileName.Visibility = Visibility.Visible;
             StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
+        }
+
+        private void CheckBox_SetCustomPath(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button button) || !button.IsMouseOver)
+                return;
+
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "选择保存文件",
+                Filter = "shp文件(*.shp)|*.shp",
+                FileName = string.Empty,
+                RestoreDirectory = true,
+                DefaultExt = "shp"
+            };
+            GData.SaveConfigModel.ShpCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
         }
     }
 }
