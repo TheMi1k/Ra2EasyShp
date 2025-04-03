@@ -29,7 +29,7 @@
                         <StackPanel x:Name="StackPanel_CustomSaveFileName" Margin="0 5 0 0" Visibility="Collapsed">
                             <TextBlock Text="保存目录"/>
                             <StackPanel Orientation="Horizontal">
-                                <TextBox x:Name="TextBox_SavePath" Text="{Binding ShpCustomPath, Mode=TwoWay}" FontSize="14" Width="180" Height="22" IsReadOnly="True"/>
+                                <TextBox x:Name="TextBox_SavePath" Text="{Binding ShpCustomPath, Mode=TwoWay}" FontSize="14" Width="180" Height="22"/>
                                 <Button Content="…" Height="20" Width="20" Margin="5 0 0 0" Click="CheckBox_SetCustomPath"/>
                             </StackPanel>
                         </StackPanel>

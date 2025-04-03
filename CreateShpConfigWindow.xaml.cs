@@ -21,6 +21,17 @@ namespace Ra2EasyShp
         {
             InitializeComponent();
 
+            if (GData.SaveConfigModel.IsPaletteCustomPath)
+            {
+                StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
+                StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                StackPanel_SaveFileName.Visibility = Visibility.Visible;
+                StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
+            }
+
             this.DataContext = GData.SaveConfigModel;
 
             _shpData = shpData;
@@ -39,6 +50,15 @@ namespace Ra2EasyShp
 
                 if (GData.SaveConfigModel.IsShpCustomPath)
                 {
+                    if (string.IsNullOrEmpty(GData.SaveConfigModel.PaletteCustomPath))
+                    {
+                        throw new Exception("路径不能为空");
+                    }
+                    if (!Directory.Exists(Path.GetDirectoryName(GData.SaveConfigModel.PaletteCustomPath)))
+                    {
+                        throw new DirectoryNotFoundException("路径非法");
+                    }
+
                     File.WriteAllBytes(GData.SaveConfigModel.ShpCustomPath, _shpData);
 
                     _saveFile = GData.SaveConfigModel.ShpCustomPath;
@@ -172,7 +192,7 @@ namespace Ra2EasyShp
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
                 Title = "选择保存文件",
-                Filter = "shp文件(*.shp)|*.shp",
+                Filter = "SHP 文件(*.shp)|*.shp",
                 FileName = string.Empty,
                 RestoreDirectory = true,
                 DefaultExt = "shp"
