@@ -237,7 +237,7 @@ namespace Ra2EasyShp
         {
             base.OnClosing(e);
 
-            if (!ShowMessageBox("请确定当前项目是否已经保存\n是否退出？", MessageBoxButton.YesNo))
+            if (GData.ImageData.Count > 0 && !ShowMessageBox("请确定当前项目是否已经保存\n是否退出？", MessageBoxButton.YesNo))
             {
                 e.Cancel = true;
 
