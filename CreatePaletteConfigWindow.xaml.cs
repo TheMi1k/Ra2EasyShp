@@ -23,6 +23,17 @@ namespace Ra2EasyShp
         {
             InitializeComponent();
 
+            if (GData.SaveConfigModel.IsPaletteCustomPath)
+            {
+                StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
+                StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                StackPanel_SaveFileName.Visibility = Visibility.Visible;
+                StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
+            }
+
             this.DataContext = GData.SaveConfigModel;
 
             Init(colorList);
@@ -73,6 +84,10 @@ namespace Ra2EasyShp
                     if (string.IsNullOrEmpty(GData.SaveConfigModel.PaletteCustomPath))
                     {
                         throw new Exception("路径不能为空");
+                    }
+                    if (!Directory.Exists(Path.GetDirectoryName(GData.SaveConfigModel.PaletteCustomPath)))
+                    {
+                        throw new DirectoryNotFoundException("路径非法");
                     }
 
                     using (BinaryWriter bw = new BinaryWriter(File.Open(GData.SaveConfigModel.PaletteCustomPath, FileMode.Create)))
@@ -198,39 +213,38 @@ namespace Ra2EasyShp
             ShowMessageBox("保存后将文件复制多份，名称后加上地图类型后缀\n例如 unit(sno).pal，unit(tem).pal\n\n如果有同名文件会被覆盖");
         }
 
-        private void CheckBox_SetSavePath(object sender, RoutedEventArgs e)
+        private void CheckBox_CustomSaveMode(object sender, RoutedEventArgs e)
         {
-            CheckBox checkBox = sender as CheckBox;
-
-            if (checkBox != null && checkBox.IsMouseOver)
-            {
-                Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
-                {
-                    Title = "选择保存文件",
-                    Filter = "Pal色盘文件(*.pal)|*.pal",
-                    FileName = string.Empty,
-                    RestoreDirectory = true,
-                    DefaultExt = "pal"
-                };
-
-                if (saveFileDialog.ShowDialog() == false)
-                {
-                    GData.SaveConfigModel.PaletteCustomPath = string.Empty;
-                    GData.SaveConfigModel.IsPaletteCustomPath = false;
-                    return;
-                }
-
-                GData.SaveConfigModel.PaletteCustomPath = saveFileDialog.FileName;
-            }
+            if (!(sender is CheckBox checkBox) || !checkBox.IsMouseOver)
+                return;
 
             StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
             StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
         }
 
-        private void CheckBox_ClearSavePath(object sender, RoutedEventArgs e)
+        private void CheckBox_AutoSaveMode(object sender, RoutedEventArgs e)
         {
+            if (!(sender is CheckBox checkBox) || !checkBox.IsMouseOver)
+                return;
+
             StackPanel_SaveFileName.Visibility = Visibility.Visible;
             StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
+        }
+
+        private void CheckBox_SetCustomPath(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button button) || !button.IsMouseOver)
+                return;
+
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "选择保存文件",
+                Filter = "PAL 色盘文件(*.pal)|*.pal",
+                FileName = string.Empty,
+                RestoreDirectory = true,
+                DefaultExt = "pal"
+            };
+            GData.SaveConfigModel.PaletteCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
         }
     }
 }
