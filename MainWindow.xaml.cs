@@ -909,12 +909,13 @@ namespace Ra2EasyShp
 
         private async void Button_Test_Click(object sender, RoutedEventArgs e)
         {
+
+#if DEBUG
             GData.UIData.NowIndex = 0;
             //GData.ImageData.Clear();
 
             StackPanel_Tips.Visibility = Visibility.Collapsed;
 
-            //string folderPath = @"D:\RA2Scripts\VEH8-马牛";
             //string folderPath = @"C:\Users\Milk\Desktop\数字图";
             //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
@@ -941,6 +942,7 @@ namespace Ra2EasyShp
             {
                 ShowMessageBox($"加载图片出错\n{ex.Message}");
             }
+#endif
         }
 
         /// <summary>
