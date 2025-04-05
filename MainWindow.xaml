@@ -87,7 +87,6 @@
                             ContextMenuOpening="DataGrid_ContextMenuOpening"
                             PreviewMouseRightButtonDown="DataGrid_Image_MouseRightButtonDown"
                             PreviewMouseLeftButtonDown="DataGrid_Images_PreviewMouseDown"
-                            MouseEnter="DataGrid_Images_MouseEnter"
                         >
                         <DataGrid.CellStyle>
                             <Style TargetType="DataGridCell">

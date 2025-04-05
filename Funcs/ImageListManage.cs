@@ -241,103 +241,6 @@ namespace Ra2EasyShp.Funcs
             return model;
         }
 
-        internal static Dictionary<int, ImageDataModel> LoadGif1(string filePath, int[] frames, bool isOverlay)
-        {
-            Dictionary<int, ImageDataModel> dic = new Dictionary<int, ImageDataModel>();
-
-            bool fileExist = File.Exists(filePath);
-
-            foreach (var frameIndex in frames)
-            {
-                ImageDataModel model = new ImageDataModel();
-
-                if (fileExist)
-                {
-                    bool isFrameExist = true;
-                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    {
-                        using (var image = System.Drawing.Image.FromStream(fs))
-                        {
-                            FrameDimension fd = new FrameDimension(image.FrameDimensionsList[0]);
-
-                            if (frameIndex > image.GetFrameCount(fd) - 1)
-                            {
-                                isFrameExist = false;
-                            }
-
-                            if (isOverlay == false)
-                            {
-                                if (isFrameExist)
-                                {
-                                    image.SelectActiveFrame(fd, frameIndex);
-
-                                    //model.EditImage.OutImg = new Bitmap(image);
-                                    model.EditImage.OutImgTempPath = GetPath.CreateImageTempPath();
-                                    LocalImageManage.SaveImageToTemp(image, model.EditImage.OutImgTempPath);
-
-                                    model.EditImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
-                                    model.EditImage.ImgPath = filePath;
-                                    model.EditImage.FileType = Enums.FileType.Gif;
-                                    model.EditImage.Frame = frameIndex;
-
-                                    model.EditImage.ImgTempPath = GetPath.CreateImageTempPath();
-                                    LocalImageManage.SaveImageToTemp(image, model.EditImage.ImgTempPath);
-                                }
-                                else
-                                {
-                                    model.EditImage.Name = StringConst.ImageFileNotExist;
-                                    model.EditImage.FileType = Enums.FileType.Gif;
-                                    model.EditImage.Frame = frameIndex;
-                                }
-                            }
-                            else
-                            {
-                                if (isFrameExist)
-                                {
-                                    image.SelectActiveFrame(fd, frameIndex);
-
-                                    //model.OverlayImage.Img = new Bitmap(image);
-                                    model.OverlayImage.ImgPath = filePath;
-
-                                    model.EditImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
-                                    model.OverlayImage.FileType = Enums.FileType.Gif;
-                                    model.OverlayImage.Frame = frameIndex;
-
-                                    model.OverlayImage.ImgTempPath = GetPath.CreateImageTempPath();
-                                    LocalImageManage.SaveImageToTemp(image, model.OverlayImage.ImgTempPath);
-                                }
-                                else
-                                {
-                                    model.OverlayImage.Name = StringConst.ImageFileNotExist;
-                                    model.OverlayImage.FileType = Enums.FileType.Gif;
-                                    model.OverlayImage.Frame = frameIndex;
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (isOverlay == false)
-                    {
-                        model.EditImage.Name = StringConst.ImageFileNotExist;
-                        model.EditImage.FileType = Enums.FileType.Gif;
-                        model.EditImage.Frame = frameIndex;
-                    }
-                    else
-                    {
-                        model.OverlayImage.Name = StringConst.ImageFileNotExist;
-                        model.OverlayImage.FileType = Enums.FileType.Gif;
-                        model.OverlayImage.Frame = frameIndex;
-                    }
-                }
-
-                dic.Add(frameIndex, model);
-            }
-
-            return dic;
-        }
-
         internal static Dictionary<int, ImageDataModel> LoadGif(string filePath, int[] frames, bool isOverlay)
         {
             Dictionary<int, ImageDataModel> dic = new Dictionary<int, ImageDataModel>();
@@ -391,7 +294,7 @@ namespace Ra2EasyShp.Funcs
                                     //model.OverlayImage.Img = new Bitmap(image);
                                     model.OverlayImage.ImgPath = filePath;
 
-                                    model.EditImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
+                                    model.OverlayImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
                                     model.OverlayImage.FileType = Enums.FileType.Gif;
                                     model.OverlayImage.Frame = frameIndex;
 
@@ -489,7 +392,7 @@ namespace Ra2EasyShp.Funcs
                         if (isFrameExist)
                         {
                             //model.OverlayImage.Img = new Bitmap(bitmapDic[frameIndex]);
-                            model.EditImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
+                            model.OverlayImage.Name = $"[{frameIndex}]{Path.GetFileName(filePath)}";
                             model.OverlayImage.ImgPath = filePath;
                             model.OverlayImage.FileType = Enums.FileType.Shp;
                             model.OverlayImage.Frame = frameIndex;

@@ -920,13 +920,13 @@ namespace Ra2EasyShp
             //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
             //string[] files = Directory.GetFiles(folderPath);
-            string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
+            //string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
 
-
+            string[] files = { @"C:\Users\Milk\Desktop\3fc4f753cd99b7e1a6657a7921ce60c1.png" };
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月18日17时8分5秒\输出.shp" };
 
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月22日20时54分9秒\输出.shp" };
-            string[] fileso = { };
+            string[] fileso = { @"C:\Users\Milk\Desktop\a7fd71b617f0770dc47f4a8939332e46.png~tplv-obj.png" };
 
             try
             {
@@ -2770,11 +2770,6 @@ namespace Ra2EasyShp
         }
 
         private void DataGrid_Images_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            DataGrid_Images.Focus();
-        }
-
-        private void DataGrid_Images_MouseEnter(object sender, MouseEventArgs e)
         {
             DataGrid_Images.Focus();
         }

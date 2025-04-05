@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,6 +22,7 @@ namespace Ra2EasyShp
     public partial class PlayerColorEditWindow : Window
     {
         private Bitmap _bitmap;
+        private int _imgIndex;
         private int _selectIndex = -1;
         private Ra2PaletteColor[] _playerColors = new Ra2PaletteColor[16];
 
@@ -28,25 +30,30 @@ namespace Ra2EasyShp
         {
             InitializeComponent();
 
-            Border_Magnify.Visibility = Visibility.Collapsed;
-            StackPanel_NowSelectIndexManage.Visibility = Visibility.Hidden;
+            _imgIndex = imgIndex;
 
-            _bitmap = ImageManage.MergeBitmaps(
-                imgIndex,
-                imgIndex,
-                GData.ImageData[imgIndex].OverlayImage.OffsetX,
-                GData.ImageData[imgIndex].OverlayImage.OffsetY,
-                GData.ImageData[imgIndex].OverlayImage.OverlayMode
-                ).Result;
+            this.ContentRendered += async (sender, e) =>
+            {
+                Border_Magnify.Visibility = Visibility.Collapsed;
+                StackPanel_NowSelectIndexManage.Visibility = Visibility.Hidden;
 
-            Image_SetPlayerColor.Source = ImageTypeConvert.BitmapToImageSource(_bitmap);
+                _bitmap = await ImageManage.MergeBitmaps(
+                       _imgIndex,
+                       _imgIndex,
+                       GData.ImageData[_imgIndex].OverlayImage.OffsetX,
+                       GData.ImageData[_imgIndex].OverlayImage.OffsetY,
+                       GData.ImageData[_imgIndex].OverlayImage.OverlayMode
+                       );
 
-            Image_ImgMagnify.Width = _bitmap.Width * 17;
-            Image_ImgMagnify.Height = _bitmap.Height * 17;
+                Image_SetPlayerColor.Source = ImageTypeConvert.BitmapToImageSource(_bitmap);
 
-            Image_ImgMagnify.Source = ImageTypeConvert.BitmapToImageSource(_bitmap);
+                Image_ImgMagnify.Width = _bitmap.Width * 17;
+                Image_ImgMagnify.Height = _bitmap.Height * 17;
 
-            LoadColor(GData.PaletteConfig.PalettePlayerColor);
+                Image_ImgMagnify.Source = ImageTypeConvert.BitmapToImageSource(_bitmap);
+
+                LoadColor(GData.PaletteConfig.PalettePlayerColor);
+            };
         }
 
         protected override void OnClosing(CancelEventArgs e)
