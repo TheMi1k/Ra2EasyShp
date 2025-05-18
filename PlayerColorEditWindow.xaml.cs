@@ -32,28 +32,48 @@ namespace Ra2EasyShp
 
             _imgIndex = imgIndex;
 
+            TextBlock_NowFrameIndex.Text = _imgIndex.ToString().PadLeft(5, '0');
+            TextBlock_MaxFrameIndex.Text = (GData.ImageData.Count - 1).ToString().PadLeft(5, '0');
+
             this.ContentRendered += async (sender, e) =>
             {
                 Border_Magnify.Visibility = Visibility.Collapsed;
                 StackPanel_NowSelectIndexManage.Visibility = Visibility.Hidden;
 
-                _bitmap = await ImageManage.MergeBitmaps(
-                       _imgIndex,
-                       _imgIndex,
-                       GData.ImageData[_imgIndex].OverlayImage.OffsetX,
-                       GData.ImageData[_imgIndex].OverlayImage.OffsetY,
-                       GData.ImageData[_imgIndex].OverlayImage.OverlayMode
-                       );
-
-                Image_SetPlayerColor.Source = ImageTypeConvert.BitmapToImageSource(_bitmap);
-
-                Image_ImgMagnify.Width = _bitmap.Width * 17;
-                Image_ImgMagnify.Height = _bitmap.Height * 17;
-
-                Image_ImgMagnify.Source = ImageTypeConvert.BitmapToImageSource(_bitmap);
+                await LoadImage(_imgIndex);
 
                 LoadColor(GData.PaletteConfig.PalettePlayerColor);
             };
+        }
+
+        private async Task LoadImage(int index)
+        {
+            if (_bitmap != null)
+            {
+                _bitmap.Dispose();
+            }
+
+            _bitmap = await ImageManage.MergeBitmaps(
+                       index,
+                       index,
+                       GData.ImageData[index].OverlayImage.OffsetX,
+                       GData.ImageData[index].OverlayImage.OffsetY,
+                       GData.ImageData[index].OverlayImage.OverlayMode
+                       );
+
+            if (_bitmap == null)
+            {
+                Image_SetPlayerColor.Source = null;
+                Image_ImgMagnify.Source = null;
+                return;
+            }
+
+            Image_SetPlayerColor.Source = ImageTypeConvert.BitmapToImageSource(_bitmap);
+
+            Image_ImgMagnify.Width = _bitmap.Width * 17;
+            Image_ImgMagnify.Height = _bitmap.Height * 17;
+
+            Image_ImgMagnify.Source = ImageTypeConvert.BitmapToImageSource(_bitmap);
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -389,6 +409,54 @@ namespace Ra2EasyShp
                     btn.Background = Ra2PaletteColorToBrush(_playerColors[i]);
                     b -= step;
                 }
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+        }
+
+        private async void Button_PreviousFrame_Click(object sender, RoutedEventArgs e)
+        {
+            _imgIndex -= 1;
+            if (_imgIndex < 0)
+            {
+                _imgIndex = GData.ImageData.Count - 1;
+            }
+
+            TextBlock_NowFrameIndex.Text = _imgIndex.ToString().PadLeft(5, '0');
+
+            await LoadImage(_imgIndex);
+        }
+
+        private async void Button_NextFrame_Click(object sender, RoutedEventArgs e)
+        {
+            _imgIndex += 1;
+            if (_imgIndex > GData.ImageData.Count - 1)
+            {
+                _imgIndex = 0;
+            }
+
+            TextBlock_NowFrameIndex.Text = _imgIndex.ToString().PadLeft(5, '0');
+
+            await LoadImage(_imgIndex);
+        }
+
+        private async void Button_GotoFrame_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int index = int.Parse(TextBox_GotoIndex.Text);
+                if (index < 0 || index > GData.ImageData.Count - 1)
+                {
+                    throw new Exception("帧序号输入不正确");
+                }
+
+                _imgIndex = index;
+
+                TextBlock_NowFrameIndex.Text = _imgIndex.ToString().PadLeft(5, '0');
+
+                await LoadImage(_imgIndex);
             }
             catch (Exception ex)
             {

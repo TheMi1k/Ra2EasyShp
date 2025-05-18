@@ -467,6 +467,11 @@ namespace Ra2EasyShp.Funcs
 
         internal static async Task Resize(int width, int height)
         {
+            if (width <= 0 || height <= 0)
+            {
+                throw new Exception("输入尺寸不正确");
+            }
+
             await Task.Run(() =>
             {
                 int suc = 0;

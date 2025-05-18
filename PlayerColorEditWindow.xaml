@@ -8,72 +8,92 @@
         Title="色盘玩家所属色设置" FontSize="15" Height="585" Width="750" ResizeMode="NoResize">
     <Grid>
         <StackPanel Margin="15 10 0 0" Orientation="Horizontal">
-            <Border x:Name="Border_Image" Width="500" Height="500" BorderThickness="1" BorderBrush="Gray" Margin="0 5 0 0" VerticalAlignment="Top" HorizontalAlignment="Left">
-                <Grid>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                        <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
-                            <Image x:Name="Image_SetPlayerColor"
-                                RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                RenderOptions.ClearTypeHint="Enabled"
-                                Stretch="None"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                MouseLeave="Image_SetPlayerColor_MouseLeave"
-                                MouseEnter="Image_SetPlayerColor_MouseEnter"
-                                MouseMove="Image_SetPlayerColor_MouseMove"
-                                MouseLeftButtonDown="Image_SetPlayerColor_MouseLeftButtonDown"
-                                MouseRightButtonDown="Image_SetPlayerColor_MouseRightButtonDown"
-                            />
-                        </Grid>
-                    </ScrollViewer>
-
-                    <Border x:Name="Border_Magnify" BorderBrush="Red" BorderThickness="1" Width="155" Height="155" Margin="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
-                        <Border BorderBrush="Blue" BorderThickness="1" Width="153" Height="153" Margin="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
-                            <Grid>
-                                <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="153" Height="153" Background="LightGray">
-                                    <Image x:Name="Image_ImgMagnify"
-                                        RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                        RenderOptions.ClearTypeHint="Enabled" Stretch="Fill"
-                                        VerticalAlignment="Top"
-                                        HorizontalAlignment="Left"
-                                        Margin="0 0 0 0"
-                                    />
-                                </Grid>
-
-                                <!--准心-->
-                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2 2 0 0">
-                                    <Rectangle Width="3" Height="17" Fill="Blue" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-                                    <Rectangle Width="17" Height="3" Fill="Blue" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 7 0 0"/>
-
-                                    <Rectangle Width="3" Height="10" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 4 0 0"/>
-                                    <Rectangle Width="10" Height="3" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 7 0 0"/>
-                                </Grid>
+            <StackPanel>
+                <Border x:Name="Border_Image" Width="500" Height="450" BorderThickness="1" BorderBrush="Gray" Margin="0 5 0 0" VerticalAlignment="Top" HorizontalAlignment="Left">
+                    <Grid>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <Image x:Name="Image_SetPlayerColor"
+                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                    RenderOptions.ClearTypeHint="Enabled"
+                    Stretch="None"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    MouseLeave="Image_SetPlayerColor_MouseLeave"
+                    MouseEnter="Image_SetPlayerColor_MouseEnter"
+                    MouseMove="Image_SetPlayerColor_MouseMove"
+                    MouseLeftButtonDown="Image_SetPlayerColor_MouseLeftButtonDown"
+                    MouseRightButtonDown="Image_SetPlayerColor_MouseRightButtonDown"
+                />
                             </Grid>
+                        </ScrollViewer>
+
+                        <Border x:Name="Border_Magnify" BorderBrush="Red" BorderThickness="1" Width="155" Height="155" Margin="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <Border BorderBrush="Blue" BorderThickness="1" Width="153" Height="153" Margin="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <Grid>
+                                    <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="153" Height="153" Background="LightGray">
+                                        <Image x:Name="Image_ImgMagnify"
+                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                            RenderOptions.ClearTypeHint="Enabled" Stretch="Fill"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Left"
+                            Margin="0 0 0 0"
+                        />
+                                    </Grid>
+
+                                    <!--准心-->
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2 2 0 0">
+                                        <Rectangle Width="3" Height="17" Fill="Blue" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+                                        <Rectangle Width="17" Height="3" Fill="Blue" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 7 0 0"/>
+
+                                        <Rectangle Width="3" Height="10" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 4 0 0"/>
+                                        <Rectangle Width="10" Height="3" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 7 0 0"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
                         </Border>
-                    </Border>
-                </Grid>
-            </Border>
+                    </Grid>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10 0 0">
+                    <Button Width="20" Height="20" Click="Button_PreviousFrame_Click">
+                        <Path Stretch="Fill" Fill="Black" Data="M630.4 41.6l-416 428.8c-6.4 9.6-9.6 19.2-9.6 28.8 0 9.6 3.2 22.4 9.6 28.8l416 428.8c12.8 16 35.2 16 48 0 12.8-16 12.8-41.6 0-54.4L288 499.2 678.4 96c12.8-16 12.8-41.6 0-54.4-12.8-16-35.2-16-48 0z"/>
+                    </Button>
+
+                    <TextBlock x:Name="TextBlock_NowFrameIndex" FontSize="16" Width="50" Margin="10 0 0 0" TextAlignment="Center"/>
+                    <TextBlock Text="/" Margin="5 0 0 0"/>
+                    <TextBlock x:Name="TextBlock_MaxFrameIndex" FontSize="16" Width="50" Margin="5 0 0 0" TextAlignment="Center"/>
+
+                    <Button Width="20" Height="20" Margin="10 0 0 0" Click="Button_NextFrame_Click">
+                        <Path Stretch="Fill" Fill="Black" Data="M329.6 969.6l416-428.8c6.4-9.6 9.6-19.2 9.6-28.8 0-9.6-3.2-22.4-9.6-28.8l-416-428.8c-12.8-16-35.2-16-48 0s-16 41.6 0 54.4L668.8 512 281.6 915.2c-12.8 16-12.8 41.6 0 54.4 12.8 16 35.2 16 48 0z"/>
+                    </Button>
+
+                    <TextBox x:Name="TextBox_GotoIndex" Width="55" Margin="10 0 0 0"/>
+                    <Button Content="跳转" Margin="5 0 0 0" Click="Button_GotoFrame_Click"/>
+                </StackPanel>
+            </StackPanel>
+            
 
             <StackPanel Margin="10 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Height="330" VerticalAlignment="Top" Margin="0 5 0 0">
                         <StackPanel Margin="0 0 0 0">
-                            <TextBlock Text="16"/>
-                            <TextBlock Text="17" Margin="0 1 0 0"/>
-                            <TextBlock Text="18" Margin="0 1 0 0"/>
-                            <TextBlock Text="19" Margin="0 1 0 0"/>
-                            <TextBlock Text="20" Margin="0 1 0 0"/>
-                            <TextBlock Text="21" Margin="0 1 0 0"/>
-                            <TextBlock Text="22" Margin="0 1 0 0"/>
-                            <TextBlock Text="23" Margin="0 1 0 0"/>
-                            <TextBlock Text="24" Margin="0 1 0 0"/>
-                            <TextBlock Text="25" Margin="0 1 0 0"/>
-                            <TextBlock Text="26" Margin="0 1 0 0"/>
-                            <TextBlock Text="27" Margin="0 1 0 0"/>
-                            <TextBlock Text="28" Margin="0 1 0 0"/>
-                            <TextBlock Text="29" Margin="0 1 0 0"/>
-                            <TextBlock Text="30" Margin="0 1 0 0"/>
-                            <TextBlock Text="31" Margin="0 1 0 0"/>
+                            <TextBlock Text="16" Height="19"/>
+                            <TextBlock Text="17" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="18" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="19" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="20" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="21" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="22" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="23" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="24" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="25" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="26" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="27" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="28" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="29" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="30" Height="19" Margin="0 1 0 0"/>
+                            <TextBlock Text="31" Height="19" Margin="0 1 0 0"/>
                         </StackPanel>
                         <Grid VerticalAlignment="Top" Margin="5 0 0 0">
                             <StackPanel>
@@ -115,7 +135,7 @@
                             </StackPanel>
                         </Grid>
 
-                        <StackPanel x:Name="StackPanel_NowSelectIndexManage" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left" Width="70">
+                        <StackPanel x:Name="StackPanel_NowSelectIndexManage" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                             <Path Width="12" Height="15" Margin="0 0 0 0" Stretch="Fill" Fill="Black" Data="M539.07911109 799.81226667l-381.952-235.52a56.86613333 56.86613333 0 0 1-0.6144-96.4608l381.95199999-241.8688A56.86613333 56.86613333 0 0 1 625.77777777 274.0224L625.77777776 751.4112a56.86613333 56.86613333 0 0 1-86.69866667 48.46933333z"/>
                             <Button Background="Transparent" BorderThickness="0" Margin="7 0 0 0" Click="Button_EditColor_Click">
                                 <Path Width="20" Height="20" Stretch="Fill" Fill="Black" Data="M811.323077 39.384615l102.4 102.4c15.753846 15.753846 15.753846 39.384615 0 55.138462l-567.138462 551.384615s-7.876923 7.876923-15.753846 7.876923l-157.538461 31.507693c-15.753846 0-23.630769-7.876923-23.63077-15.753846v-7.876924l31.507693-149.661538c0-7.876923 7.876923-15.753846 7.876923-23.630769l567.138461-551.384616c15.753846-15.753846 39.384615-15.753846 55.138462 0zM0 866.461538h1102.769231v157.538462H0z"/>

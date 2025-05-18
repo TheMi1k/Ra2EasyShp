@@ -105,7 +105,7 @@
                                         <MenuItem.Header>
                                             <StackPanel Orientation="Horizontal" Height="30">
                                                 <TextBlock Text="到上方" VerticalAlignment="Center"/>
-                                                <TextBox x:Name="TextBox_DataGrid_Image_InsertAbove" Text="1" Width="50" Height="20" Margin="10 0 0 0" VerticalAlignment="Center"/>
+                                                <TextBox x:Name="TextBox_DataGrid_Image_InsertAbove" Text="1" Width="50" Height="20" Padding="0 0 0 0" Margin="10 0 0 0" VerticalAlignment="Center"/>
                                                 <TextBlock Text="行" Margin="10 0 0 0" VerticalAlignment="Center"/>
                                                 <Path Width="15" Height="15" Stretch="Fill" Fill="Black" Margin="20 0 0 0" HorizontalAlignment="Right" VerticalAlignment="Center" Data="M345.781 890.168 0 544.571l77.181-77.187 268.601 268.234 601.781-601.786 77.186 77.366L345.781 890.168z"/>
                                             </StackPanel>
@@ -116,7 +116,7 @@
                                         <MenuItem.Header>
                                             <StackPanel Orientation="Horizontal" Height="30">
                                                 <TextBlock Text="到下方" VerticalAlignment="Center"/>
-                                                <TextBox x:Name="TextBox_DataGrid_Image_InsertBelow" Text="1" Width="50" Height="20" Margin="10 0 0 0" VerticalAlignment="Center"/>
+                                                <TextBox x:Name="TextBox_DataGrid_Image_InsertBelow" Text="1" Width="50" Height="20" Padding="0 0 0 0" Margin="10 0 0 0" VerticalAlignment="Center"/>
                                                 <TextBlock Text="行" Margin="10 0 0 0" VerticalAlignment="Center"/>
                                                 <Path Width="15" Height="15" Stretch="Fill" Fill="Black" Margin="20 0 0 0" HorizontalAlignment="Right" VerticalAlignment="Center" Data="M345.781 890.168 0 544.571l77.181-77.187 268.601 268.234 601.781-601.786 77.186 77.366L345.781 890.168z"/>
                                             </StackPanel>
@@ -399,27 +399,38 @@
                     <TabControl x:Name="TabControl_Tools" IsEnabled="{Binding UIEnable}" Width="620" Height="210" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <TabItem Header="裁剪/缩放" Width="80">
                             <StackPanel Orientation="Horizontal">
-                                <GroupBox Header="缩放" Width="160" Height="175" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                    <StackPanel Margin="10 5 0 0">
+                                <GroupBox Header="缩放" Width="185" Height="180" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                    <StackPanel Margin="10 0 0 0">
                                         <StackPanel Orientation="Horizontal">
                                             <StackPanel>
                                                 <TextBlock Text="宽度" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                                <TextBox Text="{Binding ResizeUI.ImageNowWidthStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                <TextBox Text="{Binding ResizeUI.ImageNowWidthStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Height="21" Padding="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                             </StackPanel>
 
-                                            <StackPanel x:Name="StackPanel_ResizeHeight" Margin="10 0 0 0">
+                                            <StackPanel Margin="30 0 0 0">
                                                 <TextBlock Text="高度" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                                <TextBox Text="{Binding ResizeUI.ImageNowHeightStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                <TextBox Text="{Binding ResizeUI.ImageNowHeightStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Height="21" Padding="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel>
+                                                <TextBlock Text="宽度%" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                <TextBox Text="{Binding ResizeUI.ImageNowWidthPercentageStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Height="21" Padding="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                            </StackPanel>
+
+                                            <StackPanel Margin="30 0 0 0">
+                                                <TextBlock Text="高度%" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                <TextBox Text="{Binding ResizeUI.ImageNowHeightPercentageStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Height="21" Padding="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                             </StackPanel>
                                         </StackPanel>
 
-                                        <CheckBox x:Name="CheckBox_MaintainAspectRatio" Content="保持比例" Margin="0 10 0 0" Checked="CheckBox_MaintainAspectRatio_Checked" Unchecked="CheckBox_MaintainAspectRatio_Checked"/>
-
-                                        <TextBlock Text="[还原] 或 [应用] 会取消画布调整" FontSize="14" TextWrapping="Wrap" Margin="0 5 0 0"/>
+                                        <CheckBox Content="保持比例" Margin="0 5 0 0" IsChecked="{Binding ResizeUI.ResizeMaintainAspectRatio}"/>
+                                        <TextBlock Text="操作会取消画布调整" FontSize="14" TextWrapping="Wrap" Margin="0 0 0 0"/>
 
                                         <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                             <Button Content="还原" Width="50" Click="Button_CancelResize_Click"/>
-                                            <Button Content="应用" Width="50" Margin="25 0 0 0" Click="Button_Resize_Click"/>
+                                            <Button Content="应用" Width="50" Margin="50 0 0 0" Click="Button_Resize_Click"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </GroupBox>
@@ -434,29 +445,29 @@
                                     <Path Width="60" Height="40" Fill="Black" Stretch="Fill" Data="M545.3 407.1h-421c-14.5 0-26.3 11.8-26.3 26.3v155.2c0 14.5 11.8 26.3 26.3 26.3h421V721c0 10.2 11.1 16.5 19.8 11.4l356.4-209c8.7-5.1 8.7-17.6 0-22.7l-356.4-209c-8.8-5.2-19.8 1.2-19.8 11.4v104zM598 651.9v-89.6H150.7V459.8H598v-87.6L848.7 512 598 651.9z"/>
                                 </StackPanel>
 
-                                <GroupBox Header="画布调整" Margin="10 0 0 0" Width="210" Height="175" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <GroupBox Header="画布调整" Margin="10 0 0 0" Width="210" Height="180" HorizontalAlignment="Left" VerticalAlignment="Top">
                                     <Grid Margin="10 0 0 0">
                                         <StackPanel>
                                             <StackPanel Margin="60 0 0 0">
                                                 <TextBlock Text="顶部" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
-                                                <TextBox Text="{Binding ResizeUI.ReMarginTop, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                <TextBox Text="{Binding ResizeUI.ReMarginTop, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Height="21" Padding="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                             </StackPanel>
 
                                             <StackPanel Orientation="Horizontal" Margin="0 -15 0 0">
                                                 <StackPanel>
                                                     <TextBlock Text="左侧" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
-                                                    <TextBox Text="{Binding ResizeUI.ReMarginLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                    <TextBox Text="{Binding ResizeUI.ReMarginLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Height="21" Padding="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                                 </StackPanel>
 
                                                 <StackPanel Margin="60 0 0 0">
                                                     <TextBlock Text="右侧" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
-                                                    <TextBox Text="{Binding ResizeUI.ReMarginRight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                    <TextBox Text="{Binding ResizeUI.ReMarginRight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Height="21" Padding="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                                 </StackPanel>
                                             </StackPanel>
 
                                             <StackPanel Margin="60 -15 0 0">
                                                 <TextBlock Text="底部" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13 0 0 0"/>
-                                                <TextBox Text="{Binding ResizeUI.ReMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="TextBox_Resize_LostFocus" Width="60" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                                <TextBox Text="{Binding ResizeUI.ReMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="60" Height="21" Padding="0 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                             </StackPanel>
 
                                             <CheckBox Content="调整后优化画布尺寸" IsChecked="{Binding ResizeUI.ReMarginCutImage}" Margin="0 5 0 0"/>
@@ -499,13 +510,13 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="120"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="透明度扩散" Width="90" HorizontalAlignment="Left"/>
                                     <Slider x:Name="Slider_TransparentDiffusion"
                                         Grid.Column="1"
-                                        Width="420"
+                                        Width="390"
                                         Minimum="0.01"
                                         Maximum="1.5"
                                         TickFrequency="0.01"
@@ -515,20 +526,38 @@
                                         PreviewMouseUp="Slider_MouseUp"
                                 />
 
-                                    <TextBlock Grid.Column="2" x:Name="TextBlock_TransparentDiffusion" Text="{Binding DitherUI.TransparentDiffusionStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Width="40" Margin="10 0 0 0"/>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Button Tag="-0.1"  Width="15" Height="15" Background="Transparent" BorderThickness="0" Click="Button_ChangeTransparentDiffusion_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M500.970806 776.449951l0-528.901948-374.624213 264.465301L500.970806 776.449951zM523.030218 512.014326l374.622166 264.436648 0-528.901948L523.030218 512.014326z"/>
+                                        </Button>
+
+                                        <Button Tag="-0.01" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeTransparentDiffusion_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M640 768L384 512l256-256z"/>
+                                        </Button>
+
+                                        <TextBlock x:Name="TextBlock_TransparentDiffusion" Text="{Binding DitherUI.TransparentDiffusionStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" HorizontalAlignment="Left" Width="40" Margin="5 0 0 0"/>
+
+                                        <Button Tag="0.01" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeTransparentDiffusion_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M384 256l256 256-256 256z"/>
+                                        </Button>
+
+                                        <Button Tag="0.1" Width="15" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeTransparentDiffusion_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M895.604748 512.014326l-374.624213-264.465301 0 528.901948L895.604748 512.014326zM124.298957 247.549026l0 528.901948 374.622166-264.436648L124.298957 247.549026z"/>
+                                        </Button>
+                                    </StackPanel>
                                 </Grid>
 
                                 <Grid Grid.Row="2" Margin="0 12 0 0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="120"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="边缘明暗度" Width="90" HorizontalAlignment="Left"/>
                                     <Slider x:Name="Slider_Lightness"
                                         Grid.Column="1"
-                                        Width="420"
+                                        Width="390"
                                         Minimum="-1.0"
                                         Maximum="1.0"
                                         TickFrequency="0.01"
@@ -538,20 +567,38 @@
                                         PreviewMouseUp="Slider_MouseUp"
                                 />
 
-                                    <TextBlock Grid.Column="2" x:Name="TextBlock_Lightness" Text="{Binding DitherUI.LightnessStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Width="40" Margin="10 0 0 0"/>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Button Tag="-0.1"  Width="15" Height="15" Background="Transparent" BorderThickness="0" Click="Button_ChangeLightness_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M500.970806 776.449951l0-528.901948-374.624213 264.465301L500.970806 776.449951zM523.030218 512.014326l374.622166 264.436648 0-528.901948L523.030218 512.014326z"/>
+                                        </Button>
+
+                                        <Button Tag="-0.01" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeLightness_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M640 768L384 512l256-256z"/>
+                                        </Button>
+
+                                        <TextBlock x:Name="TextBlock_Lightness" Text="{Binding DitherUI.LightnessStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" HorizontalAlignment="Left" Width="40" Margin="5 0 0 0"/>
+
+                                        <Button Tag="0.01" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeLightness_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M384 256l256 256-256 256z"/>
+                                        </Button>
+
+                                        <Button Tag="0.1" Width="15" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeLightness_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M895.604748 512.014326l-374.624213-264.465301 0 528.901948L895.604748 512.014326zM124.298957 247.549026l0 528.901948 374.622166-264.436648L124.298957 247.549026z"/>
+                                        </Button>
+                                    </StackPanel>
                                 </Grid>
 
                                 <Grid Grid.Row="3" Margin="0 12 0 0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="120"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="整体透明度" Width="90" HorizontalAlignment="Left"/>
                                     <Slider x:Name="Slider_Alpha"
                                         Grid.Column="1"
-                                        Width="420"
+                                        Width="390"
                                         Minimum="-255"
                                         Maximum="255"
                                         TickFrequency="1"
@@ -561,10 +608,28 @@
                                         PreviewMouseUp="Slider_MouseUp"
                                 />
 
-                                    <TextBlock Grid.Column="2" x:Name="TextBlock_Alpha" Text="{Binding DitherUI.Alpha, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Width="40" Margin="10 0 0 0"/>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Button Tag="-10"  Width="15" Height="15" Background="Transparent" BorderThickness="0" Click="Button_ChangeAlpha_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M500.970806 776.449951l0-528.901948-374.624213 264.465301L500.970806 776.449951zM523.030218 512.014326l374.622166 264.436648 0-528.901948L523.030218 512.014326z"/>
+                                        </Button>
+
+                                        <Button Tag="-1" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeAlpha_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M640 768L384 512l256-256z"/>
+                                        </Button>
+
+                                        <TextBlock x:Name="TextBlock_Alpha" Text="{Binding DitherUI.Alpha, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" HorizontalAlignment="Left" Width="40" Margin="5 0 0 0"/>
+
+                                        <Button Tag="1" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeAlpha_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M384 256l256 256-256 256z"/>
+                                        </Button>
+
+                                        <Button Tag="10" Width="15" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_ChangeAlpha_Click">
+                                            <Path Fill="Black" Stretch="Fill" Data="M895.604748 512.014326l-374.624213-264.465301 0 528.901948L895.604748 512.014326zM124.298957 247.549026l0 528.901948 374.622166-264.436648L124.298957 247.549026z"/>
+                                        </Button>
+                                    </StackPanel>
                                 </Grid>
 
-                                <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0 20 0 0">
+                                <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0 15 0 0">
                                     <Button Content="重置所有图像" Height="30" Margin="0 0 0 0" Click="Button_ResetAll_Click"/>
                                     <Button Content="重置当前图像" Height="30" Margin="60 0 0 0" Click="Button_ResetNowIndex_Click"/>
                                     <Button x:Name="Button_Test" Content="测试载入" d:Visibility="Visible" Visibility="Hidden" Height="30" Margin="20 0 0 0" Click="Button_Test_Click"/>
@@ -625,7 +690,7 @@
                                                 </ToolTip>
                                             </StackPanel.ToolTip>
                                             <TextBlock Text="色盘颜色数量"/>
-                                            <TextBox x:Name="TextBox_PalColorNum" Text="256" Width="40"/>
+                                            <TextBox x:Name="TextBox_PalColorNum" Text="256" Width="40" Height="21" Padding="0 0 0 0"/>
                                         </StackPanel>
 
                                         <StackPanel Margin="0 5 0 0">
@@ -687,9 +752,9 @@
                                         <ComboBox x:Name="ComboBox_ShpCompression" FontSize="15" Width="150" Height="25" HorizontalAlignment="Left" Margin="0 0 0 0"/>
                                         <CheckBox x:Name="CheckBox_ShpShadow" Content="影子帧(绘制为1号色)" Margin="0 7 0 0"/>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBox x:Name="TextBox_ShpShadowFrameStart" Width="55"/>
+                                            <TextBox x:Name="TextBox_ShpShadowFrameStart" Width="55" Height="21" Padding="0 0 0 0"/>
                                             <TextBlock Text="~"/>
-                                            <TextBox x:Name="TextBox_ShpShadowFrameEnd" Width="55"/>
+                                            <TextBox x:Name="TextBox_ShpShadowFrameEnd" Width="55" Height="21" Padding="0 0 0 0"/>
                                             <Button Content="列表后半" Margin="5 0 0 0" FontSize="14" Click="Button_ShpShadowFrameAutoSet_Click"/>
                                         </StackPanel>
                                         <Button x:Name="Button_CreateShp" Content="生成" FontSize="20" Height="28" Width="50" Margin="0 10 0 0" HorizontalAlignment="Right" Click="Button_CreateShp_Click"/>
@@ -1066,7 +1131,7 @@
                     </StackPanel>
                 </Viewbox>
 
-                <Viewbox Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Viewbox Grid.Row="4" MaxHeight="30" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="操作进度:" FontSize="16" Margin="0 0 0 0"/>
                         <TextBlock x:Name="TextBlock_Progress" FontSize="16" d:Text="0 / 0" Text="{Binding ProgressUi, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Width="100" Margin="10 0 0 0"/>

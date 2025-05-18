@@ -69,6 +69,9 @@
     <Reference Include="ImageProcessor, Version=2.9.0.207, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\ImageProcessor.2.9.0\lib\net452\ImageProcessor.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -117,6 +120,7 @@
     <Compile Include="Models\DitherUIModel.cs" />
     <Compile Include="Models\ResizeUIModel.cs" />
     <Compile Include="Models\SaveConfigModel.cs" />
+    <Compile Include="Models\WindowStateModel.cs" />
     <Compile Include="PlayerColorEditWindow.xaml.cs">
       <DependentUpon>PlayerColorEditWindow.xaml</DependentUpon>
     </Compile>

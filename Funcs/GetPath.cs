@@ -8,6 +8,11 @@ namespace Ra2EasyShp.Funcs
     {
         internal static string RunPath = AppDomain.CurrentDomain.BaseDirectory;
 
+        internal static string GetCachePath()
+        {
+            return Path.Combine(RunPath, @"Data\Cache");
+        }
+
         internal static string GetExportImagePath()
         {
             //return $@"{RunPath}输出图像";

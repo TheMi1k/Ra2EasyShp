@@ -22,6 +22,7 @@ using Image = System.Windows.Controls.Image;
 using Point = System.Windows.Point;
 using static System.Net.Mime.MediaTypeNames;
 using System.Windows.Controls.Primitives;
+using Newtonsoft.Json;
 
 namespace Ra2EasyShp
 {
@@ -46,6 +47,8 @@ namespace Ra2EasyShp
             }
 
             Init();
+
+            LoadWindowStateCache();
 
             InitPlayerColor();
 
@@ -148,6 +151,77 @@ namespace Ra2EasyShp
             }
         }
 
+        private void LoadWindowStateCache()
+        {
+            try
+            {
+                string jsonPath = Path.Combine(GetPath.GetCachePath(), "WindowState.json");
+                if (!File.Exists(jsonPath))
+                {
+                    return;
+                }
+
+                StreamReader streamReader = new StreamReader(jsonPath);
+                string jsonStr = streamReader.ReadToEnd();
+                streamReader.Close();
+
+                if (string.IsNullOrEmpty(jsonStr))
+                {
+                    return;
+                }
+
+                var model = JsonConvert.DeserializeObject<WindowStateModel>(jsonStr);
+                if (model == null)
+                {
+                    return;
+                }
+
+                if (model.Width <= 0 || model.Height <= 0)
+                {
+                    return;
+                }
+
+                this.Width = model.Width;
+                this.Height = model.Height;
+                this.Left = model.Left;
+                this.Top = model.Top;
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void SaveWindowStateCache()
+        {
+            try
+            {
+                string jsonPath = Path.Combine(GetPath.GetCachePath(), "WindowState.json");
+
+                if (!Directory.Exists(GetPath.GetCachePath()))
+                {
+                    Directory.CreateDirectory(GetPath.GetCachePath());
+                }
+
+                WindowStateModel model = new WindowStateModel()
+                {
+                    Width = this.Width,
+                    Height = this.Height,
+                    Left = this.Left,
+                    Top = this.Top
+                };
+
+                using (StreamWriter sw = new StreamWriter(jsonPath))
+                {
+                    sw.Write(JsonConvert.SerializeObject(model));
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
         private void CreateRa2Grids()
         {
             Grid_Ra2Grids_Grid.Children.Clear();
@@ -236,6 +310,8 @@ namespace Ra2EasyShp
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
+
+            SaveWindowStateCache();
 
             if (GData.ImageData.Count > 0 && !ShowMessageBox("请确定当前项目是否已经保存\n是否退出？", MessageBoxButton.YesNo))
             {
@@ -512,14 +588,7 @@ namespace Ra2EasyShp
                 return;
             }
 
-            var triggeredControl = sender as FrameworkElement;
-
-            if (triggeredControl == null)
-            {
-                return;
-            }
-
-            var dataGrid = triggeredControl as System.Windows.Controls.DataGrid;
+            var dataGrid = sender as DataGrid;
             if (dataGrid.SelectedCells.Count == 0)
             {
                 return;
@@ -548,6 +617,8 @@ namespace Ra2EasyShp
                 {
                     GData.UIData.ResizeUI.ImageNowWidth = nowWidth;
                     GData.UIData.ResizeUI.ImageNowHeight = nowHeight;
+                    GData.UIData.ResizeUI.ImageNowWidthPercentage = (int)Math.Round(nowWidth / (GData.UIData.ResizeUI.ImageOriginalWidth * 1.0f) * 100.0f);
+                    GData.UIData.ResizeUI.ImageNowHeightPercentage = (int)Math.Round(nowHeight / (GData.UIData.ResizeUI.ImageOriginalHeight * 1.0f) * 100.0f);
                 }
 
                 await ReloadImageSource(GData.UIData.NowIndex);
@@ -916,17 +987,17 @@ namespace Ra2EasyShp
 
             StackPanel_Tips.Visibility = Visibility.Collapsed;
 
-            //string folderPath = @"C:\Users\Milk\Desktop\数字图";
+            string folderPath = @"C:\Users\Milk\Desktop\数字图";
             //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
-            //string[] files = Directory.GetFiles(folderPath);
+            string[] files = Directory.GetFiles(folderPath);
             //string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
 
-            string[] files = { @"C:\Users\Milk\Desktop\3fc4f753cd99b7e1a6657a7921ce60c1.png" };
+            //string[] files = { @"C:\Users\Milk\Desktop\3fc4f753cd99b7e1a6657a7921ce60c1.png" };
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月18日17时8分5秒\输出.shp" };
 
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月22日20时54分9秒\输出.shp" };
-            string[] fileso = { @"C:\Users\Milk\Desktop\a7fd71b617f0770dc47f4a8939332e46.png~tplv-obj.png" };
+            string[] fileso = { };
 
             try
             {
@@ -1713,8 +1784,10 @@ namespace Ra2EasyShp
             {
                 ShowMessageBox(ex.Message);
             }
-
-            Grid_Main.IsEnabled = true;
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
         }
 
         private async void Button_CancelResize_Click(object sender, RoutedEventArgs e)
@@ -1739,6 +1812,14 @@ namespace Ra2EasyShp
                     LoadRa2Grids();
                 }
 
+                if (LocalImageManage.GetBaseImageNowSize(GData.UIData.NowIndex, out int nowWidth, out int nowHeight))
+                {
+                    GData.UIData.ResizeUI.ImageNowWidth = nowWidth;
+                    GData.UIData.ResizeUI.ImageNowHeight = nowHeight;
+                    GData.UIData.ResizeUI.ImageNowWidthPercentage = (int)Math.Round(nowWidth / (GData.UIData.ResizeUI.ImageOriginalWidth * 1.0f) * 100.0f);
+                    GData.UIData.ResizeUI.ImageNowHeightPercentage = (int)Math.Round(nowHeight / (GData.UIData.ResizeUI.ImageOriginalHeight * 1.0f) * 100.0f);
+                }
+
                 ShowMessageBox("已取消所有缩放");
             }
             catch (Exception ex)
@@ -1748,41 +1829,6 @@ namespace Ra2EasyShp
             finally
             {
                 Grid_Main.IsEnabled = true;
-            }
-        }
-
-        private void TextBox_Resize_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (CheckBox_MaintainAspectRatio.IsChecked == false)
-            {
-                return;
-            }
-
-            TextBox textBox = sender as TextBox;
-            if (textBox == null)
-            {
-                return;
-            }
-
-            GData.UIData.ResizeUI.SetMaintainAspectRatio();
-        }
-
-        private void CheckBox_MaintainAspectRatio_Checked(object sender, RoutedEventArgs e)
-        {
-            CheckBox checkBox = sender as CheckBox;
-            if (checkBox == null)
-            {
-                return;
-            }
-
-            if (checkBox.IsChecked == true)
-            {
-                StackPanel_ResizeHeight.IsEnabled = false;
-                GData.UIData.ResizeUI.SetMaintainAspectRatio();
-            }
-            else
-            {
-                StackPanel_ResizeHeight.IsEnabled = true;
             }
         }
 
@@ -2936,6 +2982,75 @@ namespace Ra2EasyShp
             window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             window.Owner = this;
             window.ShowDialog();
+        }
+
+        private void Button_ChangeTransparentDiffusion_Click(object sender, RoutedEventArgs e)
+        {
+            double min = 0.01;
+            double max = 1.5;
+
+            var btn = sender as Button;
+            var numStr = btn.Tag.ToString();
+
+            float num = float.Parse(numStr);
+
+            double value = GData.UIData.DitherUI.TransparentDiffusion += num;
+
+            if (value < min)
+                value = min;
+
+            if (value > max)
+                value = max;
+
+            GData.UIData.DitherUI.TransparentDiffusion = value;
+
+            ConvertImageAndReload();
+        }
+
+        private void Button_ChangeLightness_Click(object sender, RoutedEventArgs e)
+        {
+            double min = -1.0;
+            double max = 1.0;
+
+            var btn = sender as Button;
+            var numStr = btn.Tag.ToString();
+
+            float num = float.Parse(numStr);
+
+            double value = GData.UIData.DitherUI.Lightness += num;
+
+            if (value < min)
+                value = min;
+
+            if (value > max)
+                value = max;
+
+            GData.UIData.DitherUI.Lightness = value;
+
+            ConvertImageAndReload();
+        }
+
+        private void Button_ChangeAlpha_Click(object sender, RoutedEventArgs e)
+        {
+            int min = -255;
+            int max = 255;
+
+            var btn = sender as Button;
+            var numStr = btn.Tag.ToString();
+
+            int num = int.Parse(numStr);
+
+            int value = GData.UIData.DitherUI.Alpha += num;
+
+            if (value < min)
+                value = min;
+
+            if (value > max)
+                value = max;
+
+            GData.UIData.DitherUI.Alpha = value;
+
+            ConvertImageAndReload();
         }
     }
 }

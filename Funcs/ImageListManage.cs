@@ -189,6 +189,8 @@ namespace Ra2EasyShp.Funcs
                 {
                     GData.UIData.ResizeUI.ImageNowWidth = nowWidth;
                     GData.UIData.ResizeUI.ImageNowHeight = nowHeight;
+                    GData.UIData.ResizeUI.ImageNowWidthPercentage = (int)Math.Round(nowWidth / (GData.UIData.ResizeUI.ImageOriginalWidth * 1.0f) * 100.0f);
+                    GData.UIData.ResizeUI.ImageNowHeightPercentage = (int)Math.Round(nowHeight / (GData.UIData.ResizeUI.ImageOriginalHeight * 1.0f) * 100.0f);
                 }
             }
         }

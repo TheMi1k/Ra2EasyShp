@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ra2EasyShp"
         mc:Ignorable="d"
-        Title="快捷键查看" Height="410" Width="240" ResizeMode="NoResize" FontSize="15">
+        Title="快捷键查看" Height="430" Width="240" ResizeMode="NoResize" FontSize="15">
     <Grid>
         <StackPanel Margin="10 10 0 0">
             <TextBlock Text="暂不支持自定义" HorizontalAlignment="Center"/>
