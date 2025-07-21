@@ -469,7 +469,7 @@ namespace Ra2EasyShp.Funcs
         {
             if (width <= 0 || height <= 0)
             {
-                throw new Exception("输入尺寸不正确");
+                throw new Exception(GetTranslateText.Get("Message_ImageInputSizeError")); // 输入尺寸不正确
             }
 
             await Task.Run(() =>

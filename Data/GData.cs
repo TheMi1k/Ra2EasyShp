@@ -1,12 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using Ra2EasyShp.Funcs;
 using Ra2EasyShp.Models;
 
 namespace Ra2EasyShp.Data
 {
     public class GData
     {
-        internal const string VERSION = "v1.3";
+        internal const string VERSION = "v1.31";
 
         internal static int[,] BayerMatrix = {
             {  0, 32,  8, 40,  2, 34, 10, 42 },
@@ -27,8 +31,6 @@ namespace Ra2EasyShp.Data
 
         internal static ObservableCollection<ImageDataModel> ImageData = new ObservableCollection<ImageDataModel>();
 
-        internal static SaveConfigModel SaveConfigModel = new SaveConfigModel();
-
         public static UIDataModel UIData = new UIDataModel();
 
         internal static ExportPaletteModel PaletteConfig = new ExportPaletteModel();
@@ -47,34 +49,36 @@ namespace Ra2EasyShp.Data
 
         internal static int[,,] ColorToPaletteTransformTable;
 
-        internal static Enums.ViewPlayerColor PlayerColorView = Enums.ViewPlayerColor.无;
+        internal static Enums.PreviewPlayerColor PlayerColorView = Enums.PreviewPlayerColor.无;
 
-        internal static readonly Dictionary<Enums.ViewPlayerColor, byte[]> PlayerColorBaseDic = new Dictionary<Enums.ViewPlayerColor, byte[]>()
+        internal static readonly Dictionary<Enums.PreviewPlayerColor, byte[]> PlayerColorBaseDic = new Dictionary<Enums.PreviewPlayerColor, byte[]>()
         {
-            [Enums.ViewPlayerColor.黄] = new byte[] { 43, 239, 255 },
-            [Enums.ViewPlayerColor.红] = new byte[] { 0, 230, 255 },
-            [Enums.ViewPlayerColor.蓝] = new byte[] { 153, 214, 212 },
-            [Enums.ViewPlayerColor.绿] = new byte[] { 81, 200, 210 },
-            [Enums.ViewPlayerColor.橙] = new byte[] { 25, 230, 255 },
-            [Enums.ViewPlayerColor.淡蓝] = new byte[] { 131, 200, 230 },
-            [Enums.ViewPlayerColor.粉] = new byte[] { 221, 102, 255 },
-            [Enums.ViewPlayerColor.紫] = new byte[] { 201, 201, 189 },
-            [Enums.ViewPlayerColor.灰] = new byte[] { 0, 0, 131 }
+            [Enums.PreviewPlayerColor.黄] = new byte[] { 43, 239, 255 },
+            [Enums.PreviewPlayerColor.红] = new byte[] { 0, 230, 255 },
+            [Enums.PreviewPlayerColor.蓝] = new byte[] { 153, 214, 212 },
+            [Enums.PreviewPlayerColor.绿] = new byte[] { 81, 200, 210 },
+            [Enums.PreviewPlayerColor.橙] = new byte[] { 25, 230, 255 },
+            [Enums.PreviewPlayerColor.淡蓝] = new byte[] { 131, 200, 230 },
+            [Enums.PreviewPlayerColor.粉] = new byte[] { 221, 102, 255 },
+            [Enums.PreviewPlayerColor.紫] = new byte[] { 201, 201, 189 },
+            [Enums.PreviewPlayerColor.灰] = new byte[] { 0, 0, 131 }
         };
 
-        internal static Dictionary<Enums.ViewPlayerColor, List<byte[]>> PlayerColorDic = new Dictionary<Enums.ViewPlayerColor, List<byte[]>>()
+        internal static Dictionary<Enums.PreviewPlayerColor, List<byte[]>> PlayerColorDic = new Dictionary<Enums.PreviewPlayerColor, List<byte[]>>()
         {
-            [Enums.ViewPlayerColor.黄] = new List<byte[]>(),
-            [Enums.ViewPlayerColor.红] = new List<byte[]>(),
-            [Enums.ViewPlayerColor.蓝] = new List<byte[]>(),
-            [Enums.ViewPlayerColor.绿] = new List<byte[]>(),
-            [Enums.ViewPlayerColor.橙] = new List<byte[]>(),
-            [Enums.ViewPlayerColor.淡蓝] = new List<byte[]>(),
-            [Enums.ViewPlayerColor.粉] = new List<byte[]>(),
-            [Enums.ViewPlayerColor.紫] = new List<byte[]>(),
-            [Enums.ViewPlayerColor.灰] = new List<byte[]>()
+            [Enums.PreviewPlayerColor.黄] = new List<byte[]>(),
+            [Enums.PreviewPlayerColor.红] = new List<byte[]>(),
+            [Enums.PreviewPlayerColor.蓝] = new List<byte[]>(),
+            [Enums.PreviewPlayerColor.绿] = new List<byte[]>(),
+            [Enums.PreviewPlayerColor.橙] = new List<byte[]>(),
+            [Enums.PreviewPlayerColor.淡蓝] = new List<byte[]>(),
+            [Enums.PreviewPlayerColor.粉] = new List<byte[]>(),
+            [Enums.PreviewPlayerColor.紫] = new List<byte[]>(),
+            [Enums.PreviewPlayerColor.灰] = new List<byte[]>()
         };
 
         internal static string TempPath = string.Empty;
+
+        internal static readonly string TempPublicPath = GetPath.TempPublickPath();
     }
 }

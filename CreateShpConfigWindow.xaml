@@ -5,31 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ra2EasyShp"
         mc:Ignorable="d"
-        Title="SHP保存选项" Height="280" Width="260" ResizeMode="NoResize">
+        d:Title="SHP保存选项" Title="{Binding LanguageDic[Title_SaveShp]}" Height="280" Width="270" ResizeMode="NoResize">
     <Grid>
         <StackPanel Margin="10 10 0 0">
             <StackPanel>
-                <GroupBox Header="保存选项" Width="225" HorizontalAlignment="Left">
+                <GroupBox d:Header="保存选项" Header="{Binding LanguageDic[Text_SaveShp_Option]}" Width="235" HorizontalAlignment="Left">
                     <StackPanel Margin="5 5 0 0">
-                        <CheckBox x:Name="CheckBox_CustomSavePath" Content="自定义保存目录" Margin="0 3 0 0" IsChecked="{Binding IsShpCustomPath, Mode=TwoWay}" Checked="CheckBox_CustomSaveMode" Unchecked="CheckBox_AutoSaveMode"/>
+                        <CheckBox x:Name="CheckBox_CustomSavePath" d:Content="自定义保存目录" Content="{Binding LanguageDic[Cb_SaveShp_CustomSavePath]}" Margin="0 3 0 0" IsChecked="{Binding SaveConfig.IsShpCustomPath, Mode=TwoWay}" Checked="CheckBox_CustomSaveMode" Unchecked="CheckBox_AutoSaveMode"/>
 
                         <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
-                            <CheckBox x:Name="CheckBox_MapTypeForName" Content="创建地图类型命名副本" IsChecked="{Binding IsShpMapType, Mode=TwoWay}"/>
+                            <CheckBox x:Name="CheckBox_MapTypeForName" d:Content="创建地图类型命名副本" Content="{Binding LanguageDic[Cb_SaveShp_MapTypeForFileName]}" IsChecked="{Binding SaveConfig.IsShpMapType, Mode=TwoWay}"/>
                             <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Click="Button_Tip_Click"/>
                         </StackPanel>
 
                         <StackPanel x:Name="StackPanel_SaveFileName" Margin="0 5 0 0">
-                            <TextBlock Text="命名(为空保存为 输出.shp)"/>
+                            <TextBlock d:Text="命名(为空保存为 输出.shp)" Text="{Binding LanguageDic[Text_SaveShp_FileName]}"/>
                             <StackPanel Orientation="Horizontal">
-                                <TextBox x:Name="TextBox_FileName" Text="{Binding ShpName, Mode=TwoWay}" Width="120" HorizontalAlignment="Left" Margin="2 0 0 0"/>
+                                <TextBox x:Name="TextBox_FileName" Text="{Binding SaveConfig.ShpName, Mode=TwoWay}" Width="120" HorizontalAlignment="Left" Margin="2 0 0 0"/>
                                 <TextBlock Text=".shp" Margin="5 0 0 0"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel x:Name="StackPanel_CustomSaveFileName" Margin="0 5 0 0" Visibility="Collapsed">
-                            <TextBlock Text="保存目录"/>
+                            <TextBlock d:Text="保存目录" Text="{Binding LanguageDic[Text_SaveShp_SavePath]}"/>
                             <StackPanel Orientation="Horizontal">
-                                <TextBox x:Name="TextBox_SavePath" Text="{Binding ShpCustomPath, Mode=TwoWay}" FontSize="14" Width="180" Height="22"/>
+                                <TextBox x:Name="TextBox_SavePath" Text="{Binding SaveConfig.ShpCustomPath, Mode=TwoWay}" FontSize="14" Width="180" Height="22"/>
                                 <Button Content="…" Height="20" Width="20" Margin="5 0 0 0" Click="CheckBox_SetCustomPath"/>
                             </StackPanel>
                         </StackPanel>
@@ -38,8 +38,8 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="30 20 0 0">
-                <Button Content="取消" Width="60" FontSize="20" Click="Button_Cancel_Click"/>
-                <Button Content="保存" Width="60" FontSize="20" Margin="40 0 0 0" Click="Button_Save_Click"/>
+                <Button d:Content="取消" Content="{Binding LanguageDic[Text_SaveShp_Cancel]}" MinWidth="60" FontSize="20" Click="Button_Cancel_Click"/>
+                <Button d:Content="保存" Content="{Binding LanguageDic[Text_SaveShp_Save]}" MinWidth="60" FontSize="20" Margin="40 0 0 0" Click="Button_Save_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>

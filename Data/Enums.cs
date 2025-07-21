@@ -11,11 +11,11 @@
         public enum CreatePalMode
         {
             主要颜色,
-            主要颜色补小像素,
+            主要颜色加补全,
             OctreeQuantizer
         }
 
-        public enum ShpCompressionMode
+        public enum ShpSaveMode
         {
             最佳文件大小,
             单位建筑,
@@ -36,7 +36,7 @@
             SHP
         }
 
-        internal enum ViewPlayerColor
+        public enum PreviewPlayerColor
         {
             无,
             黄,

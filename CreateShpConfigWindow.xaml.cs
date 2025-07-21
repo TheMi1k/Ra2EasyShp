@@ -21,7 +21,9 @@ namespace Ra2EasyShp
         {
             InitializeComponent();
 
-            if (GData.SaveConfigModel.IsPaletteCustomPath)
+            this.DataContext = GData.UIData;
+
+            if (GData.UIData.SaveConfig.IsPaletteCustomPath)
             {
                 StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
                 StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
@@ -31,8 +33,6 @@ namespace Ra2EasyShp
                 StackPanel_SaveFileName.Visibility = Visibility.Visible;
                 StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
             }
-
-            this.DataContext = GData.SaveConfigModel;
 
             _shpData = shpData;
         }
@@ -48,31 +48,31 @@ namespace Ra2EasyShp
             {
                 string _saveFile = string.Empty;
 
-                if (GData.SaveConfigModel.IsShpCustomPath)
+                if (GData.UIData.SaveConfig.IsShpCustomPath)
                 {
-                    if (string.IsNullOrEmpty(GData.SaveConfigModel.PaletteCustomPath))
+                    if (string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpCustomPath))
                     {
-                        throw new Exception("路径不能为空");
+                        throw new Exception(GetTranslateText.Get("Message_PathCanNotEmpty")); // 路径不能为空
                     }
-                    if (!Directory.Exists(Path.GetDirectoryName(GData.SaveConfigModel.PaletteCustomPath)))
+                    if (!Directory.Exists(Path.GetDirectoryName(GData.UIData.SaveConfig.ShpCustomPath)))
                     {
-                        throw new DirectoryNotFoundException("路径非法");
+                        throw new DirectoryNotFoundException(GetTranslateText.Get("Message_PathError")); // 路径错误
                     }
 
-                    File.WriteAllBytes(GData.SaveConfigModel.ShpCustomPath, _shpData);
+                    File.WriteAllBytes(GData.UIData.SaveConfig.ShpCustomPath, _shpData);
 
-                    _saveFile = GData.SaveConfigModel.ShpCustomPath;
+                    _saveFile = GData.UIData.SaveConfig.ShpCustomPath;
                 }
                 else
                 {
                     string savePath = string.Empty;
 
-                    if (!string.IsNullOrEmpty(GData.SaveConfigModel.ShpName) && !IsValidString(GData.SaveConfigModel.ShpName))
+                    if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) && !IsValidString(GData.UIData.SaveConfig.ShpName))
                     {
-                        throw new Exception("名称只能为数字和字母");
+                        throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
                     }
 
-                    string saveFileName = string.IsNullOrEmpty(GData.SaveConfigModel.ShpName) ? "输出" : GData.SaveConfigModel.ShpName;
+                    string saveFileName = string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) ? GetTranslateText.Get("SaveNameEmpty_Shp") : GData.UIData.SaveConfig.ShpName;
 
                     savePath = GetPath.CreateSavePath(Enums.PathType.SHP);
                     if (!Directory.Exists(savePath))
@@ -87,7 +87,7 @@ namespace Ra2EasyShp
 
                 string path = Path.GetDirectoryName(_saveFile);
 
-                if (GData.SaveConfigModel.IsShpMapType)
+                if (GData.UIData.SaveConfig.IsShpMapType)
                 {
                     char[] mapTypeArray = { 'a', 'u', 't', 'd', 'l', 'g' };
                     string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(_saveFile);
@@ -122,7 +122,8 @@ namespace Ra2EasyShp
 
         private void Button_Tip_Click(object sender, RoutedEventArgs e)
         {
-            ShowMessageBox("保存后将文件复制多份，名称第二个字母修改为地图类型字母\n例如 c(a)pill.shp，c(g)pill.shp等\n\n如果有同名文件会被覆盖");
+            // 保存后将文件复制多份，名称第二个字母修改为地图类型字母\n例如 c(a)pill.shp，c(g)pill.shp等\n\n如果有同名文件会被覆盖
+            ShowMessageBox(GetTranslateText.Get("Message_GenerateShpMapTypeFileNameTip"));
         }
 
         private bool ShowMessageBox(string text, MessageBoxButton type = MessageBoxButton.OK)
@@ -138,7 +139,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                MessageBox.Show("载入提示框失败\n" + ex.Message);
+                MessageBox.Show($"{GetTranslateText.Get("Message_MessageBoxLoadError")}\n" + ex.Message); // 载入提示框失败
                 return false;
             }
         }
@@ -156,7 +157,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                MessageBox.Show("载入提示框失败\n" + ex.Message);
+                MessageBox.Show($"{GetTranslateText.Get("Message_MessageBoxLoadError")}\n" + ex.Message); // 载入提示框失败
                 return false;
             }
         }
@@ -191,13 +192,14 @@ namespace Ra2EasyShp
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
-                Title = "选择保存文件",
-                Filter = "SHP 文件(*.shp)|*.shp",
+                Title = GetTranslateText.Get("Title_SelectFile"),
+                Filter = "SHP (*.shp)|*.shp",
                 FileName = string.Empty,
                 RestoreDirectory = true,
                 DefaultExt = "shp"
             };
-            GData.SaveConfigModel.ShpCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
+
+            GData.UIData.SaveConfig.ShpCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
         }
     }
 }

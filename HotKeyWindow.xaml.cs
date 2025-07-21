@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ra2EasyShp.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,8 @@ namespace Ra2EasyShp
         public HotKeyWindow()
         {
             InitializeComponent();
+
+            this.DataContext = GData.UIData;
         }
     }
 }

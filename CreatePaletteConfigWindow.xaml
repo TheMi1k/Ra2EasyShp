@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ra2EasyShp"
         mc:Ignorable="d"
-        Title="色盘保存选项" Height="400" Width="430" FontSize="15" ResizeMode="NoResize">
+        d:Title="色盘保存选项" Title="{Binding LanguageDic[Title_SavePalette]}" Height="400" Width="440" FontSize="15" ResizeMode="NoResize">
     <Grid>
         <StackPanel Margin="5 10 0 0" Orientation="Horizontal">
             <StackPanel x:Name="StackPanel_Color" Orientation="Horizontal" Height="320" Width="160" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 0 0 0">
@@ -13,27 +13,27 @@
             </StackPanel>
 
             <StackPanel Margin="10 70 0 0">
-                <GroupBox Header="保存选项" Width="225" Height="170">
+                <GroupBox Header="保存选项" Width="235" Height="170">
                     <StackPanel Margin="5 0 0 0">
-                        <CheckBox x:Name="CheckBox_CustomSavePath" Content="自定义保存目录" Margin="0 3 0 0" IsChecked="{Binding IsPaletteCustomPath, Mode=TwoWay}" Checked="CheckBox_CustomSaveMode" Unchecked="CheckBox_AutoSaveMode"/>
+                        <CheckBox x:Name="CheckBox_CustomSavePath" d:Content="自定义保存目录" Content="{Binding LanguageDic[Cb_SavePalette_CustomSavePath]}" Margin="0 3 0 0" IsChecked="{Binding SaveConfig.IsPaletteCustomPath, Mode=TwoWay}" Checked="CheckBox_CustomSaveMode" Unchecked="CheckBox_AutoSaveMode"/>
 
                         <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
-                            <CheckBox x:Name="CheckBox_MapTypeForName" IsChecked="{Binding IsPaletteMapType, Mode=TwoWay}" Content="创建地图类型命名副本" Margin="0 0 0 0"/>
+                            <CheckBox x:Name="CheckBox_MapTypeForName" IsChecked="{Binding SaveConfig.IsPaletteMapType, Mode=TwoWay}" d:Content="创建地图类型命名副本" Content="{Binding LanguageDic[Cb_SavePalette_MapTypeForFileName]}" Margin="0 0 0 0"/>
                             <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Click="Button_Tip_Click"/>
                         </StackPanel>
 
                         <StackPanel x:Name="StackPanel_SaveFileName" Margin="0 5 0 0">
-                            <TextBlock Text="命名(为空保存为 色盘.pal)"/>
+                            <TextBlock d:Text="命名(为空保存为 色盘.pal)" Text="{Binding LanguageDic[Text_SavePalette_FileName]}"/>
                             <StackPanel Orientation="Horizontal" Margin="0 3 0 0">
-                                <TextBox x:Name="TextBox_FileName" Text="{Binding PaletteName, Mode=TwoWay}" Width="120" HorizontalAlignment="Left"/>
+                                <TextBox x:Name="TextBox_FileName" Text="{Binding SaveConfig.PaletteName, Mode=TwoWay}" Width="120" HorizontalAlignment="Left"/>
                                 <TextBlock Text=".pal" Margin="5 0 0 0"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel x:Name="StackPanel_CustomSaveFileName" Margin="0 5 0 0" Visibility="Collapsed">
-                            <TextBlock Text="保存目录"/>
+                            <TextBlock d:Text="保存目录" Text="{Binding LanguageDic[Text_SavePalette_SavePath]}"/>
                             <StackPanel Orientation="Horizontal">
-                                <TextBox x:Name="TextBox_SavePath" Text="{Binding PaletteCustomPath, Mode=TwoWay}" FontSize="14" Width="180" Height="22"/>
+                                <TextBox x:Name="TextBox_SavePath" Text="{Binding SaveConfig.PaletteCustomPath, Mode=TwoWay}" FontSize="14" Width="180" Height="22"/>
                                 <Button Content="…" Height="20" Width="20" Margin="5 0 0 0" Click="CheckBox_SetCustomPath"/>
                             </StackPanel>
                         </StackPanel>
@@ -41,8 +41,8 @@
                 </GroupBox>
 
                 <StackPanel Orientation="Horizontal" Margin="30 20 0 0">
-                    <Button Content="取消" Width="60" FontSize="20" Click="Button_Cancel_Click"/>
-                    <Button Content="保存" Width="60" FontSize="20" Margin="40 0 0 0" Click="Button_Save_Click"/>
+                    <Button d:Content="取消" Content="{Binding LanguageDic[Text_SavePalette_Cancel]}" MinWidth="60" FontSize="20" Click="Button_Cancel_Click"/>
+                    <Button d:Content="保存" Content="{Binding LanguageDic[Text_SavePalette_Save]}" MinWidth="60" FontSize="20" Margin="40 0 0 0" Click="Button_Save_Click"/>
                 </StackPanel>
             </StackPanel>
         </StackPanel>

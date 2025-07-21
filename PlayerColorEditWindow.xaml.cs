@@ -30,6 +30,8 @@ namespace Ra2EasyShp
         {
             InitializeComponent();
 
+            this.DataContext = GData.UIData;
+
             _imgIndex = imgIndex;
 
             TextBlock_NowFrameIndex.Text = _imgIndex.ToString().PadLeft(5, '0');
@@ -328,7 +330,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                MessageBox.Show("载入提示框失败\n" + ex.Message);
+                MessageBox.Show($"{GetTranslateText.Get("Message_MessageBoxLoadError")}\n" + ex.Message); // 载入提示框失败
                 return false;
             }
         }
@@ -364,7 +366,7 @@ namespace Ra2EasyShp
             {
                 if (_playerColors[0].A == 0)
                 {
-                    throw new Exception("16号色没有颜色");
+                    throw new Exception(GetTranslateText.Get("Message_16ColorEmpty")); // 16号色没有颜色
                 }
 
                 float bStart = float.Parse(TextBox_ColorsFromHsbBStart.Text);
@@ -374,19 +376,19 @@ namespace Ra2EasyShp
 
                 if (bStart < 0 || bStart > 100 || bEnd < 0 || bEnd > 100)
                 {
-                    throw new Exception("亮度不正确 0 ~ 100");
+                    throw new Exception(GetTranslateText.Get("Message_BrightnessOnly0-100")); // 亮度不正确 0 ~ 100
                 }
                 if (bStart > bEnd)
                 {
-                    throw new Exception("亮度左边不能大于右边");
+                    throw new Exception(GetTranslateText.Get("Message_BrightnessTextBoxError")); // 亮度左边不能大于右边
                 }
                 if (colorNum < 2 || colorNum > 16)
                 {
-                    throw new Exception("颜色数量不正确 2 ~ 16");
+                    throw new Exception(GetTranslateText.Get("Message_ColorCountError")); // 颜色数量不正确 2 ~ 16
                 }
                 if (startIndex < 16 || startIndex > 31)
                 {
-                    throw new Exception("起始位置不正确 16 ~ 31");
+                    throw new Exception(GetTranslateText.Get("Message_ColorStartIndexError")); // 起始位置不正确 16 ~ 31
                 }
 
                 ColorConvert.RGBtoHSB(_playerColors[0].R * 4, _playerColors[0].G * 4, _playerColors[0].B * 4, out float h, out float s, out _);
@@ -449,7 +451,7 @@ namespace Ra2EasyShp
                 int index = int.Parse(TextBox_GotoIndex.Text);
                 if (index < 0 || index > GData.ImageData.Count - 1)
                 {
-                    throw new Exception("帧序号输入不正确");
+                    throw new Exception(GetTranslateText.Get("Message_FrameInputError")); // 帧序号输入不正确
                 }
 
                 _imgIndex = index;

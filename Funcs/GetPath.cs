@@ -16,24 +16,29 @@ namespace Ra2EasyShp.Funcs
         internal static string GetExportImagePath()
         {
             //return $@"{RunPath}输出图像";
-            return Path.Combine(RunPath, "输出图像");
+            return Path.Combine(RunPath, GetTranslateText.Get("Path_ExportImage"));
         }
 
         internal static string GetExportPalPath()
         {
             //return $@"{RunPath}输出色盘";
-            return Path.Combine(RunPath, "输出色盘");
+            return Path.Combine(RunPath, GetTranslateText.Get("Path_ExportPalette"));
         }
 
         internal static string GetExportShpPath()
         {
             //return $@"{RunPath}输出SHP";
-            return Path.Combine(RunPath, "输出SHP");
+            return Path.Combine(RunPath, GetTranslateText.Get("Path_ExportShp"));
         }
 
         internal static string CreateTempPath()
         {
             return Path.Combine(RunPath, $@"Data\Temp\{DateTime.Now.Day}{DateTime.Now.Hour}{Guid.NewGuid():N}");
+        }
+
+        internal static string TempPublickPath()
+        {
+            return Path.Combine(RunPath, $@"Data\Temp\Public");
         }
 
         internal static string CreateImageTempPath()
@@ -43,7 +48,7 @@ namespace Ra2EasyShp.Funcs
 
         internal static string CreateSavePath(Enums.PathType pathType)
         {
-            string timeStr = $"{DateTime.Now.Year}年{DateTime.Now.Month}月{DateTime.Now.Day}日{DateTime.Now.Hour}时{DateTime.Now.Minute}分{DateTime.Now.Second}秒";
+            string timeStr = $"{DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-{DateTime.Now.Hour}.{DateTime.Now.Minute}.{DateTime.Now.Second}";
 
             if (pathType == Enums.PathType.PNG)
             {

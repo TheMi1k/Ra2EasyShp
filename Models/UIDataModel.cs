@@ -1,4 +1,9 @@
-﻿using System.ComponentModel;
+﻿using Newtonsoft.Json;
+using Ra2EasyShp.Data;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Windows.Media;
 
 namespace Ra2EasyShp.Models
@@ -13,6 +18,42 @@ namespace Ra2EasyShp.Models
             DitherUI.SetDefault();
             OverlayUI.SetDefault();
         }
+
+        private ComboBoxData _comboBoxData = null;
+
+        public ComboBoxData ComboBoxData
+        {
+            get => _comboBoxData;
+            set
+            {
+                _comboBoxData = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ComboBoxData"));
+            }
+        }
+
+        public Dictionary<string, string> LanguageDic { get; set; } = new Dictionary<string, string>();
+
+        public void LoadLanguage(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                throw new Exception("语言文件不存在\nLanguage file is not exists");
+            }
+
+            string json = File.ReadAllText(filePath);
+            LanguageDic = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+
+            if (_comboBoxData == null)
+            {
+                ComboBoxData = new ComboBoxData();
+            }
+
+            ComboBoxData.Update();
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+        }
+
+        public SaveConfigModel SaveConfig { get; set; } = new SaveConfigModel();
 
         private bool _imgIsPlaying { get; set; } = false;
         internal bool ImgIsPlaying

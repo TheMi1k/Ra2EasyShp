@@ -157,11 +157,11 @@ namespace Ra2EasyShp.Funcs
 
             await Task.Run(async () =>
             {
-                if (mode == Enums.CreatePalMode.主要颜色补小像素.ToString())
+                if (mode == Enums.CreatePalMode.主要颜色加补全.ToString())
                 {
                     if (palColorNum < 150)
                     {
-                        throw new Exception("该色盘生成方法颜色数量不能小于150");
+                        throw new Exception(GetTranslateText.Get("Message_GeneratePaletteColorCountError")); // 该色盘生成方法颜色数量不能小于150
                     }
                     palette = await Create256ColorPalette_Mode3(palColorNum, headerColors.ToArray(), playerColorSetBackgroud);
                 }

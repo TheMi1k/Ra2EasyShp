@@ -23,7 +23,9 @@ namespace Ra2EasyShp
         {
             InitializeComponent();
 
-            if (GData.SaveConfigModel.IsPaletteCustomPath)
+            this.DataContext = GData.UIData;
+
+            if (GData.UIData.SaveConfig.IsPaletteCustomPath)
             {
                 StackPanel_SaveFileName.Visibility = Visibility.Collapsed;
                 StackPanel_CustomSaveFileName.Visibility = Visibility.Visible;
@@ -33,8 +35,6 @@ namespace Ra2EasyShp
                 StackPanel_SaveFileName.Visibility = Visibility.Visible;
                 StackPanel_CustomSaveFileName.Visibility = Visibility.Collapsed;
             }
-
-            this.DataContext = GData.SaveConfigModel;
 
             Init(colorList);
 
@@ -79,18 +79,18 @@ namespace Ra2EasyShp
         {
             try
             {
-                if (GData.SaveConfigModel.IsPaletteCustomPath)
+                if (GData.UIData.SaveConfig.IsPaletteCustomPath)
                 {
-                    if (string.IsNullOrEmpty(GData.SaveConfigModel.PaletteCustomPath))
+                    if (string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteCustomPath))
                     {
-                        throw new Exception("路径不能为空");
+                        throw new Exception(GetTranslateText.Get("Message_PathCanNotEmpty")); // 路径不能为空
                     }
-                    if (!Directory.Exists(Path.GetDirectoryName(GData.SaveConfigModel.PaletteCustomPath)))
+                    if (!Directory.Exists(Path.GetDirectoryName(GData.UIData.SaveConfig.PaletteCustomPath)))
                     {
-                        throw new DirectoryNotFoundException("路径非法");
+                        throw new DirectoryNotFoundException(GetTranslateText.Get("Message_PathError")); // 路径错误
                     }
 
-                    using (BinaryWriter bw = new BinaryWriter(File.Open(GData.SaveConfigModel.PaletteCustomPath, FileMode.Create)))
+                    using (BinaryWriter bw = new BinaryWriter(File.Open(GData.UIData.SaveConfig.PaletteCustomPath, FileMode.Create)))
                     {
                         foreach (var color in _palette)
                         {
@@ -100,13 +100,13 @@ namespace Ra2EasyShp
                         }
                     }
 
-                    GData.LastSavePalettePath = GData.SaveConfigModel.PaletteCustomPath;
+                    GData.LastSavePalettePath = GData.UIData.SaveConfig.PaletteCustomPath;
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(GData.SaveConfigModel.PaletteName) && !IsValidString(GData.SaveConfigModel.PaletteName))
+                    if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteName) && !IsValidString(GData.UIData.SaveConfig.PaletteName))
                     {
-                        throw new Exception("名称只能为数字和字母");
+                        throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
                     }
 
                     string savePath = GetPath.CreateSavePath(Enums.PathType.Palette);
@@ -116,7 +116,7 @@ namespace Ra2EasyShp
                         Directory.CreateDirectory(savePath);
                     }
 
-                    string saveFileName = string.IsNullOrEmpty(GData.SaveConfigModel.PaletteName) ? "色盘" : GData.SaveConfigModel.PaletteName;
+                    string saveFileName = string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteName) ? GetTranslateText.Get("SaveNameEmpty_Palette") : GData.UIData.SaveConfig.PaletteName;
 
                     using (BinaryWriter bw = new BinaryWriter(File.Open($@"{savePath}\{saveFileName}.pal", FileMode.Create)))
                     {
@@ -133,7 +133,7 @@ namespace Ra2EasyShp
 
                 string path = Path.GetDirectoryName(GData.LastSavePalettePath);
 
-                if (GData.SaveConfigModel.IsPaletteMapType)
+                if (GData.UIData.SaveConfig.IsPaletteMapType)
                 {
                     string[] mapTypeArray = { "urb", "ubn", "tem", "sno", "lun", "des" };
                     string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(GData.LastSavePalettePath);
@@ -185,7 +185,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                MessageBox.Show("载入提示框失败\n" + ex.Message);
+                MessageBox.Show($"{GetTranslateText.Get("Message_MessageBoxLoadError")}\n" + ex.Message); // 载入提示框失败
                 return false;
             }
         }
@@ -203,14 +203,15 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                MessageBox.Show("载入提示框失败\n" + ex.Message);
+                MessageBox.Show($"{GetTranslateText.Get("Message_MessageBoxLoadError")}\n" + ex.Message); // 载入提示框失败
                 return false;
             }
         }
 
         private void Button_Tip_Click(object sender, RoutedEventArgs e)
         {
-            ShowMessageBox("保存后将文件复制多份，名称后加上地图类型后缀\n例如 unit(sno).pal，unit(tem).pal\n\n如果有同名文件会被覆盖");
+            // 保存后将文件复制多份，名称后加上地图类型后缀\n例如 unit(sno).pal，unit(tem).pal\n\n如果有同名文件会被覆盖
+            ShowMessageBox(GetTranslateText.Get("Message_GeneratePaletteMapTypeFileNameTip"));
         }
 
         private void CheckBox_CustomSaveMode(object sender, RoutedEventArgs e)
@@ -238,13 +239,14 @@ namespace Ra2EasyShp
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
-                Title = "选择保存文件",
-                Filter = "PAL 色盘文件(*.pal)|*.pal",
+                Title = GetTranslateText.Get("Title_SelectFile"),
+                Filter = "Palette (*.pal)|*.pal",
                 FileName = string.Empty,
                 RestoreDirectory = true,
                 DefaultExt = "pal"
             };
-            GData.SaveConfigModel.PaletteCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
+
+            GData.UIData.SaveConfig.PaletteCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
         }
     }
 }

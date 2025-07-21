@@ -880,7 +880,7 @@ namespace Ra2EasyShp.Funcs
 
             if (pasteList != index)
             {
-                throw new Exception("粘贴只能应用于复制源相同的列表");
+                throw new Exception(GetTranslateText.Get("Message_PasteSourceError")); // 粘贴只能应用于复制源相同的列表
             }
 
             if (index == 1)
@@ -1004,7 +1004,7 @@ namespace Ra2EasyShp.Funcs
 
             if (pasteList != index)
             {
-                throw new Exception("粘贴只能应用于复制源相同的列表");
+                throw new Exception(GetTranslateText.Get("Message_PasteSourceError")); // 粘贴只能应用于复制源相同的列表
             }
 
             if (index == 1)

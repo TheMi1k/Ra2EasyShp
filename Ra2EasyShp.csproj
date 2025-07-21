@@ -103,15 +103,22 @@
     <Compile Include="CreateShpConfigWindow.xaml.cs">
       <DependentUpon>CreateShpConfigWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Data\ComboBoxData.cs" />
     <Compile Include="Data\Enums.cs" />
     <Compile Include="Data\StringConst.cs" />
+    <Compile Include="DrawImageWindow.xaml.cs">
+      <DependentUpon>DrawImageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="BindingProxy.cs" />
     <Compile Include="Funcs\ColorConvert.cs" />
+    <Compile Include="Funcs\GetTranslateText.cs" />
     <Compile Include="Funcs\LocalImageManage.cs" />
     <Compile Include="Funcs\PaletteManage.cs" />
     <Compile Include="Funcs\ShpManage.cs" />
     <Compile Include="HotKeyWindow.xaml.cs">
       <DependentUpon>HotKeyWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\ComboBoxDataModel.cs" />
     <Compile Include="Models\EditImageModel.cs" />
     <Compile Include="Models\ImageDataModel.cs" />
     <Compile Include="Models\OverlayImageModel.cs" />
@@ -147,6 +154,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CreateShpConfigWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DrawImageWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -205,6 +216,12 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Res\Lang\en.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Res\Lang\zh_cn.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Res\Palette\anim.pal">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -1,0 +1,55 @@
+﻿<Window x:Class="Ra2EasyShp.DrawImageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ra2EasyShp"
+        mc:Ignorable="d"
+        Title="图片绘制" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Width="60" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
+            <Button Content="画笔" Click="Button_Click"/>
+            <Button Content="框选" Click="Button_Click_1"/>
+            <Button Content="擦头" Click="Button_Click_2"/>
+            <Button Content="载入" Click="Button_Click_3"/>
+        </StackPanel>
+
+        <Border Grid.Row="0" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Gray" Margin="0 0 0 0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="Grid_PreviewMouseWheel">
+                <Grid>
+                    <Grid.LayoutTransform>
+                        <ScaleTransform x:Name="CanvasScale" ScaleX="1.0" ScaleY="1.0"/>
+                    </Grid.LayoutTransform>
+                    
+                    <Grid x:Name="Grid_InImg" HorizontalAlignment="Left" VerticalAlignment="Top" IsHitTestVisible="False">
+                        <Image x:Name="Image_input"
+                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                            RenderOptions.ClearTypeHint="Enabled"
+                            Stretch="None"
+                            HorizontalAlignment="Left" VerticalAlignment="Top"
+                        />
+                    </Grid>
+
+                    <Grid x:Name="Grid_OutImg" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden">
+                        <Image x:Name="Image_output"
+                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                            RenderOptions.ClearTypeHint="Enabled"
+                            Stretch="None"
+                            HorizontalAlignment="Left" VerticalAlignment="Top"
+                            PreviewMouseMove="Image_ViewImg_MouseMove"
+                        />
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>

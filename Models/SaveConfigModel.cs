@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Ra2EasyShp.Models
 {
-    internal class SaveConfigModel : INotifyPropertyChanged
+    public class SaveConfigModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

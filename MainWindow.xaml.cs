@@ -61,6 +61,18 @@ namespace Ra2EasyShp
 
             this.DataContext = GData.UIData;
 
+            try
+            {
+                Console.WriteLine($"Res/Lang/{GetLastLanguage()}.json");
+                GData.UIData.LoadLanguage(Path.Combine(GetPath.RunPath, $"Res/Lang/{GetLastLanguage()}.json"));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"载入语言失败\nLoad language file failed\n{ex.Message}");
+                this.Close();
+                return;
+            }
+
             ComboBox_OverlayMode.SelectionChanged += (sender, e) =>
             {
                 if (GData.UIData.OverlayUI.OverlayMode == Enums.OverlayMode.叠加在上)
@@ -87,19 +99,24 @@ namespace Ra2EasyShp
             (StackPanel_PaletteHeaderColor.Children[0] as Button).Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 252));
             GData.PaletteConfig.PaletteHeaderColor[0] = Ra2PaletteColor.FromArgb(255, 0, 0, 252);
 
-            ComboBox_CreatePalMode.ItemsSource = Enum.GetValues(typeof(Enums.CreatePalMode));
+            ComboBox_CreatePalMode.ItemsSource = GData.UIData.ComboBoxData.CreatePalMode;
             ComboBox_CreatePalMode.SelectedIndex = 0;
 
-            ComboBox_OverlayMode.ItemsSource = Enum.GetValues(typeof(Enums.OverlayMode));
+            ComboBox_OverlayMode.ItemsSource = GData.UIData.ComboBoxData.OverlayMode;
             ComboBox_OverlayMode.SelectedIndex = 0;
 
-            ComboBox_ShpCompression.ItemsSource = Enum.GetValues(typeof(Enums.ShpCompressionMode));
-            ComboBox_ShpCompression.SelectedIndex = 0;
+            ComboBox_ShpSaveMode.ItemsSource = GData.UIData.ComboBoxData.ShpSaveMode;
+            ComboBox_ShpSaveMode.SelectedIndex = 0;
 
             GData.TempPath = GetPath.CreateTempPath();
             if (!Directory.Exists(GData.TempPath))
             {
                 Directory.CreateDirectory(GData.TempPath);
+            }
+
+            if (!Directory.Exists(GData.TempPublicPath))
+            {
+                Directory.CreateDirectory(GData.TempPublicPath);
             }
 
             string[] _getResPalette()
@@ -123,8 +140,8 @@ namespace Ra2EasyShp
             ComboBox_Palette.ItemsSource = _getResPalette();
             ComboBox_Palette.SelectedIndex = 0;
 
-            ComboBox_PlayerColorView.ItemsSource = Enum.GetValues(typeof(Enums.ViewPlayerColor));
-            ComboBox_PlayerColorView.SelectedIndex = 0;
+            ComboBox_PlayerColorPreview.ItemsSource = GData.UIData.ComboBoxData.PlayerColor;
+            ComboBox_PlayerColorPreview.SelectedIndex = 0;
 
             DataGrid_Images.ItemsSource = GData.ImageData;
 
@@ -222,6 +239,42 @@ namespace Ra2EasyShp
             }
         }
 
+        private string GetLastLanguage()
+        {
+            try
+            {
+                string cfgPath = Path.Combine(GetPath.RunPath, "Res/Lang/language.cfg");
+
+                if (File.Exists(cfgPath))
+                {
+                    using (StreamReader sr = new StreamReader(cfgPath))
+                    {
+                        string lang = sr.ReadToEnd();
+                        if (!string.IsNullOrEmpty(lang))
+                        {
+                            return lang;
+                        }
+                    }
+                }
+
+                return "zh_cn";
+            }
+            catch
+            {
+                return "zh_cn";
+            }
+        }
+
+        private void SaveLanguage(string languageName)
+        {
+            string cfgPath = Path.Combine(GetPath.RunPath, "Res/Lang/language.cfg");
+
+            using (StreamWriter sw = new StreamWriter(cfgPath))
+            {
+                sw.Write(languageName);
+            }
+        }
+
         private void CreateRa2Grids()
         {
             Grid_Ra2Grids_Grid.Children.Clear();
@@ -284,7 +337,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                MessageBox.Show("载入提示框失败\n" + ex.Message);
+                MessageBox.Show($"{GetTranslateText.Get("Message_MessageBoxLoadError")}\n" + ex.Message); // 载入提示框失败
                 return false;
             }
         }
@@ -302,7 +355,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                MessageBox.Show("载入提示框失败\n" + ex.Message);
+                MessageBox.Show($"{GetTranslateText.Get("Message_MessageBoxLoadError")}\n" + ex.Message); // 载入提示框失败
                 return false;
             }
         }
@@ -313,7 +366,7 @@ namespace Ra2EasyShp
 
             SaveWindowStateCache();
 
-            if (GData.ImageData.Count > 0 && !ShowMessageBox("请确定当前项目是否已经保存\n是否退出？", MessageBoxButton.YesNo))
+            if (GData.ImageData.Count > 0 && !ShowMessageBox(GetTranslateText.Get("Message_ConfirmExit"), MessageBoxButton.YesNo)) // 请确定当前项目是否已经保存\n是否退出？
             {
                 e.Cancel = true;
 
@@ -329,7 +382,7 @@ namespace Ra2EasyShp
             }
             catch
             {
-                ShowMessageBox($"清理缓存失败，可稍后手动清理\n{GData.TempPath}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_TempClearFailed")}\n{GData.TempPath}"); // 清理缓存失败，可稍后手动清理
             }
         }
 
@@ -416,7 +469,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                ShowMessageBox($"加载图片错误\n{ex.Message}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_LoadImageError")}\n{ex.Message}"); // 加载图片错误
             }
             finally
             {
@@ -456,7 +509,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                ShowMessageBox($"加载图片错误\n{ex.Message}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_LoadImageError")}\n{ex.Message}"); // 加载图片错误
             }
             finally
             {
@@ -503,11 +556,11 @@ namespace Ra2EasyShp
 
                 await ReloadImageSource(GData.UIData.NowIndex);
 
-                ShowMessageBox("重置当前图像完毕");
+                ShowMessageBox(GetTranslateText.Get("Message_RestoreThisImageCompleted")); // 重置当前图像完毕
             }
             catch (Exception ex)
             {
-                ShowMessageBox($"重置当前图像失败\n{ex.Message}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_RestoreThisImageFailed")}\n{ex.Message}"); // 重置当前图像失败
             }
         }
 
@@ -544,11 +597,11 @@ namespace Ra2EasyShp
 
                 await ReloadImageSource(GData.UIData.NowIndex);
 
-                ShowMessageBox("重置所有图像完毕");
+                ShowMessageBox(GetTranslateText.Get("Message_RestoreAllImageCompleted")); // 重置所有图像完毕
             }
             catch (Exception ex)
             {
-                ShowMessageBox($"重置所有图像失败\n{ex.Message}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_RestoreAllImageFailed")}\n{ex.Message}"); // 重置所有图像失败
             }
         }
 
@@ -712,9 +765,9 @@ namespace Ra2EasyShp
                     return;
                 }
 
-                if ((Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedItem != Enums.ViewPlayerColor.无)
+                if ((Enums.PreviewPlayerColor)ComboBox_PlayerColorPreview.SelectedValue != Enums.PreviewPlayerColor.无)
                 {
-                    throw new Exception("请先将预览所属色改为 [无]");
+                    throw new Exception(GetTranslateText.Get("Message_SetPlayerColorNone")); // 请先将预览所属色改为 [无]
                 }
 
                 string savePath = GetPath.CreateSavePath(Enums.PathType.PNG);
@@ -790,9 +843,9 @@ namespace Ra2EasyShp
                     return;
                 }
 
-                if ((Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedItem != Enums.ViewPlayerColor.无)
+                if ((Enums.PreviewPlayerColor)ComboBox_PlayerColorPreview.SelectedValue != Enums.PreviewPlayerColor.无)
                 {
-                    throw new Exception("请先将预览所属色改为 [无]");
+                    throw new Exception(GetTranslateText.Get("Message_SetPlayerColorNone")); // 请先将预览所属色改为 [无]
                 }
 
                 string savePath = GetPath.CreateSavePath(Enums.PathType.PNG);
@@ -862,19 +915,19 @@ namespace Ra2EasyShp
             if (GData.ImageData.Count < 2)
             {
                 GData.UIData.ImgIsPlaying = false;
-                Button_Play.Content = "播放";
+                Button_Play.Content = GData.UIData.LanguageDic["Btn_Play"];
                 return;
             }
 
-            if (Button_Play.Content.ToString() == "播放")
+            if (Button_Play.Content.ToString() == GData.UIData.LanguageDic["Btn_Play"])
             {
                 GData.UIData.ImgIsPlaying = true;
-                Button_Play.Content = "停止";
+                Button_Play.Content = GData.UIData.LanguageDic["Btn_Stop"];
             }
             else
             {
                 GData.UIData.ImgIsPlaying = false;
-                Button_Play.Content = "播放";
+                Button_Play.Content = GData.UIData.LanguageDic["Btn_Play"];
                 return;
             }
 
@@ -1011,7 +1064,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                ShowMessageBox($"加载图片出错\n{ex.Message}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_LoadImageError")}\n{ex.Message}"); // 加载图片出错
             }
 #endif
         }
@@ -1037,7 +1090,7 @@ namespace Ra2EasyShp
 
                 GData.UIData.OverlayUI.ChangeOverlayMargin(GData.UIData.OverlayUI.OverlayOffsetX, GData.UIData.OverlayUI.OverlayOffsetY);
 
-                ShowMessageBox("更改完成");
+                ShowMessageBox(GetTranslateText.Get("Message_Completed")); // 完成
             }
             catch (Exception ex)
             {
@@ -1088,7 +1141,7 @@ namespace Ra2EasyShp
 
                 await ReloadImageSource(GData.UIData.NowIndex);
 
-                ShowMessageBox("应用到所有图像完成");
+                ShowMessageBox(GetTranslateText.Get("Message_ApplyToAllImageCompleted")); // 应用到所有图像完成
             }
             catch (Exception ex)
             {
@@ -1111,7 +1164,7 @@ namespace Ra2EasyShp
                 palColorNum = int.Parse(TextBox_PalColorNum.Text);
                 if (palColorNum < 2 || palColorNum > 256)
                 {
-                    throw new Exception("色盘颜色数量只能为2-256");
+                    throw new Exception(GetTranslateText.Get("Message_PaletteColorCountError")); // 色盘颜色数量只能为2-256
                 }
 
                 if (GData.ImageData.Count == 0)
@@ -1121,7 +1174,7 @@ namespace Ra2EasyShp
 
                 bool isPlayerColor = (bool)CheckBox_PlayerColor.IsChecked;
 
-                List<Ra2PaletteColor> palette = await PaletteManage.CreatePalette(palColorNum, GData.PaletteConfig.PaletteHeaderColor, isPlayerColor ? GData.PaletteConfig.PalettePlayerColor : null, ComboBox_CreatePalMode.SelectedItem.ToString());
+                List<Ra2PaletteColor> palette = await PaletteManage.CreatePalette(palColorNum, GData.PaletteConfig.PaletteHeaderColor, isPlayerColor ? GData.PaletteConfig.PalettePlayerColor : null, ComboBox_CreatePalMode.SelectedValue.ToString());
 
                 CreatePaletteConfigWindow window = new CreatePaletteConfigWindow(palette);
                 window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -1157,7 +1210,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                ShowMessageBox($"生成色盘失败\n{ex.Message}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_GeneratePaletteFailed")}\n{ex.Message}");
             }
             finally
             {
@@ -1475,7 +1528,7 @@ namespace Ra2EasyShp
 
                 if (GData.NowPalette == null || GData.NowPalette.Count == 0)
                 {
-                    throw new Exception("没有选择色盘");
+                    throw new Exception(GetTranslateText.Get("Message_NotSelectPalette")); // 没有选择色盘
                 }
 
                 int shadowStart = -1;
@@ -1487,7 +1540,7 @@ namespace Ra2EasyShp
                     shadowEnd = int.Parse(TextBox_ShpShadowFrameEnd.Text);
                 }
 
-                Enums.ShpCompressionMode shpCompressionMode = (Enums.ShpCompressionMode)ComboBox_ShpCompression.SelectedItem;
+                Enums.ShpSaveMode shpCompressionMode = (Enums.ShpSaveMode)ComboBox_ShpSaveMode.SelectedValue;
 
                 byte[] shpData = null;
                 await Task.Run(() =>
@@ -1528,7 +1581,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                ShowMessageBox($"生成SHP失败\n{ex.Message}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_GenerateShpFailed")}\n{ex.Message}"); // 生成SHP失败
             }
             finally
             {
@@ -1555,8 +1608,8 @@ namespace Ra2EasyShp
         {
             Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "选择打开文件",
-                Filter = "Pal色盘文件(*.pal)|*.pal",
+                Title = GetTranslateText.Get("Title_SelectFile"),
+                Filter = "Pal(*.pal)|*.pal",
                 FileName = string.Empty,
                 RestoreDirectory = true,
                 DefaultExt = "pal"
@@ -1571,7 +1624,8 @@ namespace Ra2EasyShp
 
             if (string.IsNullOrEmpty(fileName))
             {
-                throw new Exception("打开的文件不正确");
+                ShowMessageBox(GetTranslateText.Get("Message_FileIncorrect")); // 打开的文件不正确
+                return;
             }
 
             Grid_Main.IsEnabled = false;
@@ -1601,13 +1655,13 @@ namespace Ra2EasyShp
             {
                 if (!File.Exists(palPath))
                 {
-                    throw new Exception("色盘不存在");
+                    throw new Exception(GetTranslateText.Get("Message_PaletteNotExist")); // 色盘不存在
                 }
 
                 FileInfo fileInfo = new FileInfo(palPath);
                 if (fileInfo.Length != 768)
                 {
-                    throw new Exception("色盘文件不正确");
+                    throw new Exception(GetTranslateText.Get("Message_PaletteIncorrect")); // 色盘文件不正确
                 }
 
                 GData.NowPalette = new List<Ra2PaletteColor>();
@@ -1680,7 +1734,7 @@ namespace Ra2EasyShp
             }
             catch (Exception ex)
             {
-                ShowMessageBox($"载入色盘失败\n{ex.Message}");
+                ShowMessageBox($"{GetTranslateText.Get("Message_LoadPaletteFailed")}\n{ex.Message}"); // 载入色盘失败
             }
         }
 
@@ -1764,7 +1818,7 @@ namespace Ra2EasyShp
             {
                 if (GData.UIData.ResizeUI.ImageOriginalWidth == 0 || GData.UIData.ResizeUI.ImageOriginalHeight == 0)
                 {
-                    throw new Exception("没有图片信息，请双击列表选择一张图片后再调整");
+                    throw new Exception(GetTranslateText.Get("Message_NotImageInfo")); // 没有图片信息，请双击列表选择一张图片后再调整
                 }
 
                 await ImageManage.Resize(GData.UIData.ResizeUI.ImageNowWidth, GData.UIData.ResizeUI.ImageNowHeight);
@@ -1778,7 +1832,7 @@ namespace Ra2EasyShp
                     LoadRa2Grids();
                 }
 
-                ShowMessageBox("缩放完成");
+                ShowMessageBox(GetTranslateText.Get("Message_ResizeCompleted")); // 缩放完成
             }
             catch (Exception ex)
             {
@@ -1820,7 +1874,7 @@ namespace Ra2EasyShp
                     GData.UIData.ResizeUI.ImageNowHeightPercentage = (int)Math.Round(nowHeight / (GData.UIData.ResizeUI.ImageOriginalHeight * 1.0f) * 100.0f);
                 }
 
-                ShowMessageBox("已取消所有缩放");
+                ShowMessageBox(GetTranslateText.Get("Message_ResizeCancel")); // 已取消所有缩放
             }
             catch (Exception ex)
             {
@@ -1845,7 +1899,7 @@ namespace Ra2EasyShp
             {
                 if (GData.UIData.ResizeUI.ImageOriginalWidth == 0 || GData.UIData.ResizeUI.ImageOriginalHeight == 0)
                 {
-                    throw new Exception("没有图片信息，请双击列表选择一张图片后再调整");
+                    throw new Exception(GetTranslateText.Get("Message_NotImageInfo")); // 没有图片信息，请双击列表选择一张图片后再调整
                 }
 
                 int left = int.Parse(GData.UIData.ResizeUI.ReMarginLeft);
@@ -1870,7 +1924,7 @@ namespace Ra2EasyShp
                     LoadRa2Grids();
                 }
 
-                ShowMessageBox("调整画布完成");
+                ShowMessageBox(GetTranslateText.Get("Message_CanvasEditCompleted")); // 调整画布完成
             }
             catch (Exception ex)
             {
@@ -1902,7 +1956,7 @@ namespace Ra2EasyShp
                     LoadRa2Grids();
                 }
 
-                ShowMessageBox("已取消画布调整");
+                ShowMessageBox(GetTranslateText.Get("Message_EditCanvasCancel"));
             }
             catch (Exception ex)
             {
@@ -1918,7 +1972,7 @@ namespace Ra2EasyShp
             {
                 if (GData.ImageData.Count % 2 != 0)
                 {
-                    throw new Exception("列表图片数量不为偶数，无法自动设置");
+                    throw new Exception(GetTranslateText.Get("Message_ShadowFrameCanNotAutoSet")); // 列表图片数量不为偶数，无法自动设置
                 }
 
                 TextBox_ShpShadowFrameStart.Text = (GData.ImageData.Count / 2).ToString();
@@ -1952,7 +2006,7 @@ namespace Ra2EasyShp
                     return;
                 }
 
-                GData.PlayerColorView = (Enums.ViewPlayerColor)ComboBox_PlayerColorView.SelectedIndex;
+                GData.PlayerColorView = (Enums.PreviewPlayerColor)ComboBox_PlayerColorPreview.SelectedIndex;
 
                 if (!GData.UIData.ImgIsPlaying)
                 {
@@ -2302,7 +2356,7 @@ namespace Ra2EasyShp
 
                 if (_isReMarginOnImageClick)
                 {
-                    Button_ReMarginOnImage.Content = "拖动设置";
+                    Button_ReMarginOnImage.Content = GData.UIData.LanguageDic["Text_Edit_Canvas_DragToEdit"];
                     _isReMarginOnImageClick = false;
 
                     Grid_InImg.Children.Remove(_reMarginLine1);
@@ -2311,7 +2365,7 @@ namespace Ra2EasyShp
                 }
 
                 _isReMarginOnImageClick = true;
-                Button_ReMarginOnImage.Content = "取消";
+                Button_ReMarginOnImage.Content = GData.UIData.LanguageDic["Text_Edit_Canvas_DragToEdit_Cancel"];
             }
             catch (Exception ex)
             {
@@ -2483,7 +2537,7 @@ namespace Ra2EasyShp
 
                 if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
                 {
-                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                    throw new Exception(GetTranslateText.Get("Message_CopyCutPasteOnlySingleList")); // 复制、剪切、粘贴只能在单个列表操作
                 }
 
                 ImageListManage.CopyItem(1, selectedDic[1]);
@@ -2510,7 +2564,7 @@ namespace Ra2EasyShp
 
                 if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
                 {
-                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                    throw new Exception(GetTranslateText.Get("Message_CopyCutPasteOnlySingleList")); // 复制、剪切、粘贴只能在单个列表操作
                 }
 
                 if (selectedDic[1].Count > 0)
@@ -2738,7 +2792,7 @@ namespace Ra2EasyShp
                 int insertCount = int.Parse(TextBox_DataGrid_Image_InsertAbove.Text);
                 if (insertCount < 1)
                 {
-                    throw new Exception("最少插入1行");
+                    throw new Exception(GetTranslateText.Get("Message_InsertLeast1Line")); // 最少插入1行
                 }
 
                 var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
@@ -2762,7 +2816,7 @@ namespace Ra2EasyShp
                 int insertCount = int.Parse(TextBox_DataGrid_Image_InsertBelow.Text);
                 if (insertCount < 1)
                 {
-                    throw new Exception("最少插入1行");
+                    throw new Exception(GetTranslateText.Get("Message_InsertLeast1Line")); // 最少插入1行
                 }
 
                 var selectedDic = ImageListManage.GetDataGirdSelectInfo(DataGrid_Images.SelectedCells.ToList());
@@ -2798,7 +2852,7 @@ namespace Ra2EasyShp
 
                 if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
                 {
-                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                    throw new Exception(GetTranslateText.Get("Message_CopyCutPasteOnlySingleList")); // 复制、剪切、粘贴只能在单个列表操作
                 }
 
                 ImageListManage.CutItem(1, selectedDic[1], false);
@@ -2890,7 +2944,7 @@ namespace Ra2EasyShp
 
                 if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
                 {
-                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                    throw new Exception(GetTranslateText.Get("Message_CopyCutPasteOnlySingleList")); // 复制、剪切、粘贴只能在单个列表操作
                 }
 
                 if (selectedDic[1].Count > 0)
@@ -2922,7 +2976,7 @@ namespace Ra2EasyShp
 
                 if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
                 {
-                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                    throw new Exception(GetTranslateText.Get("Message_CopyCutPasteOnlySingleList")); // 复制、剪切、粘贴只能在单个列表操作
                 }
 
                 if (selectedDic[1].Count > 0)
@@ -2959,7 +3013,7 @@ namespace Ra2EasyShp
 
                 if (selectedDic[1].Count > 0 && selectedDic[2].Count > 0)
                 {
-                    throw new Exception("复制、剪切、粘贴只能在单个列表操作");
+                    throw new Exception(GetTranslateText.Get("Message_CopyCutPasteOnlySingleList")); // 复制、剪切、粘贴只能在单个列表操作
                 }
 
                 ImageListManage.CutItem(1, selectedDic[1], true);
@@ -3051,6 +3105,87 @@ namespace Ra2EasyShp
             GData.UIData.DitherUI.Alpha = value;
 
             ConvertImageAndReload();
+        }
+
+        private void Button_DrawImage_Click(object sender, RoutedEventArgs e)
+        {
+            DrawImageWindow drawImageWindow = new DrawImageWindow();
+            drawImageWindow.Owner = this;
+            drawImageWindow.ShowDialog();
+        }
+
+        private void MenuItem_Language_ChineseSimplified_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                GData.UIData.LoadLanguage(Path.Combine(GetPath.RunPath, "Res/Lang/zh_cn.json"));
+
+                SaveLanguage("zh_cn");
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox($"载入语言失败\nLoad language file failed\n{ex.Message}");
+            }
+        }
+
+        private void MenuItem_Language_English_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                GData.UIData.LoadLanguage(Path.Combine(GetPath.RunPath, "Res/Lang/en.json"));
+
+                SaveLanguage("en");
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox($"载入语言失败\nLoad language file failed\n{ex.Message}");
+            }
+        }
+
+        private void MenuItem_Language_Other_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = GetTranslateText.Get("Title_SelectFile"),
+                Filter = "json(*.json)|*.json",
+                FileName = string.Empty,
+                RestoreDirectory = true,
+                DefaultExt = "json"
+            };
+
+            if (openFileDialog.ShowDialog() == false)
+            {
+                return;
+            }
+
+            string fileName = openFileDialog.FileName;
+
+            if (string.IsNullOrEmpty(fileName))
+            {
+                ShowMessageBox(GetTranslateText.Get("Message_FileIncorrect")); // 打开的文件不正确
+                return;
+            }
+
+            try
+            {
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+
+                string fullPath1 = Path.GetFullPath(fileName).TrimEnd(Path.DirectorySeparatorChar).ToUpperInvariant();
+                string fullPath2 = Path.GetFullPath(Path.Combine(GetPath.RunPath, $"Res/Lang/{fileNameWithoutExtension}.json")).TrimEnd(Path.DirectorySeparatorChar).ToUpperInvariant();
+                
+                if (fullPath1 != fullPath2)
+                {
+                    File.Copy(fileName, Path.Combine(GetPath.RunPath, $"Res/Lang/{fileNameWithoutExtension}.json"), true);
+                }
+
+                GData.UIData.LoadLanguage(fileName);
+
+                SaveLanguage(fileNameWithoutExtension);
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox($"载入语言失败\nLoad language file failed\n{ex.Message}");
+            }
         }
     }
 }

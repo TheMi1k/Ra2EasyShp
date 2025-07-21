@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ra2EasyShp"
         mc:Ignorable="d"
-                Title="保存成功" Height="230" Width="300" ResizeMode="NoResize" FontSize="15">
+                d:Title="保存成功" Title="{Binding LanguageDic[Title_SaveMessage_Success]}" Height="230" Width="300" ResizeMode="NoResize" FontSize="15">
 
     <Window.Resources>
         <Style x:Key="MyStyle">
@@ -29,13 +29,13 @@
 
     <Grid x:Name="MainGrid" Width="298" HorizontalAlignment="Center">
         <StackPanel HorizontalAlignment="Left" Margin="20 10 0 0">
-            <TextBlock Text="文件已保存到" FontSize="17" HorizontalAlignment="Left"/>
+            <TextBlock d:Text="文件已保存到" Text="{Binding LanguageDic[Text_SaveMessage_FileSaveTo]}" FontSize="17" HorizontalAlignment="Left"/>
             <TextBox x:Name="TextBox_SavePath" Height="80" Width="250" TextWrapping="Wrap" IsReadOnly="True"/>
-            <TextBlock Text="是否打开目录？" FontSize="17" HorizontalAlignment="Left" Margin="0 5 0 0"/>
+            <TextBlock d:Text="是否打开目录？" Text="{Binding LanguageDic[Text_SaveMessage_OpenFilePath]}" FontSize="17" HorizontalAlignment="Left" Margin="0 5 0 0"/>
 
             <StackPanel Orientation="Horizontal" Margin="35 10 0 0">
-                <Button x:Name="Button_No" Content="取消" FontSize="17" Width="70" Height="30" Click="Button_No_Click"/>
-                <Button Content="打开" FontSize="17" Width="70" Height="30" Margin="40 0 0 0" Click="Button_Yes_Click"/>
+                <Button x:Name="Button_No" d:Content="取消" Content="{Binding LanguageDic[Text_SaveMessage_No]}" FontSize="17" Width="70" Height="30" Click="Button_No_Click"/>
+                <Button d:Content="打开" Content="{Binding LanguageDic[Text_SaveMessage_Yes]}" FontSize="17" Width="70" Height="30" Margin="40 0 0 0" Click="Button_Yes_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>

@@ -5,20 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ra2EasyShp"
         mc:Ignorable="d"
-        Title="关于" Height="250" Width="650" ResizeMode="NoResize">
+        d:Title="关于" Title="{Binding LanguageDic[Title_About]}" Height="420" Width="650" ResizeMode="NoResize">
     <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="一个SHP制作工具" FontSize="25"/>
-            
-            <StackPanel Orientation="Horizontal" Margin="0 20 0 0">
-                <TextBlock Text="Github：" FontSize="20"/>
-                <TextBox Text="https://github.com/TheMi1k/Ra2EasyShp" Width="460" IsReadOnly="True" FontSize="20" Margin="5 0 0 0"/>
-            </StackPanel>
+        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center">
+            <TextBlock d:Text="一个SHP制作工具" Text="{Binding LanguageDic[Text_About]}" FontSize="25" Margin="0 40 0 0" HorizontalAlignment="Center"/>
 
-            <StackPanel Orientation="Horizontal" Margin="0 20 0 0">
-                <TextBlock Text="BUG反馈、新版通知Q群：" FontSize="20"/>
-                <TextBox Text="604238349" Width="150" IsReadOnly="True" FontSize="20" Margin="5 0 0 0"/>
-            </StackPanel>
+            <GroupBox Header="Github" FontSize="17" Margin="0 10 0 0">
+                <TextBox Text="https://github.com/TheMi1k/Ra2EasyShp" Width="550" IsReadOnly="True" FontSize="17" HorizontalAlignment="Left" Margin="0 5 0 0"/>
+            </GroupBox>
+
+            <GroupBox Header="百度网盘 (包含后续更新)" FontSize="17" Margin="0 10 0 0">
+                <StackPanel>
+                    <TextBox Text="https://pan.baidu.com/s/1vY2QFWBsGyNKt9nMeBDHpQ?pwd=r2es" Width="550" IsReadOnly="True" FontSize="17" HorizontalAlignment="Left" Margin="0 5 0 0"/>
+                    <TextBox Text="r2es" Width="60" IsReadOnly="True" FontSize="17" Margin="0 5 0 0" HorizontalAlignment="Left"/>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="BUG反馈，提议Q群" FontSize="17" Margin="0 10 0 0">
+                <TextBox Text="604238349" Width="150" IsReadOnly="True" FontSize="17" HorizontalAlignment="Left" Margin="0 5 0 0"/>
+            </GroupBox>
+
+            <TextBlock d:Text="Translated by ChatGPT.If you have a better translation or other translation, please let me know" Text="{Binding LanguageDic[Text_TranslatedBy]}" TextWrapping="Wrap" Width="450" Margin="0 10 0 0"/>
         </StackPanel>
     </Grid>
 </Window>

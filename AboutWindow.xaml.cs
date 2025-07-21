@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Ra2EasyShp.Data;
+using System.Windows;
 
 namespace Ra2EasyShp
 {
@@ -10,6 +11,8 @@ namespace Ra2EasyShp
         public AboutWindow()
         {
             InitializeComponent();
+
+            this.DataContext = GData.UIData;
         }
     }
 }

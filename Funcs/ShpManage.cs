@@ -47,7 +47,7 @@ namespace Ra2EasyShp.Funcs
                 return;
             }
 
-            if (palIndex < 16 || palIndex > 31 || GData.PlayerColorView == Enums.ViewPlayerColor.无)
+            if (palIndex < 16 || palIndex > 31 || GData.PlayerColorView == Enums.PreviewPlayerColor.无)
             {
                 oA = (byte)255;
                 oR = (byte)(palette[palIndex].R * 4);
@@ -134,7 +134,7 @@ namespace Ra2EasyShp.Funcs
             }
         }
 
-        private static void BitmapToShpData(Bitmap bitmap, List<Ra2PaletteColor> palette, Enums.ShpCompressionMode shpCompressionMode, bool isShadow, out byte[] frameHeader, out byte[] frameData)
+        private static void BitmapToShpData(Bitmap bitmap, List<Ra2PaletteColor> palette, Enums.ShpSaveMode shpCompressionMode, bool isShadow, out byte[] frameHeader, out byte[] frameData)
         {
             if (bitmap == null)
             {
@@ -147,7 +147,7 @@ namespace Ra2EasyShp.Funcs
                         bw.Write((ushort)0);
                         bw.Write((ushort)0);
 
-                        if (shpCompressionMode == Enums.ShpCompressionMode.鼠标动画)
+                        if (shpCompressionMode == Enums.ShpSaveMode.鼠标动画)
                         {
                             bw.Write((byte)1); // 压缩方式 flag
                         }
@@ -225,7 +225,7 @@ namespace Ra2EasyShp.Funcs
                                 bw.Write((ushort)width);
                                 bw.Write((ushort)height);
 
-                                if (shpCompressionMode == Enums.ShpCompressionMode.鼠标动画)
+                                if (shpCompressionMode == Enums.ShpSaveMode.鼠标动画)
                                 {
                                     bw.Write((byte)1); // 压缩方式 flag
                                 }
@@ -303,7 +303,7 @@ namespace Ra2EasyShp.Funcs
                     }
                 }
 
-                if (shpCompressionMode == Enums.ShpCompressionMode.鼠标动画)
+                if (shpCompressionMode == Enums.ShpSaveMode.鼠标动画)
                 {
                     return;
                 }
@@ -360,7 +360,7 @@ namespace Ra2EasyShp.Funcs
 
                     var frameDataCompression = ms.ToArray();
 
-                    if (shpCompressionMode == Enums.ShpCompressionMode.最佳文件大小)
+                    if (shpCompressionMode == Enums.ShpSaveMode.最佳文件大小)
                     {
                         if (frameDataCompression.Length < frameData.Length)
                         {
@@ -368,7 +368,7 @@ namespace Ra2EasyShp.Funcs
                             frameHeader[8] = 3;
                         }
                     }
-                    else if (shpCompressionMode == Enums.ShpCompressionMode.单位建筑)
+                    else if (shpCompressionMode == Enums.ShpSaveMode.单位建筑)
                     {
                         frameData = frameDataCompression;
                         frameHeader[8] = 3;
@@ -386,7 +386,7 @@ namespace Ra2EasyShp.Funcs
             }
         }
 
-        internal static byte[] BitmapToShp(List<string> bitmapPathList, List<Ra2PaletteColor> palette, Enums.ShpCompressionMode shpCompressionMode, int shadowFrameStart, int shadowFrameEnd)
+        internal static byte[] BitmapToShp(List<string> bitmapPathList, List<Ra2PaletteColor> palette, Enums.ShpSaveMode shpCompressionMode, int shadowFrameStart, int shadowFrameEnd)
         {
             GData.UIData.SetProgressUI(0, bitmapPathList.Count);
 
