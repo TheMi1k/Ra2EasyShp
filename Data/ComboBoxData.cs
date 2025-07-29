@@ -29,6 +29,11 @@ namespace Ra2EasyShp.Data
             {
                 item.Update();
             }
+
+            foreach (var item in ColorDither)
+            {
+                item.Update();
+            }
         }
 
         public ObservableCollection<ComboBoxDataModel<Enums.OverlayMode>> OverlayMode { get; set; } = new ObservableCollection<ComboBoxDataModel<Enums.OverlayMode>>()
@@ -63,6 +68,13 @@ namespace Ra2EasyShp.Data
             new ComboBoxDataModel<Enums.PreviewPlayerColor>() { Key = "ComboboxItem_PlayerColor_Pink", Value = Enums.PreviewPlayerColor.粉 },
             new ComboBoxDataModel<Enums.PreviewPlayerColor>() { Key = "ComboboxItem_PlayerColor_Purple", Value = Enums.PreviewPlayerColor.紫 },
             new ComboBoxDataModel<Enums.PreviewPlayerColor>() { Key = "ComboboxItem_PlayerColor_Grey", Value = Enums.PreviewPlayerColor.灰 }
+        };
+
+        public ObservableCollection<ComboBoxDataModel<Enums.ColorDither>> ColorDither { get; set; } = new ObservableCollection<ComboBoxDataModel<Enums.ColorDither>>()
+        {
+            new ComboBoxDataModel<Enums.ColorDither>() { Key = "ComboboxItem_ColorDither_None", Value = Enums.ColorDither.无 },
+            new ComboBoxDataModel<Enums.ColorDither>() { Key = "ComboboxItem_ColorDither_PlayerColor", Value = Enums.ColorDither.有所属色 },
+            new ComboBoxDataModel<Enums.ColorDither>() { Key = "ComboboxItem_PlayerColor_NotPlayerColor", Value = Enums.ColorDither.无所属色 }
         };
     }
 }

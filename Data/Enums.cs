@@ -49,5 +49,12 @@
             紫,
             灰
         }
+
+        public enum ColorDither
+        {
+            无,
+            有所属色,
+            无所属色
+        }
     }
 }

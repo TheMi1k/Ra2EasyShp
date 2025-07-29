@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Ra2EasyShp.Funcs
 {
@@ -18,7 +19,7 @@ namespace Ra2EasyShp.Funcs
         /// 移除相似颜色
         /// </summary>
         /// <param name="colorDic"></param>
-        private static void RemoveSimilarColors(Dictionary<Ra2PaletteColor, int> colorDic)
+        private static void RemoveSimilarColors_old(Dictionary<Ra2PaletteColor, int> colorDic)
         {
             List<Ra2PaletteColor> allColorList = new List<Ra2PaletteColor>(colorDic.Keys);
             HashSet<Ra2PaletteColor> removeList = new HashSet<Ra2PaletteColor>();
@@ -39,6 +40,79 @@ namespace Ra2EasyShp.Funcs
                             if (colorDic[allColorList[i]] > colorDic[allColorList[j]])
                             {
                                 removeList.Add(allColorList[j]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (var c in removeList)
+            {
+                colorDic.Remove(c);
+            }
+        }
+
+        /// <summary>
+        /// 移除相似颜色
+        /// </summary>
+        /// <param name="colorDic"></param>
+        private static void RemoveSimilarColors(Dictionary<Ra2PaletteColor, int> colorDic, int diffValue)
+        {
+            Dictionary<(int R, int G, int B), Ra2PaletteColor> cubeMap = new Dictionary<(int R, int G, int B), Ra2PaletteColor>();
+            foreach (var color in colorDic.Keys)
+            {
+                cubeMap[(color.R, color.G, color.B)] = color;
+            }
+
+            HashSet<Ra2PaletteColor> removeList = new HashSet<Ra2PaletteColor>();
+
+            foreach (var color in colorDic.Keys)
+            {
+                if (removeList.Contains(color))
+                {
+                    continue;
+                }
+
+                for (int dr = diffValue * -1; dr <= diffValue; dr++)
+                {
+                    for (int dg = diffValue * -1; dg <= diffValue; dg++)
+                    {
+                        for (int db = diffValue * -1; db <= diffValue; db++)
+                        {
+                            if (Math.Abs(dr) + Math.Abs(dg) + Math.Abs(db) > diffValue)
+                            {
+                                continue;
+                            }
+
+                            int nr = color.R + dr;
+                            int ng = color.G + dg;
+                            int nb = color.B + db;
+
+                            if (nr < 0 || nr > 255 || ng < 0 || ng > 255 || nb < 0 || nb > 255)
+                            {
+                                continue;
+                            }
+
+                            if (nr == color.R && ng == color.G && nb == color.B)
+                            {
+                                continue;
+                            }
+
+                            if (cubeMap.TryGetValue((nr, ng, nb), out var neighbor) && !removeList.Contains(neighbor))
+                            {
+                                int diff = Math.Abs(color.R - neighbor.R) + Math.Abs(color.G - neighbor.G) + Math.Abs(color.B - neighbor.B);
+
+                                if (diff <= diffValue)
+                                {
+                                    if (colorDic[color] >= colorDic[neighbor])
+                                    {
+                                        removeList.Add(neighbor);
+                                    }
+                                    else
+                                    {
+                                        removeList.Add(color);
+                                    }
+                                }
                             }
                         }
                     }
@@ -125,7 +199,7 @@ namespace Ra2EasyShp.Funcs
             }
         }
 
-        internal static async Task<List<Ra2PaletteColor>> CreatePalette(int palColorNum, Ra2PaletteColor[] paletteHeaderColor, List<Ra2PaletteColor> playerColorList, string mode)
+        internal static async Task<List<Ra2PaletteColor>> CreatePalette(int palColorNum, Ra2PaletteColor[] paletteHeaderColor, List<Ra2PaletteColor> playerColorList, string mode, int diffValue)
         {
             List<Ra2PaletteColor> playerColorSetBackgroud = null;
             if (playerColorList != null)
@@ -163,11 +237,11 @@ namespace Ra2EasyShp.Funcs
                     {
                         throw new Exception(GetTranslateText.Get("Message_GeneratePaletteColorCountError")); // 该色盘生成方法颜色数量不能小于150
                     }
-                    palette = await Create256ColorPalette_Mode3(palColorNum, headerColors.ToArray(), playerColorSetBackgroud);
+                    palette = await Create256ColorPalette_Mode3(palColorNum, headerColors.ToArray(), playerColorSetBackgroud, diffValue);
                 }
                 else if (mode == Enums.CreatePalMode.主要颜色.ToString())
                 {
-                    palette = await Create256ColorPalette_Mode1(palColorNum, headerColors.ToArray(), playerColorSetBackgroud);
+                    palette = await Create256ColorPalette_Mode1(palColorNum, headerColors.ToArray(), playerColorSetBackgroud, diffValue);
                 }
                 else
                 {
@@ -183,7 +257,7 @@ namespace Ra2EasyShp.Funcs
         /// </summary>
         /// <param name="palColorNum"></param>
         /// <returns></returns>
-        private static async Task<List<Ra2PaletteColor>> Create256ColorPalette_Mode1(int palColorNum, Ra2PaletteColor[] paletteHeaderColor, List<Ra2PaletteColor> playerColorList)
+        private static async Task<List<Ra2PaletteColor>> Create256ColorPalette_Mode1(int palColorNum, Ra2PaletteColor[] paletteHeaderColor, List<Ra2PaletteColor> playerColorList, int diffValue)
         {
             Dictionary<Ra2PaletteColor, int> colorCounts = new Dictionary<Ra2PaletteColor, int>();
 
@@ -254,11 +328,9 @@ namespace Ra2EasyShp.Funcs
                 GData.UIData.SetProgressUI(sucCount, maxCount);
             }
 
-            RemoveSimilarColors(colorCounts);
+            RemoveSimilarColors(colorCounts, diffValue);
 
-            var result = colorCounts.OrderByDescending(c => c.Value)
-                              .Select(c => c.Key)
-                              .ToList();
+            var result = colorCounts.OrderByDescending(c => c.Value).Select(c => c.Key).ToList();
 
             if (playerColorList != null)
             {
@@ -278,6 +350,203 @@ namespace Ra2EasyShp.Funcs
             }
 
             result = result.Take(palColorNum).ToList();
+
+            while (true)
+            {
+                if (result.Count >= 256)
+                {
+                    break;
+                }
+
+                result.Add(paletteHeaderColor[0]);
+            }
+
+            GC.Collect();
+
+            return result;
+        }
+
+        /// <summary>
+        /// 生成色盘(补全少部分像素细节)
+        /// </summary>
+        /// <param name="palColorNum"></param>
+        /// <returns></returns>
+        private static async Task<List<Ra2PaletteColor>> Create256ColorPalette_Mode3(int palColorNum, Ra2PaletteColor[] paletteHeaderColor, List<Ra2PaletteColor> playerColorList, int diffValue)
+        {
+            Dictionary<Ra2PaletteColor, int> colorCounts = new Dictionary<Ra2PaletteColor, int>();
+
+            int sucCount = 0;
+            int maxCount = GData.ImageData.Count;
+
+            GData.UIData.SetProgressUI(sucCount, maxCount);
+
+            List<Ra2PaletteColor> colorBase = new List<Ra2PaletteColor>();
+            for (int r = 4; r <= 244; r += 60)
+            {
+                for (int g = 4; g <= 244; g += 60)
+                {
+                    for (int b = 4; b <= 244; b += 60)
+                    {
+                        colorBase.Add(Ra2PaletteColor.FromArgb(255, (byte)r, (byte)g, (byte)b));
+                    }
+                }
+            }
+
+            for (int index = 0; index < GData.ImageData.Count; index++)
+            {
+                Bitmap resultImg = await ImageManage.MergeBitmaps(
+                    index,
+                    index,
+                    GData.ImageData[index].OverlayImage.OffsetX,
+                    GData.ImageData[index].OverlayImage.OffsetY,
+                    GData.ImageData[index].OverlayImage.OverlayMode);
+
+                if (resultImg != null)
+                {
+                    unsafe
+                    {
+                        Rectangle rect = new Rectangle(0, 0, resultImg.Width, resultImg.Height);
+                        BitmapData bmpData = resultImg.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                        byte* ptr = (byte*)bmpData.Scan0;
+
+                        int stride = bmpData.Stride;
+                        int width = resultImg.Width;
+                        int height = resultImg.Height;
+
+                        object locker = new object();
+
+                        for (int y = 0; y < height; y++)
+                        {
+                            for (int x = 0; x < width; x++)
+                            {
+                                byte* pixel = ptr + (y * stride) + (x * 4);
+
+                                byte pixelB = pixel[0];
+                                byte pixelG = pixel[1];
+                                byte pixelR = pixel[2];
+                                byte pixelA = pixel[3];
+
+                                if (pixelA == 0)
+                                {
+                                    continue;
+                                }
+
+                                Ra2PaletteColor c = Ra2PaletteColor.FromArgb(255, pixelR, pixelG, pixelB);
+
+                                if (colorCounts.ContainsKey(c))
+                                {
+                                    colorCounts[c]++;
+                                }
+                                else
+                                {
+                                    colorCounts[c] = 1;
+                                }
+                            }
+                        }
+
+                        resultImg.UnlockBits(bmpData);
+                    }
+
+                    ImageManage.DisposeBitmap(resultImg);
+                }
+
+                sucCount += 1;
+
+                GData.UIData.SetProgressUI(sucCount, maxCount);
+            }
+
+            HashSet<Ra2PaletteColor> appendColor = new HashSet<Ra2PaletteColor>();
+
+            if (colorCounts.Count > palColorNum - 1)
+            {
+                RemoveSimilarColors(colorCounts, diffValue);
+
+                // 获取原图片中对于base颜色中最相近的颜色
+                Ra2PaletteColor ac = Ra2PaletteColor.FromArgb(0, 0, 0, 0);
+
+                object locker = new object();
+                Parallel.For(0, colorBase.Count, i =>
+                {
+                    Ra2PaletteColor cb = colorBase[i];
+                    int minOffset = int.MaxValue;
+                    foreach (var kv in colorCounts)
+                    {
+                        int offset = Math.Abs(kv.Key.R - cb.R) + Math.Abs(kv.Key.G - cb.G) + Math.Abs(kv.Key.B - cb.B);
+                        if (offset <= 15)
+                        {
+                            if (offset < minOffset)
+                            {
+                                minOffset = offset;
+                                ac = kv.Key;
+                            }
+                        }
+                    }
+
+                    if (minOffset != int.MaxValue)
+                    {
+                        lock (locker)
+                        {
+                            appendColor.Add(ac);
+                        }
+                    }
+                });
+            }
+
+            var result = colorCounts.OrderByDescending(c => c.Value).Select(c => c.Key).ToList();
+
+            if (playerColorList != null)
+            {
+                RemovePlayerColors(result, playerColorList);
+            }
+
+            // 插入头部颜色
+            for (int i = paletteHeaderColor.Length - 1; i >= 0; i--)
+            {
+                result.Insert(0, paletteHeaderColor[i]);
+            }
+
+            // 插入玩家所属色
+            if (playerColorList != null)
+            {
+                result.InsertRange(16, playerColorList);
+            }
+
+            result = result.Take(palColorNum).ToList();
+
+            //插入细节颜色
+            if (appendColor.Count > 0)
+            {
+                // 判断当前色盘中有没有这个色
+                List<Ra2PaletteColor> insertBaseColorList = new List<Ra2PaletteColor>();
+                foreach (var cb in appendColor)
+                {
+                    bool isContains = false;
+                    foreach (var cr in result)
+                    {
+                        if (Math.Abs(cr.R - cb.R) + Math.Abs(cr.G - cb.G) + Math.Abs(cr.B - cb.B) <= 20)
+                        {
+                            isContains = true;
+                        }
+                    }
+
+                    if (!isContains)
+                    {
+                        insertBaseColorList.Add(cb);
+                    }
+                }
+
+                if (playerColorList != null)
+                {
+                    RemovePlayerColors(insertBaseColorList, playerColorList);
+                }
+
+                if (insertBaseColorList.Count > 0)
+                {
+                    result.RemoveRange(result.Count - insertBaseColorList.Count - 1, insertBaseColorList.Count);
+                    result.AddRange(insertBaseColorList);
+                }
+            }
 
             while (true)
             {
@@ -430,206 +699,6 @@ namespace Ra2EasyShp.Funcs
             }
 
             result = result.Take(palColorNum).ToList();
-
-            while (true)
-            {
-                if (result.Count >= 256)
-                {
-                    break;
-                }
-
-                result.Add(paletteHeaderColor[0]);
-            }
-
-            GC.Collect();
-
-            return result;
-        }
-
-        /// <summary>
-        /// 生成色盘(补全少部分像素细节)
-        /// </summary>
-        /// <param name="palColorNum"></param>
-        /// <returns></returns>
-        private static async Task<List<Ra2PaletteColor>> Create256ColorPalette_Mode3(int palColorNum, Ra2PaletteColor[] paletteHeaderColor, List<Ra2PaletteColor> playerColorList)
-        {
-            Dictionary<Ra2PaletteColor, int> colorCounts = new Dictionary<Ra2PaletteColor, int>();
-
-            int sucCount = 0;
-            int maxCount = GData.ImageData.Count;
-
-            GData.UIData.SetProgressUI(sucCount, maxCount);
-
-            List<Ra2PaletteColor> colorBase = new List<Ra2PaletteColor>();
-            for (int r = 4; r <= 244; r += 60)
-            {
-                for (int g = 4; g <= 244; g += 60)
-                {
-                    for (int b = 4; b <= 244; b += 60)
-                    {
-                        colorBase.Add(Ra2PaletteColor.FromArgb(255, (byte)r, (byte)g, (byte)b));
-                    }
-                }
-            }
-
-            for (int index = 0; index < GData.ImageData.Count; index++)
-            {
-                Bitmap resultImg = await ImageManage.MergeBitmaps(
-                    index,
-                    index,
-                    GData.ImageData[index].OverlayImage.OffsetX,
-                    GData.ImageData[index].OverlayImage.OffsetY,
-                    GData.ImageData[index].OverlayImage.OverlayMode);
-
-                if (resultImg != null)
-                {
-                    unsafe
-                    {
-                        Rectangle rect = new Rectangle(0, 0, resultImg.Width, resultImg.Height);
-                        BitmapData bmpData = resultImg.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-                        byte* ptr = (byte*)bmpData.Scan0;
-
-                        int stride = bmpData.Stride;
-                        int width = resultImg.Width;
-                        int height = resultImg.Height;
-
-                        object locker = new object();
-
-                        Parallel.For(0, height, y =>
-                        {
-                            for (int x = 0; x < width; x++)
-                            {
-                                byte* pixel = ptr + (y * stride) + (x * 4);
-
-                                byte pixelB = pixel[0];
-                                byte pixelG = pixel[1];
-                                byte pixelR = pixel[2];
-                                byte pixelA = pixel[3];
-
-                                if (pixelA == 0)
-                                {
-                                    continue;
-                                }
-
-                                Ra2PaletteColor c = Ra2PaletteColor.FromArgb(255, pixelR, pixelG, pixelB);
-
-                                lock (locker)
-                                {
-                                    if (colorCounts.ContainsKey(c))
-                                    {
-                                        colorCounts[c]++;
-                                    }
-                                    else
-                                    {
-                                        colorCounts[c] = 1;
-                                    }
-                                }
-                            }
-                        });
-
-                        resultImg.UnlockBits(bmpData);
-                    }
-
-                    ImageManage.DisposeBitmap(resultImg);
-                }
-
-                sucCount += 1;
-
-                GData.UIData.SetProgressUI(sucCount, maxCount);
-            }
-
-            HashSet<Ra2PaletteColor> appendColor = new HashSet<Ra2PaletteColor>();
-
-            if (colorCounts.Count > palColorNum - 1)
-            {
-                RemoveSimilarColors(colorCounts);
-
-                // 获取原图片中对于base颜色中最相近的颜色
-                Ra2PaletteColor ac = Ra2PaletteColor.FromArgb(0, 0, 0, 0);
-
-                object locker = new object();
-                Parallel.For(0, colorBase.Count, i =>
-                {
-                    Ra2PaletteColor cb = colorBase[i];
-                    int minOffset = int.MaxValue;
-                    foreach (var kv in colorCounts)
-                    {
-                        int offset = Math.Abs(kv.Key.R - cb.R) + Math.Abs(kv.Key.G - cb.G) + Math.Abs(kv.Key.B - cb.B);
-                        if (offset <= 15)
-                        {
-                            if (offset < minOffset)
-                            {
-                                minOffset = offset;
-                                ac = kv.Key;
-                            }
-                        }
-                    }
-
-                    if (minOffset != int.MaxValue)
-                    {
-                        lock (locker)
-                        {
-                            appendColor.Add(ac);
-                        }
-                    }
-                });
-            }
-
-            var result = colorCounts.OrderByDescending(c => c.Value).Select(c => c.Key).ToList();
-
-            if (playerColorList != null)
-            {
-                RemovePlayerColors(result, playerColorList);
-            }
-
-            // 插入头部颜色
-            for (int i = paletteHeaderColor.Length - 1; i >= 0; i--)
-            {
-                result.Insert(0, paletteHeaderColor[i]);
-            }
-
-            // 插入玩家所属色
-            if (playerColorList != null)
-            {
-                result.InsertRange(16, playerColorList);
-            }
-
-            result = result.Take(palColorNum).ToList();
-
-            // 插入细节颜色
-            if (appendColor.Count > 0)
-            {
-                // 判断当前色盘中有没有这个色
-                List<Ra2PaletteColor> insertBaseColorList = new List<Ra2PaletteColor>();
-                foreach (var cb in appendColor)
-                {
-                    bool isContains = false;
-                    foreach (var cr in result)
-                    {
-                        if (Math.Abs(cr.R - cb.R) + Math.Abs(cr.G - cb.G) + Math.Abs(cr.B - cb.B) <= 20)
-                        {
-                            isContains = true;
-                        }
-                    }
-
-                    if (!isContains)
-                    {
-                        insertBaseColorList.Add(cb);
-                    }
-                }
-
-                if (playerColorList != null)
-                {
-                    RemovePlayerColors(insertBaseColorList, playerColorList);
-                }
-
-                if (insertBaseColorList.Count > 0)
-                {
-                    result.RemoveRange(result.Count - insertBaseColorList.Count - 1, insertBaseColorList.Count);
-                    result.AddRange(insertBaseColorList);
-                }
-            }
 
             while (true)
             {

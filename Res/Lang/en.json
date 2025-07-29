@@ -114,6 +114,7 @@
   "ComboBoxItem_CreatePalette_DominantColor": "Dominant color",
   "ComboBoxItem_CreatePalette_DominantColorExtra": "Dominant color extra",
   "ComboBoxItem_CreatePalette_OctreeQuantizer": "Octree Quantizer",
+  "Text_CreatePalette_ColorMerging": "Color merging",
   "Btn_CreatePalette_Create": "Generate",
   "Text_CreateShp": "Generate SHP",
   "Text_CreateShp_SaveMode": "Save mode",
@@ -124,6 +125,11 @@
   "Btn_CreateShp_ShadowFrameLatterPartOfList": "Second half",
   "Cb_CreateShp_ShadowFrameTip": "Shadow frames to '1' color",
   "Btn_CreateShp_CreateShp": "Generate",
+  
+  "Text_ColorDither": "Color dither",
+  "ComboboxItem_ColorDither_None": "No",
+  "ComboboxItem_ColorDither_PlayerColor": "Have palyer color",
+  "ComboboxItem_PlayerColor_NotPlayerColor": "Not player color",
   
   "Btn_LoadLastSavePalette": "Load last saved palette",
   "Btn_LoadPalette": "Load palette(Drop pal preview)",
@@ -263,4 +269,15 @@
   "Text_ShortcutKeys_CanvasEdit": "Canvas edit",
   "Text_ShortcutKeys_CanvasEdit_Drag": "Drag to Set",
   "Text_ShortcutKeys_CanvasEdit_Drag_Tip": "Preview is original mode",
+  
+  "Ti_Exprot_Palette": "Palette",
+  "Ti_Exprot_Shp": "SHP",
+  "Ti_Exprot_Image": "Image",
+  
+  "Text_SaveShpOpenPath": "Open folder after save",
+  "Rb_SaveShpOpenPath_AskMe": "Ask me",
+  "Rb_SaveShpOpenPath_Yes": "Yes",
+  "Rb_SaveShpOpenPath_No": "No",
+  
+  "Cb_SavePaletteLoad": "Load palette after save",
 }

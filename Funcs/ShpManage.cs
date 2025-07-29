@@ -7,6 +7,9 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Linq;
+using ImageProcessor.Imaging;
+using ImageProcessor.Processors;
+using System.Reflection;
 
 namespace Ra2EasyShp.Funcs
 {
@@ -33,8 +36,34 @@ namespace Ra2EasyShp.Funcs
             internal byte[] FrameData;
         }
 
-        private static void ViewBitmapSetColor(byte r, byte g, byte b, List<Ra2PaletteColor> palette, bool backGround, out byte oA, out byte oR, out byte oG, out byte oB)
+        private static void ApplyError((byte a, byte r, byte g, byte b)[,] pixels, int x, int y, int errR, int errG, int errB, double factor)
         {
+            if (x < 0 || y < 0 || x >= pixels.GetLength(0) || y >= pixels.GetLength(1))
+            {
+                return;
+            }
+            if (pixels[x, y].a == 0)
+            {
+                return;
+            }
+
+            byte r = (byte)Clamp(pixels[x, y].r + (int)(errR * factor));
+            byte g = (byte)Clamp(pixels[x, y].g + (int)(errG * factor));
+            byte b = (byte)Clamp(pixels[x, y].b + (int)(errB * factor));
+            pixels[x, y].r = r;
+            pixels[x, y].g = g;
+            pixels[x, y].b = b;
+        }
+
+        private static int Clamp(int v)
+        {
+            return Math.Max(0, Math.Min(255, v));
+        }
+
+        private static void ViewBitmapSetColor(byte r, byte g, byte b, List<Ra2PaletteColor> palette, bool backGround, out byte oA, out byte oR, out byte oG, out byte oB, out bool isPlayerColor)
+        {
+            isPlayerColor = false;
+
             int palIndex = PaletteManage.GetPaletteIndex(r, g, b);
 
             if (palIndex == 0 && !backGround)
@@ -57,19 +86,32 @@ namespace Ra2EasyShp.Funcs
                 return;
             }
 
+            // 阵营所属色
             oA = (byte)255;
             oR = GData.PlayerColorDic[GData.PlayerColorView][palIndex - 16][0];
             oG = GData.PlayerColorDic[GData.PlayerColorView][palIndex - 16][1];
             oB = GData.PlayerColorDic[GData.PlayerColorView][palIndex - 16][2];
+
+            isPlayerColor = true;
         }
 
-        internal static Bitmap BitmapOnPalette(Bitmap bitmap, List<Ra2PaletteColor> palette, bool background)
+        internal static Bitmap BitmapOnPalette(Bitmap bitmap, List<Ra2PaletteColor> palette, bool background, Enums.ColorDither colorDither)
         {
             if (bitmap == null)
             {
                 return null;
             }
 
+            if (colorDither != Enums.ColorDither.无)
+            {
+                return BitmapOnPaletteDitherOn(bitmap, palette, background, colorDither);
+            }
+
+            return BitmapOnPaletteDitherOff(bitmap, palette, background);
+        }
+
+        private static Bitmap BitmapOnPaletteDitherOff(Bitmap bitmap, List<Ra2PaletteColor> palette, bool background)
+        {
             Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
             BitmapData bitmapData = bitmap.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
@@ -110,7 +152,7 @@ namespace Ra2EasyShp.Funcs
                             }
                             else
                             {
-                                ViewBitmapSetColor(pixel[2], pixel[1], pixel[0], palette, background, out byte oA, out byte oR, out byte oG, out byte oB);
+                                ViewBitmapSetColor(pixel[2], pixel[1], pixel[0], palette, background, out byte oA, out byte oR, out byte oG, out byte oB, out _);
 
                                 resultPixel[3] = oA;
                                 resultPixel[2] = oR;
@@ -131,6 +173,111 @@ namespace Ra2EasyShp.Funcs
             {
                 bitmap.UnlockBits(bitmapData);
                 resultBitmap.UnlockBits(resultBitmapData);
+            }
+        }
+
+        private static Bitmap BitmapOnPaletteDitherOn(Bitmap bitmap, List<Ra2PaletteColor> palette, bool background, Enums.ColorDither colorDither)
+        {
+            unsafe
+            {
+                int width = bitmap.Width;
+                int height = bitmap.Height;
+
+                Rectangle rect = new Rectangle(0, 0, width, height);
+                BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+                Bitmap outputBitmap = new Bitmap(width, height);
+                BitmapData bmpDataOutImg = outputBitmap.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+                byte* ptrImg = (byte*)bmpData.Scan0;
+                byte* ptrOutImg = (byte*)bmpDataOutImg.Scan0;
+
+                int stride = bmpData.Stride;
+
+                try
+                {
+                    (byte a, byte r, byte g, byte b)[,] pixels = new (byte a, byte r, byte g, byte b)[width, height];
+
+                    Parallel.For(0, height, y =>
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            byte* pixel = ptrImg + (y * stride) + (x * 4);
+
+                            byte pixelB = pixel[0];
+                            byte pixelG = pixel[1];
+                            byte pixelR = pixel[2];
+                            byte pixelA = pixel[3];
+
+                            pixels[x, y] = (pixelA, pixelR, pixelG, pixelB);
+                        }
+                    });
+
+                    Parallel.For(0, height, y =>
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            byte* pixel = ptrImg + (y * stride) + (x * 4);
+                            byte* pixelOutImg = ptrOutImg + (y * stride) + (x * 4);
+
+                            byte pixelB = pixel[0];
+                            byte pixelG = pixel[1];
+                            byte pixelR = pixel[2];
+                            byte pixelA = pixel[3];
+
+                            if (pixelA == 0)
+                            {
+                                if (background)
+                                {
+                                    pixelOutImg[3] = 255;
+                                }
+                                else
+                                {
+                                    pixelOutImg[3] = 0;
+                                }
+
+                                pixelOutImg[2] = (byte)(palette[0].R * 4);
+                                pixelOutImg[1] = (byte)(palette[0].G * 4);
+                                pixelOutImg[0] = (byte)(palette[0].B * 4);
+                            }
+                            else
+                            {
+                                ViewBitmapSetColor(pixels[x, y].r, pixels[x, y].g, pixels[x, y].b, palette, true, out byte oA, out byte oR, out byte oG, out byte oB, out bool isPlayerColor);
+
+                                pixelOutImg[0] = oB;
+                                pixelOutImg[1] = oG;
+                                pixelOutImg[2] = oR;
+                                pixelOutImg[3] = oA;
+
+                                if (!isPlayerColor || colorDither == Enums.ColorDither.无所属色)
+                                {
+                                    int errR = pixels[x, y].r - oR;
+                                    int errG = pixels[x, y].g - oG;
+                                    int errB = pixels[x, y].b - oB;
+
+                                    ApplyError(pixels, x + 1, y, errR, errG, errB, 7.0 / 16);
+                                    ApplyError(pixels, x - 1, y + 1, errR, errG, errB, 3.0 / 16);
+                                    ApplyError(pixels, x, y + 1, errR, errG, errB, 5.0 / 16);
+                                    ApplyError(pixels, x + 1, y + 1, errR, errG, errB, 1.0 / 16);
+                                }
+                            }
+                        }
+                    });
+                }
+                catch
+                {
+                    return null;
+                }
+                finally
+                {
+                    bitmap.UnlockBits(bmpData);
+                    bitmap.Dispose();
+                    outputBitmap.UnlockBits(bmpDataOutImg);
+
+                    GC.Collect();
+                }
+
+                return outputBitmap;
             }
         }
 

@@ -114,6 +114,7 @@
   "ComboBoxItem_CreatePalette_DominantColor": "主要颜色",
   "ComboBoxItem_CreatePalette_DominantColorExtra": "主要颜色+补全",
   "ComboBoxItem_CreatePalette_OctreeQuantizer": "Octree Quantizer",
+  "Text_CreatePalette_ColorMerging": "颜色合并",
   "Btn_CreatePalette_Create": "生成",
   "Text_CreateShp": "生成SHP",
   "Text_CreateShp_SaveMode": "储存模式",
@@ -124,6 +125,11 @@
   "Btn_CreateShp_ShadowFrameLatterPartOfList": "列表后半",
   "Cb_CreateShp_ShadowFrameTip": "影子帧绘制为1号色",
   "Btn_CreateShp_CreateShp": "生成",
+  
+  "Text_ColorDither": "颜色仿色",
+  "ComboboxItem_ColorDither_None": "无",
+  "ComboboxItem_ColorDither_PlayerColor": "有所属色",
+  "ComboboxItem_PlayerColor_NotPlayerColor": "无所属色",
   
   "Btn_LoadLastSavePalette": "载入最后保存的色盘",
   "Btn_LoadPalette": "载入色盘(或文件拖入上方)",
@@ -263,4 +269,15 @@
   "Text_ShortcutKeys_CanvasEdit": "画布调整",
   "Text_ShortcutKeys_CanvasEdit_Drag": "拖动设置",
   "Text_ShortcutKeys_CanvasEdit_Drag_Tip": "显示模式为原图下",
+  
+  "Ti_Exprot_Palette": "色盘",
+  "Ti_Exprot_Shp": "SHP",
+  "Ti_Exprot_Image": "图片",
+  
+  "Text_SaveShpOpenPath": "保存后打开文件夹",
+  "Rb_SaveShpOpenPath_AskMe": "询问",
+  "Rb_SaveShpOpenPath_Yes": "是",
+  "Rb_SaveShpOpenPath_No": "否",
+  
+  "Cb_SavePaletteLoad": "保存后载入色盘",
 }

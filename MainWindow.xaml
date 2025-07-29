@@ -259,6 +259,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="0.45*" MaxHeight="280"/>
                 </Grid.RowDefinitions>
 
@@ -338,9 +339,22 @@
                             </Grid>
                         </ScrollViewer>
                     </Border>
+                </Grid>
 
-                    <Viewbox VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0 0 18 18" MaxWidth="258">
-                        <StackPanel Orientation="Horizontal" Background="White" IsHitTestVisible="False">
+                <Viewbox Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="0 2 0 0" >
+                    <StackPanel Orientation="Horizontal" Width="auto">
+                        <StackPanel Orientation="Horizontal" Margin="0 0 0 0" HorizontalAlignment="Left">
+                            <StackPanel.ToolTip>
+                                <ToolTip Background="LightYellow">
+                                    <TextBlock d:Text="预览窗口中Ctrl+鼠标滚轮进行缩放" Text="{Binding LanguageDic[Text_PreviewScaleTip]}" TextWrapping="Wrap" Width="160"/>
+                                </ToolTip>
+                            </StackPanel.ToolTip>
+
+                            <TextBlock d:Text="预览缩放" Text="{Binding LanguageDic[Text_PreviewScale]}"/>
+                            <TextBlock d:Text="100%" Text="{Binding ImageViewScaleTransformStr}" Margin="5 0 0 0"/>
+                        </StackPanel>
+                        
+                        <StackPanel Orientation="Horizontal" IsHitTestVisible="False" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="250 0 0 0">
                             <TextBlock Text="["/>
                             <TextBlock d:Text="坐标" Text="{Binding LanguageDic[Text_ImagePreview_Point]}"/>
                             <TextBlock Text="X: " Margin="5 0 0 0"/>
@@ -352,11 +366,11 @@
                             <TextBlock Text="{Binding ViewImagePointPaletteIndex}" Margin="5 0 0 0" Width="30"/>
                             <TextBlock Text="]"/>
                         </StackPanel>
-                    </Viewbox>
-                </Grid>
+                    </StackPanel>
+                </Viewbox>
 
                 <!--显示设置-->
-                <Viewbox Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" MaxWidth="650" Margin="0 5 0 0">
+                <Viewbox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" MaxWidth="650" Margin="0 3 0 0">
                     <StackPanel Orientation="Horizontal">
                         <Border BorderThickness="1" BorderBrush="Gray" Width="260">
                             <Viewbox>
@@ -390,22 +404,11 @@
                                 </StackPanel>
                             </Viewbox>
                         </Border>
-
-                        <StackPanel Orientation="Horizontal" Margin="10 0 0 0" Background="Transparent">
-                            <StackPanel.ToolTip>
-                                <ToolTip Background="LightYellow">
-                                    <TextBlock d:Text="预览窗口中Ctrl+鼠标滚轮进行缩放" Text="{Binding LanguageDic[Text_PreviewScaleTip]}" TextWrapping="Wrap" Width="160"/>
-                                </ToolTip>
-                            </StackPanel.ToolTip>
-
-                            <TextBlock d:Text="预览缩放" Text="{Binding LanguageDic[Text_PreviewScale]}"/>
-                            <TextBlock d:Text="100%" Text="{Binding ImageViewScaleTransformStr}" Margin="5 0 0 0"/>
-                        </StackPanel>
                     </StackPanel>
                 </Viewbox>
 
                 <!--播放-预览-->
-                <Viewbox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" MaxWidth="650" Margin="0 8 0 0">
+                <Viewbox Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" MaxWidth="650" Margin="0 7 0 0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock d:Text="当前序号:" Text="{Binding LanguageDic[Text_NowImageIndex]}" FontSize="16"/>
@@ -444,7 +447,7 @@
                 </Viewbox>
 
                 <!--下方功能栏-->
-                <Viewbox Grid.Row="3" Grid.Column="0" Margin="0 10 0 0">
+                <Viewbox Grid.Row="4" Grid.Column="0" Margin="0 2 0 0">
                     <TabControl x:Name="TabControl_Tools" IsEnabled="{Binding UIEnable}" Width="620" Height="210" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                         <!--裁剪缩放-->
                         <TabItem d:Header="裁剪/缩放" Header="{Binding LanguageDic[Tc_CutResize]}" MinWidth="80">
@@ -542,7 +545,7 @@
                             </StackPanel>
                         </TabItem>
 
-                        <TabItem d:Header="透明仿色" Header="{Binding LanguageDic[Tc_Dither]}" MinWidth="80">
+                        <TabItem d:Header="仿色" Header="{Binding LanguageDic[Tc_Dither]}" MinWidth="80">
                             <Grid Margin="10 10 0 0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
@@ -556,19 +559,22 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <CheckBox Grid.Row="0" x:Name="CheckBox_OutlineTransparent" d:Content="按轮廓透明过渡(对不带透明过渡图片使用的)" Content="{Binding LanguageDic[Rb_Dither_OutlineTransparent]}" IsChecked="{Binding DitherUI.IsTransparent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Checked="CheckBox_OutlineTransparent_Changed" Unchecked="CheckBox_OutlineTransparent_Changed"/>
-
-                                <Grid Grid.Row="1" Grid.Column="0" Margin="0 12 0 0">
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <CheckBox x:Name="CheckBox_OutlineTransparent" d:Content="逐渐透明化边缘" Content="{Binding LanguageDic[Rb_Dither_OutlineTransparent]}" IsChecked="{Binding DitherUI.IsTransparent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Checked="CheckBox_OutlineTransparent_Changed" Unchecked="CheckBox_OutlineTransparent_Changed"/>
+                                </StackPanel>
+                                
+                                <Grid Grid.Row="1" Grid.Column="0" Margin="0 10 0 0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="120"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" d:Text="透明度扩散" Text="{Binding LanguageDic[Text_Dither_TransparentDiffusion]}" Width="90" HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Column="0" d:Text="透明度扩散" Text="{Binding LanguageDic[Text_Dither_TransparentDiffusion]}" Width="80" HorizontalAlignment="Left"/>
+                                    
                                     <Slider x:Name="Slider_TransparentDiffusion"
                                         Grid.Column="1"
-                                        Width="390"
+                                        Width="370"
                                         Minimum="0.01"
                                         Maximum="1.5"
                                         TickFrequency="0.01"
@@ -576,7 +582,7 @@
                                         IsSnapToTickEnabled="True"
                                         Margin="5 0 0 0"
                                         PreviewMouseUp="Slider_MouseUp"
-                                />
+                                    />
 
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left">
                                         <Button Tag="-0.1"  Width="15" Height="15" Background="Transparent" BorderThickness="0" Click="Button_ChangeTransparentDiffusion_Click">
@@ -599,17 +605,18 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <Grid Grid.Row="2" Margin="0 12 0 0">
+                                <Grid Grid.Row="2" Margin="0 10 0 0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="120"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" d:Text="边缘明暗度" Text="{Binding LanguageDic[Text_Dither_Lightness]}" Width="90" HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Column="0" d:Text="边缘明暗度" Text="{Binding LanguageDic[Text_Dither_Lightness]}" Width="80" HorizontalAlignment="Left"/>
+                                    
                                     <Slider x:Name="Slider_Lightness"
                                         Grid.Column="1"
-                                        Width="390"
+                                        Width="370"
                                         Minimum="-1.0"
                                         Maximum="1.0"
                                         TickFrequency="0.01"
@@ -640,17 +647,18 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <Grid Grid.Row="3" Margin="0 12 0 0">
+                                <Grid Grid.Row="3" Margin="0 10 0 0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="120"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" d:Text="整体透明度" Text="{Binding LanguageDic[Text_Dither_Alpha]}" Width="90" HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Column="0" d:Text="整体透明度" Text="{Binding LanguageDic[Text_Dither_Alpha]}" Width="80" HorizontalAlignment="Left"/>
+                                    
                                     <Slider x:Name="Slider_Alpha"
                                         Grid.Column="1"
-                                        Width="390"
+                                        Width="370"
                                         Minimum="-255"
                                         Maximum="255"
                                         TickFrequency="1"
@@ -719,119 +727,216 @@
                         </TabItem>
 
                         <TabItem d:Header="导出/生成" Header="{Binding LanguageDic[Tc_Exprot]}" MinWidth="80">
-                            <StackPanel Orientation="Horizontal" Margin="10 10 0 0">
-                                <GroupBox d:Header="导出全部图片" Header="{Binding LanguageDic[Text_Exprot_ExprotAllImage]}" Height="150" VerticalAlignment="Top">
-                                    <StackPanel Margin="0 3 0 0">
-                                        <Button d:Content="仿色后" Content="{Binding LanguageDic[Text_Exprot_Dither]}" Click="Button_ExportAllImage_Click" FontSize="16" Height="24" Width="100" Margin="0 0 0 0"/>
-                                        <Button d:Content="色盘下" Content="{Binding LanguageDic[Text_Exprot_OnPalette]}" Click="Button_ExportAllPaletteImage_Click" FontSize="16" Height="24" Width="100" Margin="0 10 0 0"/>
-                                        <Button Click="Button_ExportAllPaletteImageNoBackground_Click" FontSize="16" MinHeight="24" Width="100" Margin="0 10 0 0">
-                                            <TextBlock d:Text="色盘下无背景" Text="{Binding LanguageDic[Text_Exprot_OnPaletteNotBackground]}" FontSize="15" TextWrapping="Wrap"/>
-                                        </Button>
-                                    </StackPanel>
-                                </GroupBox>
-
-                                <GroupBox d:Header="生成色盘" Header="{Binding LanguageDic[Text_CreatePalette]}" Margin="10 0 0 0" Height="165" VerticalAlignment="Top">
-                                    <StackPanel Margin="0 5 0 0" HorizontalAlignment="Left">
+                            <TabControl TabStripPlacement="Left" Margin="0 5 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <TabItem d:Header="色盘" Header="{Binding LanguageDic[Ti_Exprot_Palette]}" Height="30" MinWidth="60">
+                                    <StackPanel HorizontalAlignment="Left" Margin="10 0 0 0" Height="165" Width="550">
                                         <StackPanel Orientation="Horizontal">
-                                            <CheckBox x:Name="CheckBox_PlayerColor" d:Content="所属色" Content="{Binding LanguageDic[Cb_CreatePalette_PlayerColor]}" Margin="0 3 0 0" Checked="CheckBox_PlayerColor_Changed" Unchecked="CheckBox_PlayerColor_Changed"/>
-                                            <Button x:Name="Button_EditPlayerColor" d:Content="所属色拾取" Content="{Binding LanguageDic[Cb_CreatePalette_SetPlayerColor]}" Margin="10 0 0 0" IsEnabled="False" Click="Button_EditPlayerColor_Click"/>
-                                        </StackPanel>
+                                            <StackPanel Margin="0 5 0 0" HorizontalAlignment="Left">
+                                                <ComboBox x:Name="ComboBox_CreatePalMode" DisplayMemberPath="DisplayName" SelectedValuePath="Value" FontSize="15" Width="160" Height="25" HorizontalAlignment="Left" Margin="1 0 0 0">
+                                                    <ComboBox.ToolTip>
+                                                        <ToolTip Background="LightYellow">
+                                                            <StackPanel>
+                                                                <TextBlock FontWeight="Bold" d:Text="主要颜色 (生成速度慢)：" Text="{Binding LanguageDic[Text_CreatePalette_Tip1]}"/>
+                                                                <TextBlock d:Text="适用于图片颜色不是太复杂的情况" Text="{Binding LanguageDic[Text_CreatePalette_Tip2]}"/>
+                                                                <TextBlock d:Text="根据图片占比最高的颜色生成，会合并几乎相同的颜色" Text="{Binding LanguageDic[Text_CreatePalette_Tip3]}"/>
+                                                                <TextBlock d:Text="如有少量的其他颜色可能会被忽略" Text="{Binding LanguageDic[Text_CreatePalette_Tip4]}"/>
 
-                                        <StackPanel Orientation="Horizontal" Margin="0 7 0 0" HorizontalAlignment="Left">
-                                            <StackPanel.ToolTip>
-                                                <ToolTip Background="LightYellow">
-                                                    <TextBlock d:Text="单位和建筑16-31号为玩家所属色，240-255号色不随光照变化，不使用240-255号色可填写(240)" Text="{Binding LanguageDic[Text_CreatePalette_ColorCountTip]}" TextWrapping="Wrap" Width="230"/>
-                                                </ToolTip>
-                                            </StackPanel.ToolTip>
-                                            <TextBlock d:Text="色盘颜色数量" Text="{Binding LanguageDic[Text_CreatePalette_ColorCount]}"/>
-                                            <TextBox x:Name="TextBox_PalColorNum" Text="256" Width="40" Height="21" Padding="0 0 0 0"/>
-                                        </StackPanel>
+                                                                <TextBlock FontWeight="Bold" d:Text="主要颜色+补全 (生成速度慢)：" Margin="0 10 0 0" Text="{Binding LanguageDic[Text_CreatePalette_Tip5]}"/>
+                                                                <TextBlock d:Text="适用于图片颜色不是太复杂的情况" Text="{Binding LanguageDic[Text_CreatePalette_Tip6]}"/>
+                                                                <TextBlock d:Text="在[主要颜色]的基础上尽可能补全其他占比较少的颜色" Text="{Binding LanguageDic[Text_CreatePalette_Tip7]}"/>
 
-                                        <StackPanel Margin="0 5 0 0">
-                                            <TextBlock d:Text="色盘背景/头部颜色" Text="{Binding LanguageDic[Text_CreatePalette_HeaderColor]}" HorizontalAlignment="Left"/>
+                                                                <TextBlock FontWeight="Bold" d:Text="OctreeQuantizer (生成速度快)：" Margin="0 10 0 0" Text="{Binding LanguageDic[Text_CreatePalette_Tip8]}"/>
+                                                                <TextBlock d:Text="适用于图片颜色比较复杂的情况" Text="{Binding LanguageDic[Text_CreatePalette_Tip9]}"/>
+                                                                <TextBlock d:Text="八叉树颜色量化算法" Text="{Binding LanguageDic[Text_CreatePalette_Tip10]}"/>
+                                                            </StackPanel>
+                                                        </ToolTip>
+                                                    </ComboBox.ToolTip>
+                                                </ComboBox>
 
-                                            <StackPanel Orientation="Horizontal">
-                                                <Grid Margin="0 0 0 0">
+                                                <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                                                    <CheckBox x:Name="CheckBox_PlayerColor" d:Content="所属色" Content="{Binding LanguageDic[Cb_CreatePalette_PlayerColor]}" Margin="0 3 0 0" Checked="CheckBox_PlayerColor_Changed" Unchecked="CheckBox_PlayerColor_Changed"/>
+                                                    <Button x:Name="Button_EditPlayerColor" d:Content="所属色拾取" Content="{Binding LanguageDic[Cb_CreatePalette_SetPlayerColor]}" Height="21" Margin="10 0 0 0" IsEnabled="False" Click="Button_EditPlayerColor_Click"/>
+                                                </StackPanel>
+
+                                                <StackPanel Orientation="Horizontal" Margin="0 5 0 0" HorizontalAlignment="Left">
+                                                    <StackPanel.ToolTip>
+                                                        <ToolTip Background="LightYellow">
+                                                            <TextBlock d:Text="单位和建筑16-31号为玩家所属色，240-255号色不随光照变化，不使用240-255号色可填写(240)" Text="{Binding LanguageDic[Text_CreatePalette_ColorCountTip]}" TextWrapping="Wrap" Width="230"/>
+                                                        </ToolTip>
+                                                    </StackPanel.ToolTip>
+                                                    <TextBlock d:Text="色盘颜色数量" Text="{Binding LanguageDic[Text_CreatePalette_ColorCount]}"/>
+                                                    <TextBox x:Name="TextBox_PalColorNum" Text="256" Width="40" Height="21" Padding="0 0 0 0"/>
+                                                </StackPanel>
+
+                                                <StackPanel Orientation="Horizontal" Margin="0 4 0 0">
+                                                    <TextBlock Grid.Column="0" d:Text="颜色合并" Text="{Binding LanguageDic[Text_CreatePalette_ColorMerging]}" HorizontalAlignment="Left"/>
+
+                                                    <Slider x:Name="Slider_GeneratePaletteDiffValue"
+                                                        Width="100"
+                                                        Minimum="1"
+                                                        Maximum="10"
+                                                        TickFrequency="1.0"
+                                                        Value="3"
+                                                        IsSnapToTickEnabled="True"
+                                                        Margin="0 0 0 0"
+                                                        AutoToolTipPlacement="TopLeft"
+                                                        HorizontalAlignment="Left"
+                                                    />
+                                                </StackPanel>
+
+                                                <StackPanel Margin="0 4 0 0">
+                                                    <TextBlock d:Text="色盘背景/头部颜色" Text="{Binding LanguageDic[Text_CreatePalette_HeaderColor]}" HorizontalAlignment="Left"/>
+
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Path Width="16" Height="16" Margin="14 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
-                                                        <Path Width="16" Height="16" Margin="24 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
-                                                        <Path Width="16" Height="16" Margin="24 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
-                                                    </StackPanel>
+                                                        <Grid Margin="0 0 0 0">
+                                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="0 2 0 0">
+                                                                <Path Width="13" Height="13" Margin="12 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
+                                                                <Path Width="13" Height="13" Margin="22 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
+                                                                <Path Width="13" Height="13" Margin="22 0 0 0" Fill="Black" Stretch="Fill" Data="M964.794062 100.92562 923.057495 59.190077 511.999488 470.263433 100.938412 59.190077 59.203892 100.92562 470.263945 512 59.232544 923.045727 100.968088 964.78127 511.999488 553.736567 923.057495 964.8089 964.794062 923.073356 553.732985 512Z"/>
+                                                            </StackPanel>
 
-                                                    <StackPanel x:Name="StackPanel_PaletteHeaderColor" Orientation="Horizontal">
-                                                        <Button Width="20" Height="20" Background="Transparent" Margin="12 0 0 0" Click="Button_SetPalHeaderColor_Click"/>
-                                                        <Button Width="20" Height="20" Background="Transparent" Margin="20 0 0 0" Click="Button_SetPalHeaderColor_Click" MouseRightButtonDown="ClearPalHeaderColor"/>
-                                                        <Button Width="20" Height="20" Background="Transparent" Margin="20 0 0 0" Click="Button_SetPalHeaderColor_Click" MouseRightButtonDown="ClearPalHeaderColor"/>
-                                                    </StackPanel>
+                                                            <StackPanel x:Name="StackPanel_PaletteHeaderColor" Orientation="Horizontal" VerticalAlignment="Top">
+                                                                <Button Width="17" Height="17" Background="Transparent" Margin="10 0 0 0" Click="Button_SetPalHeaderColor_Click"/>
+                                                                <Button Width="17" Height="17" Background="Transparent" Margin="18 0 0 0" Click="Button_SetPalHeaderColor_Click" MouseRightButtonDown="ClearPalHeaderColor"/>
+                                                                <Button Width="17" Height="17" Background="Transparent" Margin="18 0 0 0" Click="Button_SetPalHeaderColor_Click" MouseRightButtonDown="ClearPalHeaderColor"/>
+                                                            </StackPanel>
 
+                                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                                                                <TextBlock Text="0"/>
+                                                                <TextBlock Text="1" Margin="25 0 0 0"/>
+                                                                <TextBlock Text="2" Margin="25 0 0 0"/>
+                                                            </StackPanel>
+                                                        </Grid>
+
+                                                        <StackPanel Margin="10 -10 0 0">
+                                                            <TextBlock d:Text="左键设置" Text="{Binding LanguageDic[Text_CreatePalette_HeaderColorTip1]}" FontSize="14"/>
+                                                            <TextBlock d:Text="右键删除" Text="{Binding LanguageDic[Text_CreatePalette_HeaderColorTip2]}" FontSize="14" Margin="0 0 0 0"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <StackPanel Margin="35 0 0 0">
+                                                <CheckBox x:Name="CheckBox_PaletteCustomSavePath" d:Content="自定义保存目录" Content="{Binding LanguageDic[Cb_SavePalette_CustomSavePath]}" Margin="0 3 0 0" IsChecked="{Binding SaveConfig.IsPaletteCustomPath, Mode=TwoWay}" Checked="CheckBox_GeneratePaletteCustomSavePath" Unchecked="CheckBox_GeneratePaletteAutoSavePath"/>
+
+                                                <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                                                    <CheckBox x:Name="CheckBox_PaletteMapTypeForName" IsChecked="{Binding SaveConfig.IsPaletteMapType, Mode=TwoWay}" d:Content="创建地图类型命名副本" Content="{Binding LanguageDic[Cb_SavePalette_MapTypeForFileName]}" Margin="0 0 0 0"/>
+                                                    <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Click="Button_GeneratePaletteMapTypeTip_Click"/>
+                                                </StackPanel>
+
+                                                <StackPanel x:Name="StackPanel_PaletteSaveFileName" Margin="0 3 0 0">
+                                                    <TextBlock d:Text="命名(为空保存为 色盘.pal)" Text="{Binding LanguageDic[Text_SavePalette_FileName]}"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
+                                                        <TextBox x:Name="TextBox_PaletteFileName" Text="{Binding SaveConfig.PaletteName, Mode=TwoWay}" FontSize="14" Width="120" Height="22" HorizontalAlignment="Left"/>
+                                                        <TextBlock Text=".pal" Margin="5 0 0 0"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <StackPanel x:Name="StackPanel_PaletteCustomSaveFileName" Margin="0 3 0 0" Visibility="Collapsed">
+                                                    <TextBlock d:Text="保存目录" Text="{Binding LanguageDic[Text_SavePalette_SavePath]}"/>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="0"/>
-                                                        <TextBlock Text="1" Margin="30 0 0 0"/>
-                                                        <TextBlock Text="2" Margin="30 0 0 0"/>
+                                                        <TextBox x:Name="TextBox_PaletteSavePath" Text="{Binding SaveConfig.PaletteCustomPath, Mode=TwoWay}" FontSize="14" Width="200" Height="22"/>
+                                                        <Button Content="…" Height="20" Width="20" Margin="5 0 0 0" Click="CheckBox_PaletteSetCustomPath"/>
                                                     </StackPanel>
-                                                </Grid>
+                                                </StackPanel>
 
-                                                <StackPanel Margin="10 -15 0 0">
-                                                    <TextBlock d:Text="左键设置" Text="{Binding LanguageDic[Text_CreatePalette_HeaderColorTip1]}" FontSize="14"/>
-                                                    <TextBlock d:Text="右键删除" Text="{Binding LanguageDic[Text_CreatePalette_HeaderColorTip2]}" FontSize="14"/>
+                                                <CheckBox x:Name="CheckBox_PaletteSaveLoadPalette" d:Content="保存后载入色盘" Content="{Binding LanguageDic[Cb_SavePaletteLoad]}" Margin="0 5 0 0"/>
+
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                    <GroupBox d:Header="保存后打开文件夹" Header="{Binding LanguageDic[Text_SaveShpOpenPath]}">
+                                                        <StackPanel Orientation="Horizontal" Margin="0 3 0 0">
+                                                            <RadioButton x:Name="RadioButton_PaletteSaveOpenPath_AskMe" d:Content="询问" Content="{Binding LanguageDic[Rb_SaveShpOpenPath_AskMe]}" Padding="0 -3 0 0" IsChecked="True"/>
+                                                            <RadioButton x:Name="RadioButton_PaletteSaveOpenPath_Yes" d:Content="是" Content="{Binding LanguageDic[Rb_SaveShpOpenPath_Yes]}" Padding="0 -3 0 0" Margin="10 0 0 0"/>
+                                                            <RadioButton x:Name="RadioButton_PaletteSaveOpenPath_No" d:Content="否" Content="{Binding LanguageDic[Rb_SaveShpOpenPath_No]}" Padding="0 -3 0 0" Margin="10 0 0 0"/>
+                                                        </StackPanel>
+                                                    </GroupBox>
+
+                                                    <Button x:Name="Button_CreatePal" Height="28" MinWidth="50" MaxWidth="65" Margin="20 15 0 0" Click="Button_CreatePal_Click">
+                                                        <Viewbox>
+                                                            <TextBlock d:Text="生成" FontSize="20" Text="{Binding LanguageDic[Btn_CreatePalette_Create]}"/>
+                                                        </Viewbox>
+                                                    </Button>
                                                 </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
+                                    </StackPanel>
+                                </TabItem>
 
-                                        <StackPanel Orientation="Horizontal" Margin="0 5 0 0" HorizontalAlignment="Right">
-                                            <ComboBox x:Name="ComboBox_CreatePalMode" DisplayMemberPath="DisplayName" SelectedValuePath="Value" FontSize="15" Width="160" Height="25" Margin="0 0 0 0">
-                                                <ComboBox.ToolTip>
-                                                    <ToolTip Background="LightYellow">
-                                                        <StackPanel>
-                                                            <TextBlock FontWeight="Bold" d:Text="主要颜色 (生成速度慢)：" Text="{Binding LanguageDic[Text_CreatePalette_Tip1]}"/>
-                                                            <TextBlock d:Text="适用于图片颜色不是太复杂的情况" Text="{Binding LanguageDic[Text_CreatePalette_Tip2]}"/>
-                                                            <TextBlock d:Text="根据图片占比最高的颜色生成，会合并几乎相同的颜色" Text="{Binding LanguageDic[Text_CreatePalette_Tip3]}"/>
-                                                            <TextBlock d:Text="如有少量的其他颜色可能会被忽略" Text="{Binding LanguageDic[Text_CreatePalette_Tip4]}"/>
+                                <TabItem d:Header="SHP" Header="{Binding LanguageDic[Ti_Exprot_Shp]}" Height="30" MinWidth="60">
+                                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10 0 0 0" Height="165" Width="550">
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel Margin="0 5 0 0" HorizontalAlignment="Left">
+                                                <TextBlock d:Text="储存模式" Text="{Binding LanguageDic[Text_CreateShp_SaveMode]}"/>
+                                                <ComboBox x:Name="ComboBox_ShpSaveMode" DisplayMemberPath="DisplayName" SelectedValuePath="Value" FontSize="15" Width="150" Height="25" HorizontalAlignment="Left" Margin="1 0 0 0"/>
+                                                <CheckBox x:Name="CheckBox_ShpShadow" d:Content="影子帧" Content="{Binding LanguageDic[Cb_CreateShp_ShadowFrame]}" Margin="0 7 0 0"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox x:Name="TextBox_ShpShadowFrameStart" Width="42" Height="21" Padding="0 0 0 0"/>
+                                                    <TextBlock Text="~"/>
+                                                    <TextBox x:Name="TextBox_ShpShadowFrameEnd" Width="42" Height="21" Padding="0 0 0 0"/>
+                                                    <Button d:Content="列表后半" Content="{Binding LanguageDic[Btn_CreateShp_ShadowFrameLatterPartOfList]}" Margin="5 0 0 0" FontSize="14" Click="Button_ShpShadowFrameAutoSet_Click"/>
+                                                </StackPanel>
 
-                                                            <TextBlock FontWeight="Bold" d:Text="主要颜色+补全 (生成速度慢)：" Margin="0 10 0 0" Text="{Binding LanguageDic[Text_CreatePalette_Tip5]}"/>
-                                                            <TextBlock d:Text="适用于图片颜色不是太复杂的情况" Text="{Binding LanguageDic[Text_CreatePalette_Tip6]}"/>
-                                                            <TextBlock d:Text="在[主要颜色]的基础上尽可能补全其他占比较少的颜色" Text="{Binding LanguageDic[Text_CreatePalette_Tip7]}"/>
+                                                <TextBlock d:Text="影子帧绘制为1号色" Text="{Binding LanguageDic[Cb_CreateShp_ShadowFrameTip]}" TextWrapping="Wrap" Width="180" FontSize="14" HorizontalAlignment="Left" Margin="0 5 0 0"/>
+                                            </StackPanel>
 
-                                                            <TextBlock FontWeight="Bold" d:Text="OctreeQuantizer (生成速度快)：" Margin="0 10 0 0" Text="{Binding LanguageDic[Text_CreatePalette_Tip8]}"/>
-                                                            <TextBlock d:Text="适用于图片颜色比较复杂的情况" Text="{Binding LanguageDic[Text_CreatePalette_Tip9]}"/>
-                                                            <TextBlock d:Text="八叉树颜色量化算法" Text="{Binding LanguageDic[Text_CreatePalette_Tip10]}"/>
+                                            <StackPanel Margin="35 0 0 0">
+                                                <CheckBox x:Name="CheckBox_ShpCustomSavePath" d:Content="自定义保存目录" Content="{Binding LanguageDic[Cb_SaveShp_CustomSavePath]}" Margin="0 3 0 0" IsChecked="{Binding SaveConfig.IsShpCustomPath, Mode=TwoWay}" Checked="CheckBox_GenerateShpCustomSavePath" Unchecked="CheckBox_GenerateShpAutoSavePath"/>
+
+                                                <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                                                    <CheckBox x:Name="CheckBox_ShpMapTypeForName" d:Content="创建地图类型命名副本" Content="{Binding LanguageDic[Cb_SaveShp_MapTypeForFileName]}" IsChecked="{Binding SaveConfig.IsShpMapType, Mode=TwoWay}"/>
+                                                    <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Click="Button_GenerateShpMapTypeTip_Click"/>
+                                                </StackPanel>
+
+                                                <StackPanel x:Name="StackPanel_ShpSaveFileName" Margin="0 3 0 0">
+                                                    <TextBlock d:Text="命名(为空保存为 输出.shp)" Text="{Binding LanguageDic[Text_SaveShp_FileName]}"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBox x:Name="TextBox_ShpFileName" Text="{Binding SaveConfig.ShpName, Mode=TwoWay}" FontSize="14" Width="120" Height="22" HorizontalAlignment="Left" Margin="0 0 0 0"/>
+                                                        <TextBlock Text=".shp" Margin="5 0 0 0"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <StackPanel x:Name="StackPanel_ShpCustomSaveFileName" Margin="0 3 0 0" Visibility="Collapsed">
+                                                    <TextBlock d:Text="保存目录" Text="{Binding LanguageDic[Text_SaveShp_SavePath]}"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBox x:Name="TextBox_ShpSavePath" Text="{Binding SaveConfig.ShpCustomPath, Mode=TwoWay}" FontSize="14" Width="200" Height="22"/>
+                                                        <Button Content="…" Height="20" Width="20" Margin="5 0 0 0" Click="CheckBox_GenerateShpSetCustomPath"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0 15 0 0">
+                                                    <GroupBox d:Header="保存后打开文件夹" Header="{Binding LanguageDic[Text_SaveShpOpenPath]}" Margin="0 2 0 0">
+                                                        <StackPanel Orientation="Horizontal" Margin="0 3 0 0">
+                                                            <RadioButton x:Name="RadioButton_ShpSaveOpenPath_AskMe" d:Content="询问" Content="{Binding LanguageDic[Rb_SaveShpOpenPath_AskMe]}" Padding="0 -3 0 0" IsChecked="True"/>
+                                                            <RadioButton x:Name="RadioButton_ShpSaveOpenPath_Yes" d:Content="是" Content="{Binding LanguageDic[Rb_SaveShpOpenPath_Yes]}" Padding="0 -3 0 0" Margin="10 0 0 0"/>
+                                                            <RadioButton x:Name="RadioButton_ShpSaveOpenPath_No" d:Content="否" Content="{Binding LanguageDic[Rb_SaveShpOpenPath_No]}" Padding="0 -3 0 0" Margin="10 0 0 0"/>
                                                         </StackPanel>
-                                                    </ToolTip>
-                                                </ComboBox.ToolTip>
-                                            </ComboBox>
+                                                    </GroupBox>
 
-                                            <Button x:Name="Button_CreatePal" Height="28" MinWidth="50" MaxWidth="65" Margin="10 0 0 0" HorizontalAlignment="Right" Click="Button_CreatePal_Click">
-                                                <Viewbox>
-                                                    <TextBlock d:Text="生成" FontSize="20" Text="{Binding LanguageDic[Btn_CreatePalette_Create]}"/>
-                                                </Viewbox>
-                                            </Button>
+                                                    <Button x:Name="Button_CreateShp" Height="28" MinWidth="50" MaxWidth="65" Margin="20 15 0 0" Click="Button_CreateShp_Click">
+                                                        <Viewbox>
+                                                            <TextBlock d:Text="生成" FontSize="20" Text="{Binding LanguageDic[Btn_CreateShp_CreateShp]}"/>
+                                                        </Viewbox>
+                                                    </Button>
+                                                </StackPanel>
+                                            </StackPanel>
                                         </StackPanel>
                                     </StackPanel>
-                                </GroupBox>
+                                </TabItem>
 
-                                <GroupBox d:Header="生成SHP" Header="{Binding LanguageDic[Text_CreateShp]}" Margin="10 0 0 0" Height="165" Width="200" VerticalAlignment="Top">
-                                    <StackPanel Margin="0 5 0 0" HorizontalAlignment="Left">
-                                        <TextBlock d:Text="储存模式" Text="{Binding LanguageDic[Text_CreateShp_SaveMode]}"/>
-                                        <ComboBox x:Name="ComboBox_ShpSaveMode" DisplayMemberPath="DisplayName" SelectedValuePath="Value" FontSize="15" Width="150" Height="25" HorizontalAlignment="Left" Margin="0 0 0 0"/>
-                                        <CheckBox x:Name="CheckBox_ShpShadow" d:Content="影子帧" Content="{Binding LanguageDic[Cb_CreateShp_ShadowFrame]}" Margin="0 7 0 0"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox x:Name="TextBox_ShpShadowFrameStart" Width="42" Height="21" Padding="0 0 0 0"/>
-                                            <TextBlock Text="~"/>
-                                            <TextBox x:Name="TextBox_ShpShadowFrameEnd" Width="42" Height="21" Padding="0 0 0 0"/>
-                                            <Button d:Content="列表后半" Content="{Binding LanguageDic[Btn_CreateShp_ShadowFrameLatterPartOfList]}" Margin="5 0 0 0" FontSize="14" Click="Button_ShpShadowFrameAutoSet_Click"/>
-                                        </StackPanel>
-
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock d:Text="影子帧绘制为1号色" Text="{Binding LanguageDic[Cb_CreateShp_ShadowFrameTip]}" TextWrapping="Wrap" Width="120" FontSize="14" HorizontalAlignment="Left" Margin="0 5 0 0"/>
-                                            <Button x:Name="Button_CreateShp" Height="28" MinWidth="50" MaxWidth="65" Margin="0 10 0 0" HorizontalAlignment="Right" Click="Button_CreateShp_Click">
-                                                <Viewbox>
-                                                    <TextBlock d:Text="生成" FontSize="20" Text="{Binding LanguageDic[Btn_CreateShp_CreateShp]}"/>
-                                                </Viewbox>
-                                            </Button>
-                                        </StackPanel>
+                                <TabItem d:Header="图片" Header="{Binding LanguageDic[Ti_Exprot_Image]}" Height="30" MinWidth="60">
+                                    <StackPanel HorizontalAlignment="Left" Margin="10 0 0 0">
+                                        <GroupBox d:Header="导出全部图片" Header="{Binding LanguageDic[Text_Exprot_ExprotAllImage]}" Height="150" VerticalAlignment="Top">
+                                            <StackPanel Margin="0 3 0 0">
+                                                <Button d:Content="仿色后" Content="{Binding LanguageDic[Text_Exprot_Dither]}" Click="Button_ExportAllImage_Click" FontSize="16" Height="24" Width="100" Margin="0 0 0 0"/>
+                                                <Button d:Content="色盘下" Content="{Binding LanguageDic[Text_Exprot_OnPalette]}" Click="Button_ExportAllPaletteImage_Click" FontSize="16" Height="24" Width="100" Margin="0 10 0 0"/>
+                                                <Button Click="Button_ExportAllPaletteImageNoBackground_Click" FontSize="16" MinHeight="24" Width="100" Margin="0 10 0 0">
+                                                    <TextBlock d:Text="色盘下无背景" Text="{Binding LanguageDic[Text_Exprot_OnPaletteNotBackground]}" FontSize="15" TextWrapping="Wrap"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </GroupBox>
                                     </StackPanel>
-                                </GroupBox>
-                            </StackPanel>
+                                </TabItem>
+                            </TabControl>
                         </TabItem>
                     </TabControl>
                 </Viewbox>
@@ -1198,9 +1303,16 @@
                     </DataGrid>
                 </Viewbox>
 
-                <Viewbox Grid.Row="2" MaxHeight="80" HorizontalAlignment="Left">
+                <Viewbox Grid.Row="2" MaxHeight="30" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
+                        <TextBlock d:Text="颜色仿色" Text="{Binding LanguageDic[Text_ColorDither]}"/>
+                        <ComboBox x:Name="ComboBox_ColorDither" Width="110" Height="20" Margin="5 0 0 0" Padding="5 0 0 0" DisplayMemberPath="DisplayName" SelectedValuePath="Value" SelectionChanged="ComboBox_ColorDither_SelectionChanged"/>
+                    </StackPanel>
+                </Viewbox>
+
+                <Viewbox Grid.Row="3" MaxHeight="80" HorizontalAlignment="Left" Margin="0 5 0 0">
                     <StackPanel>
-                        <Button d:Content="载入最后保存的色盘" Content="{Binding LanguageDic[Btn_LoadLastSavePalette]}" Margin="0 10 0 0" Click="Button_LoadLastSavePalette_Click" IsEnabled="{Binding UIEnable}"/>
+                        <Button d:Content="载入最后保存的色盘" Content="{Binding LanguageDic[Btn_LoadLastSavePalette]}" Margin="0 0 0 0" Click="Button_LoadLastSavePalette_Click" IsEnabled="{Binding UIEnable}"/>
                         <Button d:Content="载入色盘(或文件拖入上方)" Content="{Binding LanguageDic[Btn_LoadPalette]}" Margin="0 10 0 0" Click="Button_LoadPalette_Click" IsEnabled="{Binding UIEnable}"/>
                     </StackPanel>
                 </Viewbox>

@@ -63,7 +63,7 @@ namespace Ra2EasyShp
 
             try
             {
-                Console.WriteLine($"Res/Lang/{GetLastLanguage()}.json");
+                //Console.WriteLine($"Res/Lang/{GetLastLanguage()}.json");
                 GData.UIData.LoadLanguage(Path.Combine(GetPath.RunPath, $"Res/Lang/{GetLastLanguage()}.json"));
             }
             catch (Exception ex)
@@ -107,6 +107,9 @@ namespace Ra2EasyShp
 
             ComboBox_ShpSaveMode.ItemsSource = GData.UIData.ComboBoxData.ShpSaveMode;
             ComboBox_ShpSaveMode.SelectedIndex = 0;
+
+            ComboBox_ColorDither.ItemsSource = GData.UIData.ComboBoxData.ColorDither;
+            ComboBox_ColorDither.SelectedIndex = 0;
 
             GData.TempPath = GetPath.CreateTempPath();
             if (!Directory.Exists(GData.TempPath))
@@ -781,6 +784,8 @@ namespace Ra2EasyShp
 
                 GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
 
+                var colorDither = (Enums.ColorDither)ComboBox_ColorDither.SelectedValue;
+
                 await Task.Run(async () =>
                 {
                     int imgOutIndex = 0;
@@ -797,7 +802,7 @@ namespace Ra2EasyShp
                                 GData.ImageData[index].OverlayImage.OffsetY,
                                 GData.ImageData[index].OverlayImage.OverlayMode))
                             {
-                                using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(result, GData.NowPalette, true))
+                                using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(result, GData.NowPalette, true, colorDither))
                                 {
                                     bitmapOnPal?.Save($@"{savePath}\{imgName}", System.Drawing.Imaging.ImageFormat.Png);
                                 }
@@ -859,6 +864,8 @@ namespace Ra2EasyShp
 
                 GData.UIData.SetProgressUI(sucCount, GData.ImageData.Count);
 
+                var colorDither = (Enums.ColorDither)ComboBox_ColorDither.SelectedValue;
+
                 await Task.Run(async () =>
                 {
                     int imgOutIndex = 0;
@@ -875,7 +882,7 @@ namespace Ra2EasyShp
                                 GData.ImageData[index].OverlayImage.OffsetY,
                                 GData.ImageData[index].OverlayImage.OverlayMode))
                             {
-                                using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(result, GData.NowPalette, false))
+                                using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(result, GData.NowPalette, false, colorDither))
                                 {
                                     bitmapOnPal?.Save($@"{savePath}\{imgName}", System.Drawing.Imaging.ImageFormat.Png);
                                 }
@@ -1040,13 +1047,13 @@ namespace Ra2EasyShp
 
             StackPanel_Tips.Visibility = Visibility.Collapsed;
 
-            string folderPath = @"C:\Users\Milk\Desktop\数字图";
+            string folderPath = @"C:\Users\Milk\Desktop\色盘生成测试";
             //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
             string[] files = Directory.GetFiles(folderPath);
             //string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
 
-            //string[] files = { @"C:\Users\Milk\Desktop\3fc4f753cd99b7e1a6657a7921ce60c1.png" };
+            //string[] files = { @"C:\Users\Milk\Desktop\手办换衣服.png" };
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月18日17时8分5秒\输出.shp" };
 
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月22日20时54分9秒\输出.shp" };
@@ -1174,7 +1181,7 @@ namespace Ra2EasyShp
 
                 bool isPlayerColor = (bool)CheckBox_PlayerColor.IsChecked;
 
-                List<Ra2PaletteColor> palette = await PaletteManage.CreatePalette(palColorNum, GData.PaletteConfig.PaletteHeaderColor, isPlayerColor ? GData.PaletteConfig.PalettePlayerColor : null, ComboBox_CreatePalMode.SelectedValue.ToString());
+                List<Ra2PaletteColor> palette = await PaletteManage.CreatePalette(palColorNum, GData.PaletteConfig.PaletteHeaderColor, isPlayerColor ? GData.PaletteConfig.PalettePlayerColor : null, ComboBox_CreatePalMode.SelectedValue.ToString(), (int)Slider_GeneratePaletteDiffValue.Value);
 
                 CreatePaletteConfigWindow window = new CreatePaletteConfigWindow(palette);
                 window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -1186,26 +1193,86 @@ namespace Ra2EasyShp
                     return;
                 }
 
-                string savePath = GetPath.CreateSavePath(Enums.PathType.Palette);
-                if (!Directory.Exists(savePath))
+                if (GData.UIData.SaveConfig.IsPaletteCustomPath)
                 {
-                    Directory.CreateDirectory(savePath);
-                }
-                using (BinaryWriter writer = new BinaryWriter(File.Open($@"{savePath}\色盘.pal", FileMode.Create)))
-                {
-                    foreach (var color in palette)
+                    if (string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteCustomPath))
                     {
-                        writer.Write((byte)color.R);
-                        writer.Write((byte)color.G);
-                        writer.Write((byte)color.B);
+                        throw new Exception(GetTranslateText.Get("Message_PathCanNotEmpty")); // 路径不能为空
+                    }
+                    if (!Directory.Exists(Path.GetDirectoryName(GData.UIData.SaveConfig.PaletteCustomPath)))
+                    {
+                        throw new DirectoryNotFoundException(GetTranslateText.Get("Message_PathError")); // 路径错误
+                    }
+
+                    using (BinaryWriter bw = new BinaryWriter(File.Open(GData.UIData.SaveConfig.PaletteCustomPath, FileMode.Create)))
+                    {
+                        foreach (var color in palette)
+                        {
+                            bw.Write((byte)color.R);
+                            bw.Write((byte)color.G);
+                            bw.Write((byte)color.B);
+                        }
+                    }
+
+                    GData.LastSavePalettePath = GData.UIData.SaveConfig.PaletteCustomPath;
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteName) && !IsValidString(GData.UIData.SaveConfig.PaletteName))
+                    {
+                        throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
+                    }
+
+                    string savePath = GetPath.CreateSavePath(Enums.PathType.Palette);
+
+                    if (!Directory.Exists(savePath))
+                    {
+                        Directory.CreateDirectory(savePath);
+                    }
+
+                    string saveFileName = string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteName) ? GetTranslateText.Get("SaveNameEmpty_Palette") : GData.UIData.SaveConfig.PaletteName;
+
+                    using (BinaryWriter bw = new BinaryWriter(File.Open($@"{savePath}\{saveFileName}.pal", FileMode.Create)))
+                    {
+                        foreach (var color in palette)
+                        {
+                            bw.Write((byte)color.R);
+                            bw.Write((byte)color.G);
+                            bw.Write((byte)color.B);
+                        }
+                    }
+
+                    GData.LastSavePalettePath = $@"{savePath}\{saveFileName}.pal";
+                }
+
+                string path = Path.GetDirectoryName(GData.LastSavePalettePath);
+
+                if (GData.UIData.SaveConfig.IsPaletteMapType)
+                {
+                    string[] mapTypeArray = { "urb", "ubn", "tem", "sno", "lun", "des" };
+                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(GData.LastSavePalettePath);
+
+                    foreach (var mapType in mapTypeArray)
+                    {
+                        File.Copy(GData.LastSavePalettePath, Path.Combine(path, $"{fileNameWithoutExtension}{mapType}.pal"), true);
                     }
                 }
 
-                GData.LastSavePalettePath = $@"{savePath}\色盘.pal";
-
-                if (OpenSaveSuccessWindow(savePath))
+                if (RadioButton_PaletteSaveOpenPath_AskMe.IsChecked == true)
                 {
-                    Process.Start("explorer.exe", savePath);
+                    if (OpenSaveSuccessWindow(path))
+                    {
+                        Process.Start("explorer.exe", path);
+                    }
+                }
+                else if (RadioButton_PaletteSaveOpenPath_Yes.IsChecked == true)
+                {
+                    Process.Start("explorer.exe", path);
+                }
+
+                if (CheckBox_PaletteSaveLoadPalette.IsChecked == true)
+                {
+                    await LoadPalette(GData.LastSavePalettePath);
                 }
             }
             catch (Exception ex)
@@ -1531,6 +1598,11 @@ namespace Ra2EasyShp
                     throw new Exception(GetTranslateText.Get("Message_NotSelectPalette")); // 没有选择色盘
                 }
 
+                if ((Enums.PreviewPlayerColor)ComboBox_PlayerColorPreview.SelectedValue != Enums.PreviewPlayerColor.无)
+                {
+                    throw new Exception(GetTranslateText.Get("Message_SetPlayerColorNone")); // 请先将预览所属色改为 [无]
+                }
+
                 int shadowStart = -1;
                 int shadowEnd = -1;
 
@@ -1541,6 +1613,8 @@ namespace Ra2EasyShp
                 }
 
                 Enums.ShpSaveMode shpCompressionMode = (Enums.ShpSaveMode)ComboBox_ShpSaveMode.SelectedValue;
+
+                var colorDither = (Enums.ColorDither)ComboBox_ColorDither.SelectedValue;
 
                 byte[] shpData = null;
                 await Task.Run(() =>
@@ -1560,7 +1634,17 @@ namespace Ra2EasyShp
                                GData.ImageData[index].OverlayImage.OffsetY,
                                GData.ImageData[index].OverlayImage.OverlayMode).Result)
                         {
-                            LocalImageManage.SaveBitmapToTemp(bitmap, bitmapTempList[index]);
+                            if (colorDither == Enums.ColorDither.无)
+                            {
+                                LocalImageManage.SaveBitmapToTemp(bitmap, bitmapTempList[index]);
+                            }
+                            else
+                            {
+                                using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette, true, colorDither))
+                                {
+                                    LocalImageManage.SaveBitmapToTemp(bitmapOnPal, bitmapTempList[index]);
+                                }
+                            }
                         }
                     });
 
@@ -1574,10 +1658,83 @@ namespace Ra2EasyShp
                     GC.Collect();
                 });
 
-                var window = new CreateShpConfigWindow(shpData);
-                window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                window.Owner = this;
-                window.ShowDialog();
+                //var window = new CreateShpConfigWindow(shpData);
+                //window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                //window.Owner = this;
+                //window.ShowDialog();
+
+                string _saveFile = string.Empty;
+
+                if (GData.UIData.SaveConfig.IsShpCustomPath)
+                {
+                    if (string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpCustomPath))
+                    {
+                        throw new Exception(GetTranslateText.Get("Message_PathCanNotEmpty")); // 路径不能为空
+                    }
+                    if (!Directory.Exists(Path.GetDirectoryName(GData.UIData.SaveConfig.ShpCustomPath)))
+                    {
+                        throw new DirectoryNotFoundException(GetTranslateText.Get("Message_PathError")); // 路径错误
+                    }
+
+                    File.WriteAllBytes(GData.UIData.SaveConfig.ShpCustomPath, shpData);
+
+                    _saveFile = GData.UIData.SaveConfig.ShpCustomPath;
+                }
+                else
+                {
+                    string savePath = string.Empty;
+
+                    if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) && !IsValidString(GData.UIData.SaveConfig.ShpName))
+                    {
+                        throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
+                    }
+
+                    string saveFileName = string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) ? GetTranslateText.Get("SaveNameEmpty_Shp") : GData.UIData.SaveConfig.ShpName;
+
+                    savePath = GetPath.CreateSavePath(Enums.PathType.SHP);
+                    if (!Directory.Exists(savePath))
+                    {
+                        Directory.CreateDirectory(savePath);
+                    }
+
+                    File.WriteAllBytes(Path.Combine(savePath, $"{saveFileName}.shp"), shpData);
+
+                    _saveFile = Path.Combine(savePath, $"{saveFileName}.shp");
+                }
+
+                string path = Path.GetDirectoryName(_saveFile);
+
+                if (GData.UIData.SaveConfig.IsShpMapType)
+                {
+                    char[] mapTypeArray = { 'a', 'u', 't', 'd', 'l', 'g' };
+                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(_saveFile);
+
+                    if (fileNameWithoutExtension.ToCharArray().Length > 1)
+                    {
+                        foreach (var mapType in mapTypeArray)
+                        {
+                            char[] renameChar = fileNameWithoutExtension.ToCharArray();
+                            renameChar[1] = mapType;
+                            string rename = new string(renameChar);
+                            if (rename != fileNameWithoutExtension)
+                            {
+                                File.Copy(_saveFile, Path.Combine(path, $"{rename}.shp"), true);
+                            }
+                        }
+                    }
+                }
+
+                if (RadioButton_ShpSaveOpenPath_AskMe.IsChecked == true)
+                {
+                    if (OpenSaveSuccessWindow(path))
+                    {
+                        Process.Start("explorer.exe", path);
+                    }
+                }
+                else if (RadioButton_ShpSaveOpenPath_Yes.IsChecked == true)
+                {
+                    Process.Start("explorer.exe", path);
+                }
             }
             catch (Exception ex)
             {
@@ -1587,6 +1744,11 @@ namespace Ra2EasyShp
             {
                 Grid_Main.IsEnabled = true;
             }
+        }
+
+        private bool IsValidString(string input)
+        {
+            return Regex.IsMatch(input, @"^[0-9a-zA-Z]+$");
         }
 
         private async void Button_LoadLastSavePalette_Click(object sender, RoutedEventArgs e)
@@ -2084,7 +2246,7 @@ namespace Ra2EasyShp
                     GData.ImageData[index].OverlayImage.OverlayMode
                     ))
                 {
-                    using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette, true))
+                    using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette, true, (Enums.ColorDither)ComboBox_ColorDither.SelectedValue))
                     {
                         Image_PaletteImg.Source = ImageTypeConvert.BitmapToImageSource(bitmapOnPal);
                     }
@@ -3186,6 +3348,105 @@ namespace Ra2EasyShp
             {
                 ShowMessageBox($"载入语言失败\nLoad language file failed\n{ex.Message}");
             }
+        }
+
+        private async void ComboBox_ColorDither_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            await ReloadImageSource(GData.UIData.NowIndex);
+        }
+
+        private void Button_GenerateShpMapTypeTip_Click(object sender, RoutedEventArgs e)
+        {
+            // 保存后将文件复制多份，名称第二个字母修改为地图类型字母\n例如 c(a)pill.shp，c(g)pill.shp等\n\n如果有同名文件会被覆盖
+            ShowMessageBox(GetTranslateText.Get("Message_GenerateShpMapTypeFileNameTip"));
+        }
+
+        private void CheckBox_GenerateShpCustomSavePath(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is CheckBox checkBox) || !checkBox.IsMouseOver)
+            {
+                return;
+            }
+
+            StackPanel_ShpSaveFileName.Visibility = Visibility.Collapsed;
+            StackPanel_ShpCustomSaveFileName.Visibility = Visibility.Visible;
+        }
+
+        private void CheckBox_GenerateShpAutoSavePath(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is CheckBox checkBox) || !checkBox.IsMouseOver)
+            {
+                return;
+            }
+
+            StackPanel_ShpSaveFileName.Visibility = Visibility.Visible;
+            StackPanel_ShpCustomSaveFileName.Visibility = Visibility.Collapsed;
+        }
+
+        private void CheckBox_GenerateShpSetCustomPath(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button button) || !button.IsMouseOver)
+            {
+                return;
+            }
+
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = GetTranslateText.Get("Title_SelectFile"),
+                Filter = "SHP (*.shp)|*.shp",
+                FileName = string.Empty,
+                RestoreDirectory = true,
+                DefaultExt = "shp"
+            };
+
+            GData.UIData.SaveConfig.ShpCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
+        }
+
+        private void CheckBox_GeneratePaletteCustomSavePath(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is CheckBox checkBox) || !checkBox.IsMouseOver)
+            {
+                return;
+            }
+
+            StackPanel_PaletteSaveFileName.Visibility = Visibility.Collapsed;
+            StackPanel_PaletteCustomSaveFileName.Visibility = Visibility.Visible;
+        }
+
+        private void CheckBox_GeneratePaletteAutoSavePath(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is CheckBox checkBox) || !checkBox.IsMouseOver)
+            {
+                return;
+            }
+
+            StackPanel_PaletteSaveFileName.Visibility = Visibility.Visible;
+            StackPanel_PaletteCustomSaveFileName.Visibility = Visibility.Collapsed;
+        }
+
+        private void Button_GeneratePaletteMapTypeTip_Click(object sender, RoutedEventArgs e)
+        {
+            // 保存后将文件复制多份，名称后加上地图类型后缀\n例如 unit(sno).pal，unit(tem).pal\n\n如果有同名文件会被覆盖
+            ShowMessageBox(GetTranslateText.Get("Message_GeneratePaletteMapTypeFileNameTip"));
+        }
+
+        private void CheckBox_PaletteSetCustomPath(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button button) || !button.IsMouseOver)
+            {
+                return;
+            }
+
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = GetTranslateText.Get("Title_SelectFile"),
+                Filter = "Palette (*.pal)|*.pal",
+                FileName = string.Empty,
+                RestoreDirectory = true,
+                DefaultExt = "pal"
+            };
+
+            GData.UIData.SaveConfig.PaletteCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
         }
     }
 }
