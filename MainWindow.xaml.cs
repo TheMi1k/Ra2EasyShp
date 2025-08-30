@@ -1047,7 +1047,7 @@ namespace Ra2EasyShp
 
             StackPanel_Tips.Visibility = Visibility.Collapsed;
 
-            string folderPath = @"C:\Users\Milk\Desktop\色盘生成测试";
+            string folderPath = @"C:\Users\Milk\Desktop\4K素材";
             //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
             string[] files = Directory.GetFiles(folderPath);
@@ -1179,6 +1179,25 @@ namespace Ra2EasyShp
                     return;
                 }
 
+                if (GData.UIData.SaveConfig.IsPaletteCustomPath)
+                {
+                    if (string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteCustomPath))
+                    {
+                        throw new Exception(GetTranslateText.Get("Message_PathCanNotEmpty")); // 路径不能为空
+                    }
+                    if (!Directory.Exists(Path.GetDirectoryName(GData.UIData.SaveConfig.PaletteCustomPath)))
+                    {
+                        throw new DirectoryNotFoundException(GetTranslateText.Get("Message_PathError")); // 路径错误
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteName) && !IsValidString(GData.UIData.SaveConfig.PaletteName))
+                    {
+                        throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
+                    }
+                }
+
                 bool isPlayerColor = (bool)CheckBox_PlayerColor.IsChecked;
 
                 List<Ra2PaletteColor> palette = await PaletteManage.CreatePalette(palColorNum, GData.PaletteConfig.PaletteHeaderColor, isPlayerColor ? GData.PaletteConfig.PalettePlayerColor : null, ComboBox_CreatePalMode.SelectedValue.ToString(), (int)Slider_GeneratePaletteDiffValue.Value);
@@ -1195,15 +1214,6 @@ namespace Ra2EasyShp
 
                 if (GData.UIData.SaveConfig.IsPaletteCustomPath)
                 {
-                    if (string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteCustomPath))
-                    {
-                        throw new Exception(GetTranslateText.Get("Message_PathCanNotEmpty")); // 路径不能为空
-                    }
-                    if (!Directory.Exists(Path.GetDirectoryName(GData.UIData.SaveConfig.PaletteCustomPath)))
-                    {
-                        throw new DirectoryNotFoundException(GetTranslateText.Get("Message_PathError")); // 路径错误
-                    }
-
                     using (BinaryWriter bw = new BinaryWriter(File.Open(GData.UIData.SaveConfig.PaletteCustomPath, FileMode.Create)))
                     {
                         foreach (var color in palette)
@@ -1218,11 +1228,6 @@ namespace Ra2EasyShp
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.PaletteName) && !IsValidString(GData.UIData.SaveConfig.PaletteName))
-                    {
-                        throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
-                    }
-
                     string savePath = GetPath.CreateSavePath(Enums.PathType.Palette);
 
                     if (!Directory.Exists(savePath))
@@ -1584,6 +1589,18 @@ namespace Ra2EasyShp
         /// <param name="e"></param>
         private async void Button_CreateShp_Click(object sender, RoutedEventArgs e)
         {
+            if (GData.UIData.SaveConfig.IsShpEveryFrame)
+            {
+                await CreateShpEveryFrame();
+            }
+            else
+            {
+                await CreateShpDefault();
+            }
+        }
+
+        private async Task CreateShpDefault()
+        {
             try
             {
                 Grid_Main.IsEnabled = false;
@@ -1601,6 +1618,25 @@ namespace Ra2EasyShp
                 if ((Enums.PreviewPlayerColor)ComboBox_PlayerColorPreview.SelectedValue != Enums.PreviewPlayerColor.无)
                 {
                     throw new Exception(GetTranslateText.Get("Message_SetPlayerColorNone")); // 请先将预览所属色改为 [无]
+                }
+
+                if (GData.UIData.SaveConfig.IsShpCustomPath)
+                {
+                    if (string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpCustomPath))
+                    {
+                        throw new Exception(GetTranslateText.Get("Message_PathCanNotEmpty")); // 路径不能为空
+                    }
+                    if (!Directory.Exists(Path.GetDirectoryName(GData.UIData.SaveConfig.ShpCustomPath)))
+                    {
+                        throw new DirectoryNotFoundException(GetTranslateText.Get("Message_PathError")); // 路径错误
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) && !IsValidString(GData.UIData.SaveConfig.ShpName))
+                    {
+                        throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
+                    }
                 }
 
                 int shadowStart = -1;
@@ -1667,15 +1703,6 @@ namespace Ra2EasyShp
 
                 if (GData.UIData.SaveConfig.IsShpCustomPath)
                 {
-                    if (string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpCustomPath))
-                    {
-                        throw new Exception(GetTranslateText.Get("Message_PathCanNotEmpty")); // 路径不能为空
-                    }
-                    if (!Directory.Exists(Path.GetDirectoryName(GData.UIData.SaveConfig.ShpCustomPath)))
-                    {
-                        throw new DirectoryNotFoundException(GetTranslateText.Get("Message_PathError")); // 路径错误
-                    }
-
                     File.WriteAllBytes(GData.UIData.SaveConfig.ShpCustomPath, shpData);
 
                     _saveFile = GData.UIData.SaveConfig.ShpCustomPath;
@@ -1683,11 +1710,6 @@ namespace Ra2EasyShp
                 else
                 {
                     string savePath = string.Empty;
-
-                    if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) && !IsValidString(GData.UIData.SaveConfig.ShpName))
-                    {
-                        throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
-                    }
 
                     string saveFileName = string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) ? GetTranslateText.Get("SaveNameEmpty_Shp") : GData.UIData.SaveConfig.ShpName;
 
@@ -1746,9 +1768,138 @@ namespace Ra2EasyShp
             }
         }
 
+        private async Task CreateShpEveryFrame()
+        {
+            try
+            {
+                Grid_Main.IsEnabled = false;
+
+                if (GData.ImageData.Count == 0)
+                {
+                    return;
+                }
+
+                if (GData.NowPalette == null || GData.NowPalette.Count == 0)
+                {
+                    throw new Exception(GetTranslateText.Get("Message_NotSelectPalette")); // 没有选择色盘
+                }
+
+                if ((Enums.PreviewPlayerColor)ComboBox_PlayerColorPreview.SelectedValue != Enums.PreviewPlayerColor.无)
+                {
+                    throw new Exception(GetTranslateText.Get("Message_SetPlayerColorNone")); // 请先将预览所属色改为 [无]
+                }
+
+                if (!string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) && !IsValidString(GData.UIData.SaveConfig.ShpName))
+                {
+                    throw new Exception(GetTranslateText.Get("Message_FileNameError")); // 名称只能为数字和字母
+                }
+
+                string savePath = string.Empty;
+
+                string saveFileName = string.IsNullOrEmpty(GData.UIData.SaveConfig.ShpName) ? GetTranslateText.Get("SaveNameEmpty_Shp") : GData.UIData.SaveConfig.ShpName;
+
+                savePath = GetPath.CreateSavePath(Enums.PathType.SHP);
+                if (!Directory.Exists(savePath))
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+
+                int shadowStart = -1;
+                int shadowEnd = -1;
+
+                if (CheckBox_ShpShadow.IsChecked == true)
+                {
+                    shadowStart = int.Parse(TextBox_ShpShadowFrameStart.Text);
+                    shadowEnd = int.Parse(TextBox_ShpShadowFrameEnd.Text);
+                }
+
+                Enums.ShpSaveMode shpCompressionMode = (Enums.ShpSaveMode)ComboBox_ShpSaveMode.SelectedValue;
+
+                var colorDither = (Enums.ColorDither)ComboBox_ColorDither.SelectedValue;
+
+                byte[] shpData = null;
+                await Task.Run(() =>
+                {
+                    List<string> bitmapTempList = new List<string>();
+                    for (int _ = 0; _ < GData.ImageData.Count; _++)
+                    {
+                        bitmapTempList.Add(GetPath.CreateImageTempPath());
+                    }
+
+                    Parallel.For(0, GData.ImageData.Count, index =>
+                    {
+                        using (Bitmap bitmap = ImageManage.MergeBitmaps(
+                               index,
+                               index,
+                               GData.ImageData[index].OverlayImage.OffsetX,
+                               GData.ImageData[index].OverlayImage.OffsetY,
+                               GData.ImageData[index].OverlayImage.OverlayMode).Result)
+                        {
+                            if (colorDither == Enums.ColorDither.无)
+                            {
+                                LocalImageManage.SaveBitmapToTemp(bitmap, bitmapTempList[index]);
+                            }
+                            else
+                            {
+                                using (Bitmap bitmapOnPal = ShpManage.BitmapOnPalette(bitmap, GData.NowPalette, true, colorDither))
+                                {
+                                    LocalImageManage.SaveBitmapToTemp(bitmapOnPal, bitmapTempList[index]);
+                                }
+                            }
+                        }
+                    });
+
+                    Parallel.For(0, bitmapTempList.Count, index =>
+                    {
+                        List<string> everyFrameList = new List<string>()
+                        {
+                            bitmapTempList[index]
+                        };
+
+                        int shadowFrame = -1;
+                        if (index >= shadowStart && index <= shadowEnd)
+                        {
+                            shadowFrame = 0;
+                        }
+
+                        shpData = ShpManage.BitmapToShp(everyFrameList, GData.NowPalette, shpCompressionMode, shadowFrame, shadowFrame);
+
+                        File.WriteAllBytes(Path.Combine(savePath, $"{saveFileName}{index.ToString().PadLeft(5, '0')}.shp"), shpData);
+                    });
+
+                    foreach (var filePath in bitmapTempList)
+                    {
+                        LocalImageManage.DeleteImageTemp(filePath);
+                    }
+
+                    GC.Collect();
+                });
+
+                if (RadioButton_ShpSaveOpenPath_AskMe.IsChecked == true)
+                {
+                    if (OpenSaveSuccessWindow(savePath))
+                    {
+                        Process.Start("explorer.exe", savePath);
+                    }
+                }
+                else if (RadioButton_ShpSaveOpenPath_Yes.IsChecked == true)
+                {
+                    Process.Start("explorer.exe", savePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox($"{GetTranslateText.Get("Message_GenerateShpFailed")}\n{ex.Message}"); // 生成SHP失败
+            }
+            finally
+            {
+                Grid_Main.IsEnabled = true;
+            }
+        }
+
         private bool IsValidString(string input)
         {
-            return Regex.IsMatch(input, @"^[0-9a-zA-Z]+$");
+            return Regex.IsMatch(input, @"^[0-9a-zA-Z_]+$");
         }
 
         private async void Button_LoadLastSavePalette_Click(object sender, RoutedEventArgs e)
@@ -3447,6 +3598,26 @@ namespace Ra2EasyShp
             };
 
             GData.UIData.SaveConfig.PaletteCustomPath = (saveFileDialog.ShowDialog() ?? false) ? saveFileDialog.FileName : string.Empty;
+        }
+
+        private void CheckBox_GenerateShpEveryFrame(object sender, RoutedEventArgs e)
+        {
+            if (CheckBox_ShpEveryFrame.IsChecked == true)
+            {
+                CheckBox_ShpCustomSavePath.IsEnabled = false;
+                CheckBox_ShpMapTypeForName.IsEnabled = false;
+
+                GData.UIData.SaveConfig.IsShpCustomPath = false;
+                GData.UIData.SaveConfig.IsShpMapType = false;
+
+                StackPanel_ShpSaveFileName.Visibility = Visibility.Visible;
+                StackPanel_ShpCustomSaveFileName.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                CheckBox_ShpCustomSavePath.IsEnabled = true;
+                CheckBox_ShpMapTypeForName.IsEnabled = true;
+            }
         }
     }
 }

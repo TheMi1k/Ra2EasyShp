@@ -880,6 +880,8 @@
                                             </StackPanel>
 
                                             <StackPanel Margin="35 0 0 0">
+                                                <CheckBox x:Name="CheckBox_ShpEveryFrame" d:Content="每帧一个shp文件" Content="{Binding LanguageDic[Cb_SaveShp_EveryFrame]}" Margin="0 3 0 0" IsChecked="{Binding SaveConfig.IsShpEveryFrame, Mode=TwoWay}" Checked="CheckBox_GenerateShpEveryFrame" Unchecked="CheckBox_GenerateShpEveryFrame"/>
+
                                                 <CheckBox x:Name="CheckBox_ShpCustomSavePath" d:Content="自定义保存目录" Content="{Binding LanguageDic[Cb_SaveShp_CustomSavePath]}" Margin="0 3 0 0" IsChecked="{Binding SaveConfig.IsShpCustomPath, Mode=TwoWay}" Checked="CheckBox_GenerateShpCustomSavePath" Unchecked="CheckBox_GenerateShpAutoSavePath"/>
 
                                                 <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
@@ -903,7 +905,7 @@
                                                     </StackPanel>
                                                 </StackPanel>
 
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0 15 0 0">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0 0 0 0">
                                                     <GroupBox d:Header="保存后打开文件夹" Header="{Binding LanguageDic[Text_SaveShpOpenPath]}" Margin="0 2 0 0">
                                                         <StackPanel Orientation="Horizontal" Margin="0 3 0 0">
                                                             <RadioButton x:Name="RadioButton_ShpSaveOpenPath_AskMe" d:Content="询问" Content="{Binding LanguageDic[Rb_SaveShpOpenPath_AskMe]}" Padding="0 -3 0 0" IsChecked="True"/>

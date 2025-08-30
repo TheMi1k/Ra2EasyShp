@@ -200,6 +200,7 @@
   
   "Title_SaveShp": "Save Shp",
   "Text_SaveShp_Option": "Save option",
+  "Cb_SaveShp_EveryFrame": "One shp file for each frame",
   "Cb_SaveShp_CustomSavePath": "Custom save path",
   "Cb_SaveShp_MapTypeForFileName": "Map type for file name",
   "Text_SaveShp_FileName": "File name(empty=export.shp)",

@@ -58,6 +58,17 @@ namespace Ra2EasyShp.Models
 
 
 
+        private bool _isShpEveryFrame { get; set; } = false;
+        public bool IsShpEveryFrame
+        {
+            get => _isShpEveryFrame;
+            set
+            {
+                _isShpEveryFrame = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsShpEveryFrame"));
+            }
+        }
+
         private bool _isShpCustomPath { get; set; } = false;
         public bool IsShpCustomPath
         {

@@ -200,6 +200,7 @@
   
   "Title_SaveShp": "SHP保存选项",
   "Text_SaveShp_Option": "保存选项",
+  "Cb_SaveShp_EveryFrame": "每帧一个shp文件",
   "Cb_SaveShp_CustomSavePath": "自定义保存目录",
   "Cb_SaveShp_MapTypeForFileName": "创建地图类型命名副本",
   "Text_SaveShp_FileName": "命名(为空保存为 输出.shp)",

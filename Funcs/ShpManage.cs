@@ -410,7 +410,14 @@ namespace Ra2EasyShp.Funcs
                             bw.Write((ushort)height);
                             bw.Write((byte)1); // 压缩方式 flag
                             bw.Write(new byte[] { 0, 0, 0 }); // 补位
-                            bw.Write((uint)0); // Color
+                            if (isShadow)
+                            {
+                                bw.Write((uint)0); // Color
+                            }
+                            else
+                            {
+                                bw.Write((uint)1); // Color
+                            }
                             bw.Write((uint)0); // 保留
                             bw.Write((uint)0); // 帧数据偏移
                         }
