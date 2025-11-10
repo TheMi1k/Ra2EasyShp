@@ -63,6 +63,14 @@
                 </MenuItem.Header>
             </MenuItem>
 
+            <MenuItem d:Header="开关提示下划线" Header="{Binding LanguageDic[Text_SwitchTipUnderLine]}" HorizontalContentAlignment="Left" Click="MenuItem_SwitchTipsUnderline_Click"/>
+
+            <MenuItem StaysOpenOnClick="True" IsHitTestVisible="False" BorderThickness="0" Padding="0">
+                <MenuItem.Header>
+                    <Border Width="1" Height="20" Background="Gray" Margin="5,0"/>
+                </MenuItem.Header>
+            </MenuItem>
+
             <MenuItem HorizontalContentAlignment="Left" Margin="0 0 0 0">
                 <MenuItem.Header>
                     <StackPanel Orientation="Horizontal">
@@ -350,11 +358,21 @@
                                 </ToolTip>
                             </StackPanel.ToolTip>
 
-                            <TextBlock d:Text="预览缩放" Text="{Binding LanguageDic[Text_PreviewScale]}"/>
-                            <TextBlock d:Text="100%" Text="{Binding ImageViewScaleTransformStr}" Margin="5 0 0 0"/>
+                            <TextBlock d:Text="预览缩放" Text="{Binding LanguageDic[Text_PreviewScale]}" TextDecorations="{Binding TipsUnderline}"/>
+                            <TextBlock d:Text="100%" Text="{Binding ImageViewScaleTransformStr}" Margin="5 0 0 0" Width="40"/>
                         </StackPanel>
-                        
-                        <StackPanel Orientation="Horizontal" IsHitTestVisible="False" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="250 0 0 0">
+
+                        <Button Height="20" Padding="0 -1 0 0" AllowDrop="True" Drop="SetBackgroundImage" Click="SelectViewBackgroundColor_Click" Margin="30 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left">
+                            <Button.ToolTip>
+                                <ToolTip Background="LightYellow">
+                                    <TextBlock d:Text="选择预览背景色，图片背景请将图片拖放到这个按钮上载入" Text="{Binding LanguageDic[Text_PreviewBackgroundTip]}"/>
+                                </ToolTip>
+                            </Button.ToolTip>
+                            
+                            <TextBlock d:Text="预览背景色/图片" Text="{Binding LanguageDic[Btn_PreviewBackground]}" TextDecorations="{Binding TipsUnderline}"/>
+                        </Button>
+
+                        <StackPanel Orientation="Horizontal" IsHitTestVisible="False" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="80 0 0 0">
                             <TextBlock Text="["/>
                             <TextBlock d:Text="坐标" Text="{Binding LanguageDic[Text_ImagePreview_Point]}"/>
                             <TextBlock Text="X: " Margin="5 0 0 0"/>
@@ -394,7 +412,7 @@
                                         </ToolTip>
                                     </StackPanel.ToolTip>
 
-                                    <TextBlock d:Text="透明度" Text="{Binding LanguageDic[Text_ArtTranslucency]}"/>
+                                    <TextBlock d:Text="透明度" TextDecorations="{Binding TipsUnderline}" Text="{Binding LanguageDic[Text_ArtTranslucency]}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <RadioButton x:Name="RadioButton_ArtTranslucency_none" d:Content="无" Content="{Binding LanguageDic[Rb_ArtTranslucency_None]}" Margin="5 1 0 0" IsChecked="True" Checked="RadioButton_ArtTranslucencyChanged"/>
                                         <RadioButton x:Name="RadioButton_ArtTranslucency_25" Content="25" Margin="5 1 0 0" Checked="RadioButton_ArtTranslucencyChanged"/>
@@ -415,9 +433,7 @@
                             <TextBlock d:Text="00000" x:Name="TextBlock_NowIndex" Text="{Binding IndexStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  FontSize="16" Width="50" Margin="10 0 0 0"/>
                         </StackPanel>
 
-                        <Button d:Content="预览背景色/图片" Content="{Binding LanguageDic[Btn_PreviewBackground]}" Height="25" AllowDrop="True" Drop="SetBackgroundImage" Click="SelectViewBackgroundColor_Click" Margin="5 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-
-                        <StackPanel Orientation="Horizontal" Margin="20 0 0 0" >
+                        <StackPanel Orientation="Horizontal" Margin="60 0 0 0" >
                             <Button x:Name="Button_PreviousFrame" VerticalAlignment="Top" Height="25" Width="12" Click="Button_PreviousFrame_Click" IsEnabled="{Binding UIEnable}">
                                 <Path Stretch="Fill" Fill="Black" Data="M630.4 41.6l-416 428.8c-6.4 9.6-9.6 19.2-9.6 28.8 0 9.6 3.2 22.4 9.6 28.8l416 428.8c12.8 16 35.2 16 48 0 12.8-16 12.8-41.6 0-54.4L288 499.2 678.4 96c12.8-16 12.8-41.6 0-54.4-12.8-16-35.2-16-48 0z"/>
                             </Button>
@@ -427,6 +443,17 @@
                             <Button x:Name="Button_NextFrame" VerticalAlignment="Top" Height="25" Width="12" Margin="5 0 0 0" Click="Button_NextFrame_Click" IsEnabled="{Binding UIEnable}">
                                 <Path Stretch="Fill" Fill="Black" Data="M329.6 969.6l416-428.8c6.4-9.6 9.6-19.2 9.6-28.8 0-9.6-3.2-22.4-9.6-28.8l-416-428.8c-12.8-16-35.2-16-48 0s-16 41.6 0 54.4L668.8 512 281.6 915.2c-12.8 16-12.8 41.6 0 54.4 12.8 16 35.2 16 48 0z"/>
                             </Button>
+
+                            <StackPanel Orientation="Horizontal" Margin="5 0 0 0">
+                                <StackPanel.ToolTip>
+                                    <ToolTip Background="LightYellow">
+                                        <TextBlock d:Text="Rate= 决定动画的播放速度。数值越大代表播放速度越快。这个数值以900为被除数。例如300代表游戏将判定动画每帧持续900/300=3帧时间。 当Rate=X 如果900/X不是整数 帧时间则自动去尾 举例：301和450都为2帧 451和900都为1帧" Text="{Binding LanguageDic[Text_PlaySpeedTip]}" TextWrapping="Wrap" Width="215"/>
+                                    </ToolTip>
+                                </StackPanel.ToolTip>
+
+                                <TextBlock d:Text="速度" Text="{Binding LanguageDic[Text_PlaySpeed]}" TextDecorations="{Binding TipsUnderline}" FontSize="16" Margin="0 2 0 0"/>
+                                <TextBox x:Name="TextBox_PlaySpeed" Text="900" Width="35" Height="20" Padding="0 -1 0 0" Margin="2 0 0 0"/>
+                            </StackPanel>
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Margin="10 0 0 0" Background="Transparent">
@@ -435,7 +462,7 @@
                                     <TextBlock Text="颜色和游戏中可能存在差别，仅作为参考"/>
                                 </ToolTip>
                             </StackPanel.ToolTip>
-                            <TextBlock d:Text="预览所属色" Text="{Binding LanguageDic[Text_PreviewPlayerColor]}" Margin="0 3 0 0"/>
+                            <TextBlock d:Text="预览所属色" TextDecorations="{Binding TipsUnderline}" Text="{Binding LanguageDic[Text_PreviewPlayerColor]}" Margin="0 3 0 0"/>
                             <ComboBox x:Name="ComboBox_PlayerColorPreview" Width="84" Height="25" VerticalAlignment="Top" Margin="5 0 0 0" DisplayMemberPath="DisplayName" SelectedValuePath="Value" SelectionChanged="ComboBox_PlayerColorView_Changed"/>
                         </StackPanel>
 
@@ -496,7 +523,9 @@
                                         </ToolTip>
                                     </StackPanel.ToolTip>
 
-                                    <Path Width="60" Height="40" Fill="Black" Stretch="Fill" Data="M545.3 407.1h-421c-14.5 0-26.3 11.8-26.3 26.3v155.2c0 14.5 11.8 26.3 26.3 26.3h421V721c0 10.2 11.1 16.5 19.8 11.4l356.4-209c8.7-5.1 8.7-17.6 0-22.7l-356.4-209c-8.8-5.2-19.8 1.2-19.8 11.4v104zM598 651.9v-89.6H150.7V459.8H598v-87.6L848.7 512 598 651.9z"/>
+                                    <TextBlock TextDecorations="{Binding TipsUnderline}">
+                                       <Path Width="60" Height="40" Fill="Black" Stretch="Fill" Data="M545.3 407.1h-421c-14.5 0-26.3 11.8-26.3 26.3v155.2c0 14.5 11.8 26.3 26.3 26.3h421V721c0 10.2 11.1 16.5 19.8 11.4l356.4-209c8.7-5.1 8.7-17.6 0-22.7l-356.4-209c-8.8-5.2-19.8 1.2-19.8 11.4v104zM598 651.9v-89.6H150.7V459.8H598v-87.6L848.7 512 598 651.9z"/>
+                                    </TextBlock>
                                 </StackPanel>
 
                                 <!--画布调整-->
@@ -533,12 +562,14 @@
                                             </StackPanel>
                                         </StackPanel>
 
-                                        <Button x:Name="Button_ReMarginOnImage" d:Content="拖动设置" Content="{Binding LanguageDic[Text_Edit_Canvas_DragToEdit]}" Width="58" Height="20" FontSize="13" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="-5 3 0 0" Click="Button_ReMarginOnImage_Click">
+                                        <Button x:Name="Button_ReMarginOnImage" Width="58" Height="20" FontSize="13" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="-5 3 0 0" Click="Button_ReMarginOnImage_Click">
                                             <Button.ToolTip>
                                                 <ToolTip Background="LightYellow">
                                                     <TextBlock d:Text="在原图显示模式下，鼠标左键拖动来调整" Text="{Binding LanguageDic[Text_Edit_Canvas_DragToEditTip]}"/>
                                                 </ToolTip>
                                             </Button.ToolTip>
+
+                                            <TextBlock d:Text="拖动设置" Text="{Binding LanguageDic[Text_Edit_Canvas_DragToEdit]}" TextDecorations="{Binding TipsUnderline}"/>
                                         </Button>
                                     </Grid>
                                 </GroupBox>
@@ -704,13 +735,51 @@
 
                                 <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
                                     <StackPanel Margin="0 0 0 0">
-                                        <TextBlock d:Text="X偏移" Text="{Binding LanguageDic[Text_Overlay_XOffset]}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                                        <TextBox TextWrapping="NoWrap" Text="{Binding OverlayUI.OverlayXOffsetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_Overlay_PreviewTextInput" Width="60" Margin="0 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                        <TextBlock d:Text="X偏移" Text="{Binding LanguageDic[Text_Overlay_XOffset]}" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="35 0 0 0"/>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Tag="-10"  Width="15" Height="15" Background="Transparent" BorderThickness="0" Click="Button_OverlayXOffset_Move">
+                                                <Path Fill="Black" Stretch="Fill" Data="M500.970806 776.449951l0-528.901948-374.624213 264.465301L500.970806 776.449951zM523.030218 512.014326l374.622166 264.436648 0-528.901948L523.030218 512.014326z"/>
+                                            </Button>
+
+                                            <Button Tag="-1" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_OverlayXOffset_Move">
+                                                <Path Fill="Black" Stretch="Fill" Data="M640 768L384 512l256-256z"/>
+                                            </Button>
+
+                                            <TextBox TextWrapping="NoWrap" Text="{Binding OverlayUI.OverlayXOffsetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_Overlay_PreviewTextInput" Width="60" Margin="5 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+
+                                            <Button Tag="1" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_OverlayXOffset_Move">
+                                                <Path Fill="Black" Stretch="Fill" Data="M384 256l256 256-256 256z"/>
+                                            </Button>
+
+                                            <Button Tag="10" Width="15" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_OverlayXOffset_Move">
+                                                <Path Fill="Black" Stretch="Fill" Data="M895.604748 512.014326l-374.624213-264.465301 0 528.901948L895.604748 512.014326zM124.298957 247.549026l0 528.901948 374.622166-264.436648L124.298957 247.549026z"/>
+                                            </Button>
+                                        </StackPanel>
                                     </StackPanel>
 
                                     <StackPanel Margin="20 0 0 0">
-                                        <TextBlock d:Text="Y偏移" Text="{Binding LanguageDic[Text_Overlay_YOffset]}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                                        <TextBox TextWrapping="NoWrap" Text="{Binding OverlayUI.OverlayYOffsetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_Overlay_PreviewTextInput" Width="60" Margin="0 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                        <TextBlock d:Text="Y偏移" Text="{Binding LanguageDic[Text_Overlay_YOffset]}" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="35 0 0 0"/>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Tag="-10"  Width="15" Height="15" Background="Transparent" BorderThickness="0" Click="Button_OverlayYOffset_Move">
+                                                <Path Fill="Black" Stretch="Fill" Data="M500.970806 776.449951l0-528.901948-374.624213 264.465301L500.970806 776.449951zM523.030218 512.014326l374.622166 264.436648 0-528.901948L523.030218 512.014326z"/>
+                                            </Button>
+
+                                            <Button Tag="-1" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_OverlayYOffset_Move">
+                                                <Path Fill="Black" Stretch="Fill" Data="M640 768L384 512l256-256z"/>
+                                            </Button>
+
+                                            <TextBox TextWrapping="NoWrap" Text="{Binding OverlayUI.OverlayYOffsetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_Overlay_PreviewTextInput" Width="60" Margin="5 0 0 0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+
+                                            <Button Tag="1" Width="10" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_OverlayYOffset_Move">
+                                                <Path Fill="Black" Stretch="Fill" Data="M384 256l256 256-256 256z"/>
+                                            </Button>
+
+                                            <Button Tag="10" Width="15" Height="15" Background="Transparent" BorderThickness="0" Margin="5 0 0 0" Click="Button_OverlayYOffset_Move">
+                                                <Path Fill="Black" Stretch="Fill" Data="M895.604748 512.014326l-374.624213-264.465301 0 528.901948L895.604748 512.014326zM124.298957 247.549026l0 528.901948 374.622166-264.436648L124.298957 247.549026z"/>
+                                            </Button>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
 
@@ -764,7 +833,7 @@
                                                             <TextBlock d:Text="单位和建筑16-31号为玩家所属色，240-255号色不随光照变化，不使用240-255号色可填写(240)" Text="{Binding LanguageDic[Text_CreatePalette_ColorCountTip]}" TextWrapping="Wrap" Width="230"/>
                                                         </ToolTip>
                                                     </StackPanel.ToolTip>
-                                                    <TextBlock d:Text="色盘颜色数量" Text="{Binding LanguageDic[Text_CreatePalette_ColorCount]}"/>
+                                                    <TextBlock d:Text="色盘颜色数量" Text="{Binding LanguageDic[Text_CreatePalette_ColorCount]}" TextDecorations="{Binding TipsUnderline}"/>
                                                     <TextBox x:Name="TextBox_PalColorNum" Text="256" Width="40" Height="21" Padding="0 0 0 0"/>
                                                 </StackPanel>
 
@@ -774,7 +843,7 @@
                                                     <Slider x:Name="Slider_GeneratePaletteDiffValue"
                                                         Width="100"
                                                         Minimum="1"
-                                                        Maximum="10"
+                                                        Maximum="15"
                                                         TickFrequency="1.0"
                                                         Value="3"
                                                         IsSnapToTickEnabled="True"
@@ -821,7 +890,7 @@
 
                                                 <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                                     <CheckBox x:Name="CheckBox_PaletteMapTypeForName" IsChecked="{Binding SaveConfig.IsPaletteMapType, Mode=TwoWay}" d:Content="创建地图类型命名副本" Content="{Binding LanguageDic[Cb_SavePalette_MapTypeForFileName]}" Margin="0 0 0 0"/>
-                                                    <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Click="Button_GeneratePaletteMapTypeTip_Click"/>
+                                                    <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Padding="0 -1 0 0" Click="Button_GeneratePaletteMapTypeTip_Click"/>
                                                 </StackPanel>
 
                                                 <StackPanel x:Name="StackPanel_PaletteSaveFileName" Margin="0 3 0 0">
@@ -886,7 +955,7 @@
 
                                                 <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                                     <CheckBox x:Name="CheckBox_ShpMapTypeForName" d:Content="创建地图类型命名副本" Content="{Binding LanguageDic[Cb_SaveShp_MapTypeForFileName]}" IsChecked="{Binding SaveConfig.IsShpMapType, Mode=TwoWay}"/>
-                                                    <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Click="Button_GenerateShpMapTypeTip_Click"/>
+                                                    <Button Content="?" Height="20" Width="20" Margin="10 0 0 0" Padding="0 -1 0 0" Click="Button_GenerateShpMapTypeTip_Click"/>
                                                 </StackPanel>
 
                                                 <StackPanel x:Name="StackPanel_ShpSaveFileName" Margin="0 3 0 0">
@@ -894,6 +963,8 @@
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBox x:Name="TextBox_ShpFileName" Text="{Binding SaveConfig.ShpName, Mode=TwoWay}" FontSize="14" Width="120" Height="22" HorizontalAlignment="Left" Margin="0 0 0 0"/>
                                                         <TextBlock Text=".shp" Margin="5 0 0 0"/>
+
+                                                        <CheckBox x:Name="CheckBox_ShpNameFromList" d:Content="按导入文件名" Content="{Binding LanguageDic[Text_SaveShp_NameFromList]}" Padding="0 -2 0 0" Margin="8 5 0 0" Visibility="Collapsed" IsChecked="{Binding SaveConfig.IsShpNameFromList, Mode=TwoWay}" Checked="CheckBox_ShpNameFromList_Changed" Unchecked="CheckBox_ShpNameFromList_Changed"/>
                                                     </StackPanel>
                                                 </StackPanel>
 

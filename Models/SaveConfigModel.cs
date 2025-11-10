@@ -112,5 +112,16 @@ namespace Ra2EasyShp.Models
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShpName"));
             }
         }
+
+        private bool _isShpNameFromList { get; set; } = false;
+        public bool IsShpNameFromList
+        {
+            get => _isShpNameFromList;
+            set
+            {
+                _isShpNameFromList = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsShpNameFromList"));
+            }
+        }
     }
 }

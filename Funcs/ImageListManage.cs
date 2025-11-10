@@ -203,20 +203,27 @@ namespace Ra2EasyShp.Funcs
             {
                 if (File.Exists(filePath))
                 {
-                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    {
-                        using (Bitmap bitmap = new Bitmap(fs))
-                        {
-                            //model.EditImage.Img = new Bitmap(fs);
-                            //model.EditImage.OutImg = new Bitmap(fs);
-                            model.EditImage.OutImgTempPath = GetPath.CreateImageTempPath();
-                            LocalImageManage.SaveBitmapToTemp(bitmap, model.EditImage.OutImgTempPath);
-                            model.EditImage.Name = Path.GetFileName(filePath);
-                            model.EditImage.ImgPath = filePath;
-                            //model.EditImage.ImgPath = GetPath.CreateImageTempPath();
-                            //LocalImageManage.SaveBitmapToTemp(bitmap, model.EditImage.ImgPath);
-                        }
-                    }
+                    //using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    //{
+                    //    using (Bitmap bitmap = new Bitmap(fs))
+                    //    {
+                    //        //model.EditImage.Img = new Bitmap(fs);
+                    //        //model.EditImage.OutImg = new Bitmap(fs);
+
+                    //        model.EditImage.OutImgTempPath = GetPath.CreateImageTempPath();
+                    //        LocalImageManage.SaveBitmapToTemp(bitmap, model.EditImage.OutImgTempPath);
+                    //        model.EditImage.Name = Path.GetFileName(filePath);
+                    //        model.EditImage.ImgPath = filePath;
+
+                    //        //model.EditImage.ImgPath = GetPath.CreateImageTempPath();
+                    //        //LocalImageManage.SaveBitmapToTemp(bitmap, model.EditImage.ImgPath);
+                    //    }
+                    //}
+
+                    model.EditImage.OutImgTempPath = GetPath.CreateImageTempPath();
+                    File.Copy(filePath, model.EditImage.OutImgTempPath);
+                    model.EditImage.Name = Path.GetFileName(filePath);
+                    model.EditImage.ImgPath = filePath;
                 }
                 else
                 {

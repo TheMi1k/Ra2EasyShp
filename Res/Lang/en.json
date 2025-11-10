@@ -1,4 +1,5 @@
 {
+  "Text_SwitchTipUnderLine": "Switch tips underLine",
   "Path_ExportImage": "Export image",
   "Path_ExportPalette": "Export palette",
   "Path_ExportShp": "Export Shp",
@@ -47,13 +48,16 @@
   "Text_ArtTranslucencyTip": "art.ini/artmd.ini [Translucency] preview. Does not affect exported images or generated palette，you need to be adjust in art/artmd.ini [Translucency]",
 
   "Text_PreviewScale": "Zoom",
-  "Text_PreviewScaleTip": "Use Ctrl + mouse scroll in the preview window to zoom in and out",
+  "Text_PreviewScaleTip": "Use Ctrl + mouse scroll(10%) or Ctrl + Shift + mouse scroll(50%) in the preview window to zoom in and out",
   "Text_NowImageIndex": "Index:",
 
   "Btn_PreviewBackground": "Preview background/image",
+  "Text_PreviewBackgroundTip": "Select preview background.image background, please drag and drop the image onto this button to load it",
 
   "Btn_Play": "Play",
   "Btn_Stop": "Stop",
+  "Text_PlaySpeed": "Speed",
+  "Text_PlaySpeedTip": "Rate = Determines the playback speed of the animation.A larger value means a faster playback speed.This value uses 900 as the divisor. For example, 300 means the game will treat each animation frame as lasting 900 / 300 = 3 frames of game time.When Rate = X, if 900 / X is not an integer, the frame duration will be automatically rounded down.For example:301 and 450 both result in 2 frames per image.451 and 900 both result in 1 frame per image.(Note: The playback speed in preview mode may be inaccurate due to hardware performance or image size.)",
 
   "Text_PreviewPlayerColor": "Player Color",
   "Cb_PreviewGrid": "Grid",
@@ -204,6 +208,7 @@
   "Cb_SaveShp_CustomSavePath": "Custom save path",
   "Cb_SaveShp_MapTypeForFileName": "Map type for file name",
   "Text_SaveShp_FileName": "File name(empty=export.shp)",
+  "Text_SaveShp_NameFromList": "Name from list",
   "Text_SaveShp_SavePath": "Save path",
   "Text_SaveShp_Save": "Save",
   "Text_SaveShp_Cancel": "Cancel",

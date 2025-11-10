@@ -10,7 +10,7 @@ namespace Ra2EasyShp.Data
 {
     public class GData
     {
-        internal const string VERSION = "v1.5";
+        internal const string VERSION = "v1.6";
 
         internal static int[,] BayerMatrix = {
             {  0, 32,  8, 40,  2, 34, 10, 42 },
@@ -80,5 +80,7 @@ namespace Ra2EasyShp.Data
         internal static string TempPath = string.Empty;
 
         internal static readonly string TempPublicPath = GetPath.TempPublickPath();
+
+        public static WindowStateModel WindowState = new WindowStateModel();
     }
 }

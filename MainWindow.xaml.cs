@@ -23,6 +23,7 @@ using Point = System.Windows.Point;
 using static System.Net.Mime.MediaTypeNames;
 using System.Windows.Controls.Primitives;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace Ra2EasyShp
 {
@@ -46,9 +47,9 @@ namespace Ra2EasyShp
                 ifLeft = SystemParameters.MenuDropAlignment;
             }
 
-            Init();
-
             LoadWindowStateCache();
+
+            Init();
 
             InitPlayerColor();
 
@@ -178,6 +179,7 @@ namespace Ra2EasyShp
                 string jsonPath = Path.Combine(GetPath.GetCachePath(), "WindowState.json");
                 if (!File.Exists(jsonPath))
                 {
+                    GData.WindowState = new WindowStateModel();
                     return;
                 }
 
@@ -190,21 +192,23 @@ namespace Ra2EasyShp
                     return;
                 }
 
-                var model = JsonConvert.DeserializeObject<WindowStateModel>(jsonStr);
-                if (model == null)
+                GData.WindowState = JsonConvert.DeserializeObject<WindowStateModel>(jsonStr);
+                if (GData.WindowState == null)
+                {
+                    GData.WindowState = new WindowStateModel();
+                    return;
+                }
+
+                if (GData.WindowState.Width <= 0 || GData.WindowState.Height <= 0)
                 {
                     return;
                 }
 
-                if (model.Width <= 0 || model.Height <= 0)
-                {
-                    return;
-                }
-
-                this.Width = model.Width;
-                this.Height = model.Height;
-                this.Left = model.Left;
-                this.Top = model.Top;
+                this.Width = GData.WindowState.Width;
+                this.Height = GData.WindowState.Height;
+                this.Left = GData.WindowState.Left;
+                this.Top = GData.WindowState.Top;
+                GData.UIData.TipsUnderline = GData.WindowState.TipsUnderline;
             }
             catch
             {
@@ -223,17 +227,14 @@ namespace Ra2EasyShp
                     Directory.CreateDirectory(GetPath.GetCachePath());
                 }
 
-                WindowStateModel model = new WindowStateModel()
-                {
-                    Width = this.Width,
-                    Height = this.Height,
-                    Left = this.Left,
-                    Top = this.Top
-                };
+                GData.WindowState.Width = this.Width;
+                GData.WindowState.Height = this.Height;
+                GData.WindowState.Left = this.Left;
+                GData.WindowState.Top = this.Top;
 
                 using (StreamWriter sw = new StreamWriter(jsonPath))
                 {
-                    sw.Write(JsonConvert.SerializeObject(model));
+                    sw.Write(JsonConvert.SerializeObject(GData.WindowState));
                 }
             }
             catch
@@ -250,17 +251,15 @@ namespace Ra2EasyShp
 
                 if (File.Exists(cfgPath))
                 {
-                    using (StreamReader sr = new StreamReader(cfgPath))
-                    {
-                        string lang = sr.ReadToEnd();
-                        if (!string.IsNullOrEmpty(lang))
-                        {
-                            return lang;
-                        }
-                    }
+                    File.Delete(cfgPath);
                 }
 
-                return "zh_cn";
+                if (string.IsNullOrEmpty(GData.WindowState.Language))
+                {
+                    return "zh_cn";
+                }
+
+                return GData.WindowState.Language;
             }
             catch
             {
@@ -270,12 +269,9 @@ namespace Ra2EasyShp
 
         private void SaveLanguage(string languageName)
         {
-            string cfgPath = Path.Combine(GetPath.RunPath, "Res/Lang/language.cfg");
+            GData.WindowState.Language = languageName;
 
-            using (StreamWriter sw = new StreamWriter(cfgPath))
-            {
-                sw.Write(languageName);
-            }
+            SaveWindowStateCache();
         }
 
         private void CreateRa2Grids()
@@ -917,10 +913,12 @@ namespace Ra2EasyShp
             }
         }
 
+        private string playUUID;
         private async void Button_Play_Click(object sender, RoutedEventArgs e)
         {
             if (GData.ImageData.Count < 2)
             {
+                playUUID = "";
                 GData.UIData.ImgIsPlaying = false;
                 Button_Play.Content = GData.UIData.LanguageDic["Btn_Play"];
                 return;
@@ -928,11 +926,13 @@ namespace Ra2EasyShp
 
             if (Button_Play.Content.ToString() == GData.UIData.LanguageDic["Btn_Play"])
             {
+                playUUID = Guid.NewGuid().ToString();
                 GData.UIData.ImgIsPlaying = true;
                 Button_Play.Content = GData.UIData.LanguageDic["Btn_Stop"];
             }
             else
             {
+                playUUID = "";
                 GData.UIData.ImgIsPlaying = false;
                 Button_Play.Content = GData.UIData.LanguageDic["Btn_Play"];
                 return;
@@ -940,11 +940,30 @@ namespace Ra2EasyShp
 
             await Task.Run(async () =>
             {
+                string nowUUID = playUUID;
                 int gcCount = 0;
+
+                Stopwatch sw = Stopwatch.StartNew();
+
                 while (true)
                 {
                     try
                     {
+                        int speed = 900;
+                        Dispatcher.Invoke(() =>
+                        {
+                            if (!int.TryParse(TextBox_PlaySpeed.Text, out speed) || speed > 900 || speed == 0)
+                            {
+                                speed = 900;
+                                TextBox_PlaySpeed.Text = 900.ToString();
+                            }
+                            //if (speed > 900)
+                            //{
+                            //    speed = 900;
+                            //    TextBox_PlaySpeed.Text = 900.ToString();
+                            //}
+                        });
+
                         if (GData.UIData.NowIndex + 1 >= GData.ImageData.Count)
                         {
                             GData.UIData.NowIndex = 0;
@@ -961,7 +980,21 @@ namespace Ra2EasyShp
 
                         });
 
-                        await Task.Delay(70);
+                        int delay = (int)(((int)((1000 / 15f) * (900 / speed))) - sw.ElapsedMilliseconds);
+
+                        if (delay < 1)
+                        {
+                            delay = 1;
+                        }
+
+                        await Task.Delay(delay);
+
+                        sw.Restart();
+
+                        if (playUUID == "" || nowUUID != playUUID)
+                        {
+                            break;
+                        }
 
                         gcCount++;
                         if (gcCount > 5)
@@ -970,17 +1003,20 @@ namespace Ra2EasyShp
                             gcCount = 0;
                         }
                     }
-                    catch
+                    catch(Exception ex)
                     {
-
+                        Console.WriteLine(ex.Message);
                     }
 
                     if (!GData.UIData.ImgIsPlaying)
                     {
-                        GC.Collect();
                         break;
                     }
+
+
                 }
+
+                GC.Collect();
             });
         }
 
@@ -1047,11 +1083,11 @@ namespace Ra2EasyShp
 
             StackPanel_Tips.Visibility = Visibility.Collapsed;
 
-            string folderPath = @"C:\Users\Milk\Desktop\4K素材";
-            //string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
+            //string folderPath = @"F:\4K素材";
+            ////string folderPath = @"C:\Users\Milk\Desktop\气垫船32";
 
-            string[] files = Directory.GetFiles(folderPath);
-            //string[] files = { @"C:\Users\Milk\Desktop\cons.shp" };
+            //string[] files = Directory.GetFiles(folderPath);
+            string[] files = { @"C:\Users\Milk\Desktop\htnk.png" };
 
             //string[] files = { @"C:\Users\Milk\Desktop\手办换衣服.png" };
             //string[] files = { @"D:\Ra2EasyShp\bin\x64\Debug\输出SHP\2025年3月18日17时8分5秒\输出.shp" };
@@ -1278,6 +1314,7 @@ namespace Ra2EasyShp
                 if (CheckBox_PaletteSaveLoadPalette.IsChecked == true)
                 {
                     await LoadPalette(GData.LastSavePalettePath);
+                    await ReloadImageSource(GData.UIData.NowIndex);
                 }
             }
             catch (Exception ex)
@@ -1817,6 +1854,8 @@ namespace Ra2EasyShp
 
                 var colorDither = (Enums.ColorDither)ComboBox_ColorDither.SelectedValue;
 
+                object locker_name = new object();
+
                 byte[] shpData = null;
                 await Task.Run(() =>
                 {
@@ -1849,6 +1888,8 @@ namespace Ra2EasyShp
                         }
                     });
 
+                    HashSet<string> usedNameList = new HashSet<string>();
+
                     Parallel.For(0, bitmapTempList.Count, index =>
                     {
                         List<string> everyFrameList = new List<string>()
@@ -1864,7 +1905,35 @@ namespace Ra2EasyShp
 
                         shpData = ShpManage.BitmapToShp(everyFrameList, GData.NowPalette, shpCompressionMode, shadowFrame, shadowFrame);
 
-                        File.WriteAllBytes(Path.Combine(savePath, $"{saveFileName}{index.ToString().PadLeft(5, '0')}.shp"), shpData);
+                        if (GData.UIData.SaveConfig.IsShpNameFromList)
+                        {
+                            string fName;
+
+                            lock (locker_name)
+                            {
+                                fName = $"{Path.GetFileNameWithoutExtension(GData.ImageData[index].EditImage.Name)}{Path.GetFileNameWithoutExtension(GData.ImageData[index].OverlayImage.Name)}";
+                                if (usedNameList.Contains(fName))
+                                {
+                                    for (int i = 1; i < bitmapTempList.Count; i++)
+                                    {
+                                        string fName1 = $"{fName}{i}";
+                                        if (!usedNameList.Contains(fName1))
+                                        {
+                                            fName = fName1;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                usedNameList.Add(fName);
+                            }
+
+                            File.WriteAllBytes(Path.Combine(savePath, $"{fName}.shp"), shpData);
+                        }
+                        else
+                        {
+                            File.WriteAllBytes(Path.Combine(savePath, $"{saveFileName}{index.ToString().PadLeft(5, '0')}.shp"), shpData);
+                        }
                     });
 
                     foreach (var filePath in bitmapTempList)
@@ -1914,6 +1983,8 @@ namespace Ra2EasyShp
 
             await ReloadImageSource(GData.UIData.NowIndex);
 
+            ComboBox_Palette.SelectedItem = null;
+
             Grid_Main.IsEnabled = true;
         }
 
@@ -1946,11 +2017,18 @@ namespace Ra2EasyShp
 
             await ReloadImageSource(GData.UIData.NowIndex);
 
+            ComboBox_Palette.SelectedItem = null;
+
             Grid_Main.IsEnabled = true;
         }
 
         private async void ComboBox_Palette_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (ComboBox_Palette.SelectedItem == null)
+            {
+                return;
+            }
+
             string palPath = Path.Combine(GetPath.RunPath, $@"Res\Palette\{ComboBox_Palette.SelectedItem}");
 
             Grid_Main.IsEnabled = false;
@@ -2307,6 +2385,8 @@ namespace Ra2EasyShp
 
             await ReloadImageSource(GData.UIData.NowIndex);
 
+            ComboBox_Palette.SelectedItem = null;
+
             Grid_Main.IsEnabled = true;
         }
 
@@ -2336,19 +2416,40 @@ namespace Ra2EasyShp
 
         private void Grid_ImgView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
+            if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) && (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)))
+            {
+                // 滚轮向上滚动
+                if (e.Delta > 0)
+                {
+                    _scaleFactor += 0.5;
+                }
+                else if (e.Delta < 0)
+                {
+                    _scaleFactor -= 0.5;
+                }
+
+                _scaleFactor = Math.Max(0.1, _scaleFactor);
+                _scaleFactor = Math.Min(9.0, _scaleFactor);
+
+                GData.UIData.ImageViewScaleTransform = _scaleFactor;
+
+                e.Handled = true;
+                return;
+            }
+
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
                 // 滚轮向上滚动
                 if (e.Delta > 0) 
                 {
-                    _scaleFactor += 1;
+                    _scaleFactor += 0.1;
                 }
                 else if (e.Delta < 0)
                 {
-                    _scaleFactor -= 1;
+                    _scaleFactor -= 0.1;
                 }
 
-                _scaleFactor = Math.Max(1.0, _scaleFactor);
+                _scaleFactor = Math.Max(0.1, _scaleFactor);
                 _scaleFactor = Math.Min(9.0, _scaleFactor);
 
                 GData.UIData.ImageViewScaleTransform = _scaleFactor;
@@ -2588,7 +2689,8 @@ namespace Ra2EasyShp
                         Int32Rect rect = new Int32Rect(GData.UIData.ViewImagePointX, GData.UIData.ViewImagePointY, 1, 1);
                         bitmap.CopyPixels(rect, pixelData, bytesPerPixel, 0);
 
-                        GData.UIData.ViewImagePointPaletteIndex = GData.ColorToPaletteTable[pixelData[2] / 4, pixelData[1] / 4, pixelData[0] / 4];
+                        //GData.UIData.ViewImagePointPaletteIndex = GData.ColorToPaletteTable[pixelData[2] / 4, pixelData[1] / 4, pixelData[0] / 4];
+                        GData.UIData.ViewImagePointPaletteIndex = PaletteManage.GetPaletteIndex(pixelData[2], pixelData[1], pixelData[0]);
 
                         int rowIndex = GData.UIData.ViewImagePointPaletteIndex % 32;
                         int columnIndex = GData.UIData.ViewImagePointPaletteIndex / 32;
@@ -3612,11 +3714,71 @@ namespace Ra2EasyShp
 
                 StackPanel_ShpSaveFileName.Visibility = Visibility.Visible;
                 StackPanel_ShpCustomSaveFileName.Visibility = Visibility.Collapsed;
+                CheckBox_ShpNameFromList.Visibility = Visibility.Visible;
             }
             else
             {
                 CheckBox_ShpCustomSavePath.IsEnabled = true;
                 CheckBox_ShpMapTypeForName.IsEnabled = true;
+                CheckBox_ShpNameFromList.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void Button_OverlayXOffset_Move(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var btn = sender as Button;
+                var numStr = btn.Tag.ToString();
+
+                GData.UIData.OverlayUI.OverlayXOffsetStr = (GData.UIData.OverlayUI.OverlayOffsetX + int.Parse(numStr)).ToString();
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+        }
+
+        private void Button_OverlayYOffset_Move(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var btn = sender as Button;
+                var numStr = btn.Tag.ToString();
+
+                GData.UIData.OverlayUI.OverlayYOffsetStr = (GData.UIData.OverlayUI.OverlayOffsetY + int.Parse(numStr)).ToString();
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
+            }
+        }
+
+        private void MenuItem_SwitchTipsUnderline_Click(object sender, RoutedEventArgs e)
+        {
+            if (GData.UIData.TipsUnderline == null)
+            {
+                GData.UIData.TipsUnderline = TextDecorations.Underline;
+            }
+            else
+            {
+                GData.UIData.TipsUnderline = null;
+            }
+
+            GData.WindowState.TipsUnderline = GData.UIData.TipsUnderline;
+
+            SaveWindowStateCache();
+        }
+
+        private void CheckBox_ShpNameFromList_Changed(object sender, RoutedEventArgs e)
+        {
+            if (CheckBox_ShpNameFromList.IsChecked == true)
+            {
+                TextBox_ShpFileName.IsEnabled = false;
+            }
+            else
+            {
+                TextBox_ShpFileName.IsEnabled = true;
             }
         }
     }

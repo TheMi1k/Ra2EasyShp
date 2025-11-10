@@ -1,4 +1,5 @@
 {
+  "Text_SwitchTipUnderLine": "开关提示下划线",
   "Path_ExportImage": "输出图像",
   "Path_ExportPalette": "输出色盘",
   "Path_ExportShp": "输出SHP",
@@ -47,13 +48,16 @@
   "Text_ArtTranslucencyTip": "art.ini/artmd.ini中的透明度数值设置预览。不影响导出图片和生成色盘，实际效果需要在art/artmd.ini中的Translucency调整",
 
   "Text_PreviewScale": "预览缩放",
-  "Text_PreviewScaleTip": "预览窗口中Ctrl+鼠标滚轮进行缩放",
+  "Text_PreviewScaleTip": "预览窗口中Ctrl+鼠标滚轮(10%) 或 Ctrl+Shift+鼠标滚轮(50%)进行缩放",
   "Text_NowImageIndex": "当前序号:",
 
   "Btn_PreviewBackground": "预览背景色/图片",
+  "Text_PreviewBackgroundTip": "选择预览背景色，图片背景请将图片拖放到这个按钮上载入",
 
   "Btn_Play": "播放",
   "Btn_Stop": "停止",
+  "Text_PlaySpeed": "速度",
+  "Text_PlaySpeedTip": "Rate= 决定动画的播放速度。数值越大代表播放速度越快。这个数值以900为被除数。例如300代表游戏将判定动画每帧持续900/300=3帧时间。 当Rate=X 如果900/X不是整数 帧时间则自动去尾 举例：301和450都为2帧 451和900都为1帧 (预览中播放速度会受到硬件和图片尺寸的影响而导致不准确)",
 
   "Text_PreviewPlayerColor": "预览所属色",
   "Cb_PreviewGrid": "网格",
@@ -204,6 +208,7 @@
   "Cb_SaveShp_CustomSavePath": "自定义保存目录",
   "Cb_SaveShp_MapTypeForFileName": "创建地图类型命名副本",
   "Text_SaveShp_FileName": "命名(为空保存为 输出.shp)",
+  "Text_SaveShp_NameFromList": "按导入文件名",
   "Text_SaveShp_SavePath": "保存目录",
   "Text_SaveShp_Save": "保存",
   "Text_SaveShp_Cancel": "取消",

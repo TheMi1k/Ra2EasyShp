@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Ra2EasyShp.Models
 {
@@ -15,5 +16,9 @@ namespace Ra2EasyShp.Models
         public double Left { get; set; } = -1;
 
         public double Top { get; set; } = -1;
+
+        public string Language { get; set; } = string.Empty;
+
+        public TextDecorationCollection TipsUnderline { get; set; } = TextDecorations.Underline;
     }
 }

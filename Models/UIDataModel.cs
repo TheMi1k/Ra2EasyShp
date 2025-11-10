@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Ra2EasyShp.Models
@@ -54,6 +55,18 @@ namespace Ra2EasyShp.Models
         }
 
         public SaveConfigModel SaveConfig { get; set; } = new SaveConfigModel();
+
+        private TextDecorationCollection _tipsUnderline { get; set; } = TextDecorations.Underline;
+        public TextDecorationCollection TipsUnderline
+        {
+            get => _tipsUnderline;
+            set
+            {
+                _tipsUnderline = value;
+
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TipsUnderline"));
+            }
+        }
 
         private bool _imgIsPlaying { get; set; } = false;
         internal bool ImgIsPlaying
@@ -123,7 +136,7 @@ namespace Ra2EasyShp.Models
             set
             {
                 _imgViewScaleTransform = value;
-                ImageViewScaleTransformStr = $"{(int)(_imgViewScaleTransform * 100)}%";
+                ImageViewScaleTransformStr = $"{(int)Math.Round((_imgViewScaleTransform * 100))}%";
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ImageViewScaleTransform"));
             }
         }
